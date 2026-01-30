@@ -1,0 +1,87 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 024e1457aa4a9ef4387d388364ed6c1a, type: 3}
+  m_Name: TrapDictionary
+  m_EditorClassIdentifier: Assembly-CSharp::TrapDictionary
+  traps:
+  - name: Lift
+    soundOnPlace: 
+    behaviorPrefab: {fileID: 1967868990143498241, guid: 97c66fdd49fd22d448e550c96598f9bc, type: 3}
+    staticPrefab: {fileID: 8041041020565002002, guid: b091a02e72ce0414da246b4bf894cbd8, type: 3}
+    colourTarget: 0
+    colourTargetIndexOffset: 0
+  - name: Block_L
+    soundOnPlace: 
+    behaviorPrefab: {fileID: 4665495375785675357, guid: 9c5a785c731228d4c9ec7b4f7400bb65, type: 3}
+    staticPrefab: {fileID: 4665495375785675357, guid: 110cd0e9e690c844a98cbfe9b82b768a, type: 3}
+    colourTarget: 1
+    colourTargetIndexOffset: 0
+  - name: Block_2x2
+    soundOnPlace: 
+    behaviorPrefab: {fileID: 4665495375785675357, guid: 2a45f26386ea6d448a0da64617b51918, type: 3}
+    staticPrefab: {fileID: 4665495375785675357, guid: 07eaaa68948c1354e937dda2d9d28d51, type: 3}
+    colourTarget: 1
+    colourTargetIndexOffset: 1
+  - name: Block_1x1
+    soundOnPlace: 
+    behaviorPrefab: {fileID: 4665495375785675357, guid: 8fa0d383d2a7d8945add3c1b36f3af9f, type: 3}
+    staticPrefab: {fileID: 4665495375785675357, guid: df42dd5fb8c89714788885e9a18a877e, type: 3}
+    colourTarget: 1
+    colourTargetIndexOffset: 0
+  - name: Block_Ramp
+    soundOnPlace: 
+    behaviorPrefab: {fileID: 4665495375785675357, guid: 7a5de903e1b8faf448afe106de69c876, type: 3}
+    staticPrefab: {fileID: 4665495375785675357, guid: 7b1d3f43a08e48b4c9960208b41f918e, type: 3}
+    colourTarget: 1
+    colourTargetIndexOffset: 1
+  - name: BalanceBeam
+    soundOnPlace: 
+    behaviorPrefab: {fileID: 4886874729649364179, guid: ca7b25b9ba250ce4fba305a1553d5a1c, type: 3}
+    staticPrefab: {fileID: 4655082184507573389, guid: 0882d86bf85d7de4da6a3a010d5ddf07, type: 3}
+    colourTarget: 1
+    colourTargetIndexOffset: 0
+  - name: Saw
+    soundOnPlace: 
+    behaviorPrefab: {fileID: 4967037026206012188, guid: 237bd78f05bc09c4b91ebe2c3c610eb7, type: 3}
+    staticPrefab: {fileID: 4967037026206012188, guid: f1acfafa952d91746a9e9e3f2504c7dc, type: 3}
+    colourTarget: 0
+    colourTargetIndexOffset: 0
+  - name: Clamp
+    soundOnPlace: 
+    behaviorPrefab: {fileID: 2893538759217496779, guid: 49ace691c5ec59b468fac46a2046a533, type: 3}
+    staticPrefab: {fileID: 2899622994378174877, guid: ad9b7d8f5c7827d43be93725bc5ee3ac, type: 3}
+    colourTarget: 0
+    colourTargetIndexOffset: 0
+  - name: DuelClamp
+    soundOnPlace: 
+    behaviorPrefab: {fileID: 2442443908695106039, guid: 2102a9487afbc19409541ab5d82c47c1, type: 3}
+    staticPrefab: {fileID: 4706517011230636027, guid: 9a502c34010609049ae34943c04709ee, type: 3}
+    colourTarget: 0
+    colourTargetIndexOffset: 0
+  - name: Bolt_Spring
+    soundOnPlace: 
+    behaviorPrefab: {fileID: 2899622994378174877, guid: a329dab8ae91375429b072dd895194ed, type: 3}
+    staticPrefab: {fileID: 2899622994378174877, guid: b6a0ab2008416dc4d99f52b459877c0b, type: 3}
+    colourTarget: 0
+    colourTargetIndexOffset: 0
+  - name: Bolt_Spikes
+    soundOnPlace: 
+    behaviorPrefab: {fileID: 2899622994378174877, guid: be5c77b58113f39468e2347fde6f1e45, type: 3}
+    staticPrefab: {fileID: 2899622994378174877, guid: 8a64f349374613c45aaf5837b4827b01, type: 3}
+    colourTarget: 0
+    colourTargetIndexOffset: 0
+  - name: Shooter
+    soundOnPlace: 
+    behaviorPrefab: {fileID: 4665495375785675357, guid: 168575a59ae66794bbe903dc6719f244, type: 3}
+    staticPrefab: {fileID: 4665495375785675357, guid: 5dfdc3a96b0ebe84b96c82349f267297, type: 3}
+    colourTarget: 0
+    colourTargetIndexOffset: 0
