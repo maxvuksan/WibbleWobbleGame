@@ -16,6 +16,7 @@ public class GameStateManager : NetworkBehaviour
         GameState_ShowingRoundResults,
         GameState_SelectingTrap,
         GameState_PlacingTrap,
+        GameState_CreativeMode,
         GameState_NUMBER_OF_STATES
     }
 
@@ -35,6 +36,7 @@ public class GameStateManager : NetworkBehaviour
     [SerializeField] private GameObject[] onlyWhenSelectingTrap; 
     [SerializeField] private GameObject[] onlyWhenPlacingTrap;  
     [SerializeField] private GameObject[] onlyWhenShowingRoundResults;
+    [SerializeField] private GameObject[] onlyWhenCreativeMode;
 
     public GameEnviromentalVariables enviromentalVariables;
 
@@ -108,28 +110,42 @@ public class GameStateManager : NetworkBehaviour
 
     public void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            ServerSetGameState(GameStateEnum.GameState_SelectingLevel);
-        }
-        else if (Input.GetKeyDown(KeyCode.P))
-        {
-            GameStateEnum state = NetworkedState.Value;
 
-            state++;
-            if(state == GameStateEnum.GameState_NUMBER_OF_STATES)
-            {
-                state = 0;
-            }
-
-            ServerSetGameState(state);
-        }
-
-
-
-        if (!IsHost)
+        if (!IsServer)
         {
             return;
+        }
+
+        if(Configuration.Singleton.DebugMode){
+
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                ServerSetGameState(GameStateEnum.GameState_SelectingLevel);
+            }
+            else if (Input.GetKeyDown(KeyCode.P))
+            {
+                GameStateEnum state = NetworkedState.Value;
+
+                state++;
+                if(state == GameStateEnum.GameState_NUMBER_OF_STATES)
+                {
+                    state = 0;
+                }
+
+                ServerSetGameState(state);
+            }
+            if (Input.GetKeyDown(KeyCode.Keypad1))
+            {
+
+                if(NetworkedState.Value == GameStateEnum.GameState_CreativeMode)
+                {
+                    ServerSetGameState(GameStateEnum.GameState_Play);
+                }
+                else
+                {
+                    ServerSetGameState(GameStateEnum.GameState_CreativeMode);
+                }
+            }
         }
 
         // if the host has set the state to preview, create a timer to switch to the next state...
@@ -195,6 +211,41 @@ public class GameStateManager : NetworkBehaviour
     {
         switch (_state)
         {
+
+            case GameStateEnum.GameState_CreativeMode:
+            {
+                
+                TrapPlacementArea.Singleton.NetworkedDestroyAndClearAllBehavioralInstances();
+                TrapPlacementArea.Singleton.DestroyAllScopedObjects();
+                TrapPlacementArea.Singleton.SpawnAllStaticInstances();
+
+                // reset placed trap
+                List<NetworkPlayerHeader> headers = PlayerDataManager.Singleton.GetOwnedNetworkPlayerHeaders();
+                for(int i = 0; i < headers.Count; i++)
+                {
+                    headers[i].PlacedTrap.Value = false;
+                }
+
+                PlayerDataManager.Singleton.SetActiveAllMouseCursors(true, false);
+
+                Helpers.SetActiveGameObjectArray(onlyWhenSelectingLevel, false);
+                Helpers.SetActiveGameObjectArray(onlyWhenPlaying, false);
+                Helpers.SetActiveGameObjectArray(onlyWhenSelectingTrap, false);
+                Helpers.SetActiveGameObjectArray(onlyWhenShowingRoundResults, false);
+                Helpers.SetActiveGameObjectArray(onlyWhenPlacingTrap, false);
+                
+                Helpers.SetActiveGameObjectArray(onlyWhenCreativeMode, true);
+
+
+                if(IsServer){
+                    PlayerDataManager.Singleton.ServerSetActiveAllTrapToPlaceRpc(true);
+                }
+
+                TrapSelection.Singleton.HideButtons();
+
+                break;
+            }
+
             case GameStateEnum.GameState_SelectingLevel:
             {
                 TrapPlacementArea.Singleton.DestroyAllScopedObjects();
@@ -220,6 +271,7 @@ public class GameStateManager : NetworkBehaviour
                 Helpers.SetActiveGameObjectArray(onlyWhenSelectingTrap, false);
                 Helpers.SetActiveGameObjectArray(onlyWhenPlaying, false);
                 Helpers.SetActiveGameObjectArray(onlyWhenShowingRoundResults, false);
+                Helpers.SetActiveGameObjectArray(onlyWhenCreativeMode, false);
 
                 Helpers.SetActiveGameObjectArray(onlyWhenSelectingLevel, true);
 
@@ -243,6 +295,8 @@ public class GameStateManager : NetworkBehaviour
                 Helpers.SetActiveGameObjectArray(onlyWhenPlaying, false);
                 Helpers.SetActiveGameObjectArray(onlyWhenShowingRoundResults, false);
                 Helpers.SetActiveGameObjectArray(onlyWhenSelectingLevel, false);
+                Helpers.SetActiveGameObjectArray(onlyWhenCreativeMode, false);
+
 
                 // this variable only has an effect for the host, creates a timer to switch to next game state...
                 _hostPreviewTimerTracked = hostPreviewHoldSeconds;
@@ -260,6 +314,7 @@ public class GameStateManager : NetworkBehaviour
                 Helpers.SetActiveGameObjectArray(onlyWhenPlacingTrap, false);
                 Helpers.SetActiveGameObjectArray(onlyWhenPlaying, false);
                 Helpers.SetActiveGameObjectArray(onlyWhenShowingRoundResults, false);
+                Helpers.SetActiveGameObjectArray(onlyWhenCreativeMode, false);
 
                 Helpers.SetActiveGameObjectArray(onlyWhenSelectingTrap, true);
 
@@ -302,6 +357,7 @@ public class GameStateManager : NetworkBehaviour
                 Helpers.SetActiveGameObjectArray(onlyWhenPlaying, false);
                 Helpers.SetActiveGameObjectArray(onlyWhenSelectingTrap, false);
                 Helpers.SetActiveGameObjectArray(onlyWhenShowingRoundResults, false);
+                Helpers.SetActiveGameObjectArray(onlyWhenCreativeMode, false);
 
                 Helpers.SetActiveGameObjectArray(onlyWhenPlacingTrap, true);
                 
@@ -340,6 +396,7 @@ public class GameStateManager : NetworkBehaviour
                 Helpers.SetActiveGameObjectArray(onlyWhenPlacingTrap, false);
                 Helpers.SetActiveGameObjectArray(onlyWhenSelectingTrap, false);
                 Helpers.SetActiveGameObjectArray(onlyWhenShowingRoundResults, false);
+                Helpers.SetActiveGameObjectArray(onlyWhenCreativeMode, false);
 
                 Helpers.SetActiveGameObjectArray(onlyWhenPlaying, true);
                 
@@ -361,6 +418,7 @@ public class GameStateManager : NetworkBehaviour
                 Helpers.SetActiveGameObjectArray(onlyWhenPlacingTrap, false);
                 Helpers.SetActiveGameObjectArray(onlyWhenSelectingTrap, false);
                 Helpers.SetActiveGameObjectArray(onlyWhenPlaying, false);
+                Helpers.SetActiveGameObjectArray(onlyWhenCreativeMode, false);
 
                 Helpers.SetActiveGameObjectArray(onlyWhenShowingRoundResults, true);
 

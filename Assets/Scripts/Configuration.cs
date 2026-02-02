@@ -3,6 +3,8 @@ using UnityEngine;
 public class Configuration : MonoBehaviour
 {
 
+    public bool DebugMode = false;
+    
     public static Configuration Singleton;
 
     void Awake()

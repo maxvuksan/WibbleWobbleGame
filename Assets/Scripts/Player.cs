@@ -54,7 +54,7 @@ public class Player : NetworkBehaviour
 
     [SerializeField] private Transform _physicalPlayer; // the simulated body
     [SerializeField] private Transform _visualPlayer; // the player graphics
-    [SerializeField] private Rigidbody2D _serverRigidBody;
+    [SerializeField] private Rigidbody2D _ownerRigidbody;
     [SerializeField] private Rigidbody2D _visualRigidBody;
 
 
@@ -189,7 +189,10 @@ public class Player : NetworkBehaviour
         if (IsOwner)
         {
             _visualRigidBody.linearVelocity = Vector2.zero;
-            _visualRigidBody.gravityScale = GameStateManager.Singleton.enviromentalVariables.rigidBodyGravityScale;
+            _ownerRigidbody.gravityScale = GameStateManager.Singleton.enviromentalVariables.rigidBodyGravityScale;
+            
+            _visualRigidBody.simulated = false;
+            _visualRigidBody.GetComponent<CapsuleCollider2D>().enabled = false;
         }
 
         if (IsServer)
@@ -197,8 +200,8 @@ public class Player : NetworkBehaviour
             _clientInputs.inputMoveX = 0;
             _clientInputs.grounded = false;
             _clientInputs.inputJump = false;
-            _serverRigidBody.linearVelocity = Vector2.zero;
-            _serverRigidBody.gravityScale = GameStateManager.Singleton.enviromentalVariables.rigidBodyGravityScale;
+            _ownerRigidbody.linearVelocity = Vector2.zero;
+            _ownerRigidbody.gravityScale = GameStateManager.Singleton.enviromentalVariables.rigidBodyGravityScale;
         }
 
         animator.SetBool("HasWon", false);
@@ -260,7 +263,7 @@ public class Player : NetworkBehaviour
 
         if (IsOwner)
         {
-            HandleGrounding(); // both client and server do ground checks
+            OwnerHandleGrounding(); // both client and server do ground checks
 
             if (_clientInputs.inputJump && _grounded)
             {
@@ -276,20 +279,15 @@ public class Player : NetworkBehaviour
             }
 
             OwnerDetectMovement();
-
+        
+            _visualRigidBody.transform.position = _ownerRigidbody.transform.position;
         }
-        else if (IsServer)
-        {
-            if (!IsOwner)
-            {
-                ReflectSpriteState(_clientInputs.inputMoveX, !_grounded);
-            }
-        }
-
+        
+        ReflectSpriteState(_visualRigidBody, _clientInputs.inputMoveX, !_clientInputs.grounded);
     }
 
 
-    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner | RpcInvokePermission.Server)]
+    [Rpc(SendTo.Owner, InvokePermission = RpcInvokePermission.Owner | RpcInvokePermission.Server)]
     public void SetPositionRpc(Vector3 position)
     {
         _visualPlayer.position = position;
@@ -337,44 +335,49 @@ public class Player : NetworkBehaviour
     {
         if(IsOwner)
         {
-            ClientPhysicsPredict();
-        }
-
-        if (IsServer)
-        {
-            //ServerDetermineIfShouldStickToSlope();
-            //ServerHandleSlopeStick();
-            ServerApplyPositionWrapAroundInLobby();
-            ServerPhysicsCalculate();
-            //ServerApplyMovement();
+            OwnerPhysicsCalculate();
+            OwnerApplyPositionWrapAroundInLobby();
         
             ServerSnapshot s;
             s.grounded = _clientInputs.grounded;
             s.position = _physicalPlayer.transform.position;
-            s.velocity = _serverRigidBody.linearVelocity;
+            s.velocity = _ownerRigidbody.linearVelocity;
 
             SendSnapshotOwnerRpc(s);
 
             if (!_playerHeader.Alive.Value || _playerHeader.HasWon.Value || !_playerHeader.PlayerExistsInWorld.Value)
             {
-                //_serverRigidBody.linearVelocity = Vector3.zero;
+                //_ownerRigidbody.linearVelocity = Vector3.zero;
                 return;
             }
+
         }
-        
-        ReconcilePositionWithServer();
-        
-        
+
+        if (!IsOwner)
+        {
+            if (IsServer)
+            {
+                ServerPhysicsPredict();
+            }
+        }
     }
 
-    public void ReconcilePositionWithServer()
+    public void LateUpdate()
+    {
+        if (!IsOwner)
+        {
+            ReconcilePositionWithOwner();
+        }
+    }
+
+    public void ReconcilePositionWithOwner()
     {
         if (!_isReconciling)
         {
             return;
         }
 
-        _reconcileTimer += Time.fixedDeltaTime;
+        _reconcileTimer += Time.deltaTime;
 
         float t = _reconcileTimer / reconcileDuration;
         t = Mathf.Clamp01(t);
@@ -398,7 +401,7 @@ public class Player : NetworkBehaviour
     /// <summary>
     /// Predicts the players movement locally on the client, this is done to prevent latency from server physics updates
     /// </summary>
-    public void ClientPhysicsPredict()
+    public void ServerPhysicsPredict()
     {
        ApplyMovementPhysics(_visualRigidBody);
     }
@@ -407,9 +410,9 @@ public class Player : NetworkBehaviour
     /// <summary>
     /// Simulates the players physics on the server, this is done on the server to allow the clients to interact with physics objects over the network.
     /// </summary>
-    public void ServerPhysicsCalculate()
+    public void OwnerPhysicsCalculate()
     {
-        ApplyMovementPhysics(_serverRigidBody);
+        ApplyMovementPhysics(_ownerRigidbody);
     }
 
 
@@ -435,17 +438,14 @@ public class Player : NetworkBehaviour
     }
 
 
-    [Rpc(SendTo.Owner, InvokePermission = RpcInvokePermission.Server)]
+    [Rpc(SendTo.Everyone, InvokePermission = RpcInvokePermission.Owner)]
     void SendSnapshotOwnerRpc(ServerSnapshot snapshot)
     {
-        OnServerSnapshot(snapshot);
+        OnOwnerSnapshot(snapshot);
     }
 
-    /// <summary>
-    /// Reconcile local player position as the player may have been predicting the position locally.
-    /// </summary>
-    /// <param name="snapshot">A snapshot of the actual physics state for this player</param>
-    void OnServerSnapshot(ServerSnapshot s)
+    /// <param name="snapshot">A snapshot of the actual physics state for this player, dictated by the owner</param>
+    void OnOwnerSnapshot(ServerSnapshot s)
     {
         Vector2 error = new Vector2(s.position.x - _visualPlayer.position.x, s.position.y - _visualPlayer.position.y);
 
@@ -489,7 +489,7 @@ public class Player : NetworkBehaviour
         return velocity;
     }
 
-    private void ServerApplyPositionWrapAroundInLobby()
+    private void OwnerApplyPositionWrapAroundInLobby()
     {
         // we are not in lobby...
         if(GameStateManager.Singleton.NetworkedState.Value != GameStateManager.GameStateEnum.GameState_SelectingLevel)
@@ -523,11 +523,11 @@ public class Player : NetworkBehaviour
             pos.x = bounds.min.x - padding;
         }
 
-        _serverRigidBody.position = pos;
+        _ownerRigidbody.position = pos;
     }
 
 
-    void ReflectSpriteState(float moveX, bool inAir)
+    void ReflectSpriteState(Rigidbody2D rb, float moveX, bool inAir)
     {
         PlayerSpriteJiggleAnimations localAnimState = PlayerSpriteJiggleAnimations.ANIM_IDLE;
 
@@ -538,7 +538,7 @@ public class Player : NetworkBehaviour
             _stepSpriteDurationTracked = 0;
 
 
-            if(_visualRigidBody.linearVelocity.y > 0)
+            if(rb.linearVelocity.y > 0)
             {
                 _inAirRotationFactor += inAirRotationSpeed * Time.deltaTime;
             }
@@ -594,7 +594,7 @@ public class Player : NetworkBehaviour
         }
 
         _animState.SetState(_spriteJiggleAnimationMappings[(int)localAnimState]);
-        playerRenderer.transform.localScale = new Vector3((1 - Mathf.Abs(horizontalCounterStretch * _visualRigidBody.linearVelocityY)) * _ownerDirectionFacing.Value, 1 + Mathf.Abs(verticalStretch * _visualRigidBody.linearVelocityY), 1);
+        playerRenderer.transform.localScale = new Vector3((1 - Mathf.Abs(horizontalCounterStretch * rb.linearVelocityY)) * _ownerDirectionFacing.Value, 1 + Mathf.Abs(verticalStretch * rb.linearVelocityY), 1);
     }
 
 
@@ -642,11 +642,11 @@ public class Player : NetworkBehaviour
             Jump(_visualRigidBody);
         }
 
-        ReflectSpriteState(moveX, !_grounded || (_jumpDisabledTracked > 0));
+        ReflectSpriteState(_ownerRigidbody, moveX, !_grounded || (_jumpDisabledTracked > 0));
         SetInputRpc(moveX, shouldJump, _grounded, _clientInputs.tick);
     }
 
-    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    [Rpc(SendTo.Everyone, InvokePermission = RpcInvokePermission.Owner)]
     void SetInputRpc(float moveX, bool jump, bool grounded, int tick)
     {
         _clientInputs.inputMoveX = moveX;
@@ -657,13 +657,13 @@ public class Player : NetworkBehaviour
         if (jump)
         {
             // if isOwner, no need to play sound again
-            Jump(_serverRigidBody, !IsOwner);
+            Jump(_ownerRigidbody, !IsOwner);
         }
     }
 
-    void HandleGrounding()
+    void OwnerHandleGrounding()
     {
-        Bounds bounds = _visualRigidBody.GetComponent<Collider2D>().bounds;
+        Bounds bounds = _ownerRigidbody.GetComponent<Collider2D>().bounds;
 
         Vector2 center = new Vector2(bounds.center.x, bounds.min.y);
         Vector2 left   = new Vector2(bounds.min.x + groundRayInset, bounds.min.y);

@@ -152,7 +152,8 @@ public class TrapPlacementArea : NetworkBehaviour
     {
         if(GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.GameState_SelectingTrap || 
            GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.GameState_PreviewLevel ||
-           GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.GameState_PlacingTrap
+           GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.GameState_PlacingTrap ||
+           GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.GameState_CreativeMode
         )
         {
             print("NUM OF STATIC: " + _staticTrapInstances.Count);

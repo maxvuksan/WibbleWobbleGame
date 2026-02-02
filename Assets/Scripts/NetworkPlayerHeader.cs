@@ -37,7 +37,9 @@ public class NetworkPlayerHeader : NetworkBehaviour
         {
             GameStateManager.Singleton.SuggestFinishSelectingTrapRpc();
         }
-        else if(GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.GameState_PlacingTrap)
+        else if(GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.GameState_PlacingTrap ||
+                GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.GameState_CreativeMode 
+        )
         {
             _trapToPlace.SetTrapType(newValue);
         }
