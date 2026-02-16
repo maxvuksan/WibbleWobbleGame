@@ -13,6 +13,8 @@ GameObject:
   - component: {fileID: 3742951165435896355}
   - component: {fileID: 4276497733551139996}
   - component: {fileID: 6094453714332205507}
+  - component: {fileID: 9184962811959337097}
+  - component: {fileID: 2970114349983113513}
   m_Layer: 6
   m_Name: Trap_Block_2x2_STATIC
   m_TagString: Untagged
@@ -168,3 +170,35 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StaticTrap
   trapName: Block_2x2
+--- !u!114 &9184962811959337097
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4665495375785675357}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c7ee075d777dca4194707a5a6525e44, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CustomColliderRectangle
+  Offset: {x: 0, y: 0}
+  _size: {x: 4.13, y: 4.13}
+--- !u!114 &2970114349983113513
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4665495375785675357}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8e80e72817d95e41bd6acdeaf91824d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CustomPhysicsBody
+  _isStatic: 1
+  _gravity: 1
+  _restitution: 0.05
+  _constrainRotation: 0
+  _constrainXPosition: 0
+  _constrainYPosition: 0

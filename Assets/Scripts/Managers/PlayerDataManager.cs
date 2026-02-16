@@ -33,7 +33,7 @@ public class PlayerDataSet
     public Player player;
     public MouseCursor mouseCursor;
     public NetworkPlayerHeader networkedPlayerHeader;
-
+    public PlayerInputDriver playerInputDriver;
 
     // ________________________________________________
 
@@ -277,6 +277,7 @@ public class PlayerDataManager : NetworkBehaviour
 
         dataSet.gameObject = gameDataSetObject;
         dataSet.player = gameDataSetObject.GetComponentInChildren<Player>();
+        dataSet.playerInputDriver = gameDataSetObject.GetComponentInChildren<PlayerInputDriver>();
 
         dataSet.networkedPlayerHeader = gameDataSetObject.GetComponent<NetworkPlayerHeader>();
         dataSet.index = playerIndex;
@@ -299,6 +300,18 @@ public class PlayerDataManager : NetworkBehaviour
             if(_playerData[i].index == playerIndex)
             {
                 return _playerData[i].networkedPlayerHeader;
+            }
+        }
+        return null;
+    }
+
+    public PlayerDataSet GetPlayer(ulong playerIndex)
+    {
+        for(int i = 0; i < PlayerCount; i++)
+        {
+            if(_playerData[i].index == playerIndex)
+            {
+                return _playerData[i];
             }
         }
         return null;

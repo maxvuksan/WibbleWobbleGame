@@ -13,6 +13,7 @@ public class NetworkPlayerHeader : NetworkBehaviour
     public NetworkVariable<bool> PlacedTrap             = new(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner); 
     public NetworkVariable<bool> PlayerExistsInWorld    = new(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner); 
 
+
     [SerializeField] private TrapToPlace _trapToPlace;
 
 

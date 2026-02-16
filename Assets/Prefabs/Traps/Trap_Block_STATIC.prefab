@@ -14,6 +14,9 @@ GameObject:
   - component: {fileID: 2805304792715508155}
   - component: {fileID: 3742951165435896355}
   - component: {fileID: 6895141508156125244}
+  - component: {fileID: 6553815052395656642}
+  - component: {fileID: 3703681567538780420}
+  - component: {fileID: 7057226326140324838}
   m_Layer: 6
   m_Name: Trap_Block_STATIC
   m_TagString: Untagged
@@ -101,7 +104,7 @@ BoxCollider2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4665495375785675357}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Density: 1
   m_Material: {fileID: 0}
@@ -147,7 +150,7 @@ BoxCollider2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4665495375785675357}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Density: 1
   m_Material: {fileID: 0}
@@ -215,3 +218,49 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StaticTrap
   trapName: Block_L
+--- !u!114 &6553815052395656642
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4665495375785675357}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c7ee075d777dca4194707a5a6525e44, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CustomColliderRectangle
+  Offset: {x: 0, y: -0.97}
+  _size: {x: 5.96, y: 1.97}
+--- !u!114 &3703681567538780420
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4665495375785675357}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c7ee075d777dca4194707a5a6525e44, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CustomColliderRectangle
+  Offset: {x: -1.98, y: 0}
+  _size: {x: 1.95, y: 3.97}
+--- !u!114 &7057226326140324838
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4665495375785675357}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8e80e72817d95e41bd6acdeaf91824d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CustomPhysicsBody
+  _isStatic: 1
+  _gravity: 1
+  _restitution: 0.05
+  _constrainRotation: 0
+  _constrainXPosition: 0
+  _constrainYPosition: 0

@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using FixMath.NET;
 using Unity.Netcode;
 using UnityEngine;
+using Volatile;
 
 public class Player : NetworkBehaviour
 {
@@ -14,7 +16,6 @@ public class Player : NetworkBehaviour
     [SerializeField] private Transform groundCheckPosition;
     [SerializeField] private Vector2 groundCheckSize;
     [SerializeField] private Vector2 wallCheckSize;
-
  
     [Header("Movement")]
     [SerializeField] private float moveSpeed;
@@ -51,11 +52,8 @@ public class Player : NetworkBehaviour
     [SerializeField] private SpriteRenderer eyeRenderer;
     [SerializeField] private Animator animator;
 
-
-    [SerializeField] private Transform _physicalPlayer; // the simulated body
-    [SerializeField] private Transform _visualPlayer; // the player graphics
-    [SerializeField] private Rigidbody2D _ownerRigidbody;
-    [SerializeField] private Rigidbody2D _visualRigidBody;
+    [SerializeField] private CustomPhysicsBody _physicsBody;
+    [SerializeField] private PlayerInputDriver _driver;
 
 
     enum PlayerSpriteJiggleAnimations
@@ -80,90 +78,44 @@ public class Player : NetworkBehaviour
             NetworkVariableReadPermission.Everyone, 
             NetworkVariableWritePermission.Owner);
     
-    private NetworkVariable<int> _ownerDirectionFacing = 
-        new NetworkVariable<int>(
-            1, 
-            NetworkVariableReadPermission.Everyone, 
-            NetworkVariableWritePermission.Owner);
 
     private Color _originalColour;
-    private NetworkPlayerHeader _playerHeader;
+
     public NetworkPlayerHeader PlayerHeader {
         get => _playerHeader;
     }
-    
+    private NetworkPlayerHeader _playerHeader;    
+
+
     // state
     private Vector2 _groundNormal = Vector2.up;
-    private bool _shouldStickToSlope;
-    private float _groundAngle;
-    private float _groundedTracked;
-    private float _jumpInputTracked;
-    private float _jumpDisabledTracked;
+    private Fix64 _groundedTracked;
+    private double _jumpInputTracked;
+    private double _jumpDisabledTracked;
     private bool _grounded;
-    private bool _moving;
     private bool _trueGrounded;
-    private int _directionFacing;
     private float _stepSpriteDurationTracked;
     private bool _isLeftFootForward;
     private float _inAirRotationFactor = 0;
-    public int directionFacing => _directionFacing;
-
-    // server state
-
-
-    [System.Serializable]
-    public class PlayerOwnerToServerInput
-    {
-        public float inputMoveX;
-        public bool inputJump;
-        public bool grounded;
-        public int tick = 0;
-    }
-
-
-    [System.Serializable]
-    struct ServerSnapshot : INetworkSerializable
-    {
-        public Vector2 position;
-        public Vector2 velocity;
-        public bool grounded;
-
-        public void NetworkSerialize<T>(BufferSerializer<T> serializer)
-        where T : IReaderWriter
-        {
-            serializer.SerializeValue(ref position);
-            serializer.SerializeValue(ref velocity);
-            serializer.SerializeValue(ref grounded);
-        }
-    }
-
-
-
-    private PlayerOwnerToServerInput _clientInputs;
-
-
-
-    /// <summary>
-    /// For owners syncing position with server snapshots...
-    /// </summary>
-    /// private Vector2 _reconcileTargetPos;
-    [Header("Server Reconcile")]
-     [SerializeField] private float reconcileDuration = 0.08f;
-    [SerializeField] private float softError = 0.05f;
-    [SerializeField] private float hardError = 0.5f;
-    private Vector2 _reconcileTargetPos;
-    private Vector2 _reconcileStartPos;
-    private float _reconcileTimer;
-    private bool _isReconciling;
-
-
+    private int _directionFacing = 1;
 
     void Awake()
     {
-        _clientInputs = new PlayerOwnerToServerInput();
         _playerHeader = GetComponentInParent<NetworkPlayerHeader>();
         _animState = GetComponent<SpriteJiggleMultiState>();
         _inputHandler = FindFirstObjectByType<ControllerInputHandler>();
+        _physicsBody = GetComponent<CustomPhysicsBody>();
+    }
+
+    void Start()
+    {
+        CustomPhysics.OnPhysicsTick += OnPhysicsTick;
+    }
+
+    public override void OnDestroy()
+    {
+        base.OnDestroy();
+        CustomPhysics.OnPhysicsTick -= OnPhysicsTick;
     }
 
     public override void OnNetworkSpawn()
@@ -177,34 +129,16 @@ public class Player : NetworkBehaviour
     public void ResetState()
     {
         _originalColour = playerRenderer.color;
-        _directionFacing = 1;
         _jumpInputTracked = 0;
         _jumpDisabledTracked = 0;
-        _groundedTracked = 0;
         _inAirRotationFactor = 0;
         _trueGrounded = false;
-        _moving = false;
-
-
-        if (IsOwner)
-        {
-            _visualRigidBody.linearVelocity = Vector2.zero;
-            _ownerRigidbody.gravityScale = GameStateManager.Singleton.enviromentalVariables.rigidBodyGravityScale;
-            
-            _visualRigidBody.simulated = false;
-            _visualRigidBody.GetComponent<CapsuleCollider2D>().enabled = false;
-        }
-
-        if (IsServer)
-        {
-            _clientInputs.inputMoveX = 0;
-            _clientInputs.grounded = false;
-            _clientInputs.inputJump = false;
-            _ownerRigidbody.linearVelocity = Vector2.zero;
-            _ownerRigidbody.gravityScale = GameStateManager.Singleton.enviromentalVariables.rigidBodyGravityScale;
-        }
+        _directionFacing = 1;
 
         animator.SetBool("HasWon", false);
+
+        _physicsBody.LinearVelocity = VoltVector2.zero;
+
     }
 
     /// <summary>
@@ -261,37 +195,20 @@ public class Player : NetworkBehaviour
             return;
         }
 
-        if (IsOwner)
+        int moveDirection = _driver.PlayerInputs.GetMoveDirection();
+        if(moveDirection != 0)
         {
-            OwnerHandleGrounding(); // both client and server do ground checks
-
-            if (_clientInputs.inputJump && _grounded)
-            {
-                _jumpInputTracked = jumpInputBuffer;
-            }
-
-            if (_jumpInputTracked > 0)
-            {
-                _jumpInputTracked -= Time.deltaTime;
-            }
-            if (_jumpDisabledTracked > 0) {
-                _jumpDisabledTracked -= Time.deltaTime;
-            }
-
-            OwnerDetectMovement();
-        
-            _visualRigidBody.transform.position = _ownerRigidbody.transform.position;
+            _directionFacing = moveDirection;
         }
         
-        ReflectSpriteState(_visualRigidBody, _clientInputs.inputMoveX, !_clientInputs.grounded);
+        ReflectSpriteState();
     }
 
 
     [Rpc(SendTo.Owner, InvokePermission = RpcInvokePermission.Owner | RpcInvokePermission.Server)]
     public void SetPositionRpc(Vector3 position)
     {
-        _visualPlayer.position = position;
-        _physicalPlayer.position = position;
+        
     }
 
     public void HitTrap(Vector2 directionToApplyForce)
@@ -321,175 +238,52 @@ public class Player : NetworkBehaviour
         AudioManager.Singleton.Play("Player_Death");
     }
 
-    public void Jump(Rigidbody2D rb, bool playSound = true)
+    public void Jump(bool playSound = true)
     {
-        rb.linearVelocity = new Vector2(rb.linearVelocityX, jumpHeight);
+        _physicsBody.LinearVelocity = new VoltVector2(_physicsBody.LinearVelocityX, (Fix64)jumpHeight);
 
         if (playSound)
         {
-            AudioManager.Singleton.Play("Player_Jump");
+            //AudioManager.Singleton.Play("Player_Jump");
         }
     }
 
-    public void FixedUpdate()
+    public void OnPhysicsTick()
     {
-        if(IsOwner)
+        if (_driver.PlayerInputs.InputJump == PlayerJumpInput.JumpPressed)
         {
-            OwnerPhysicsCalculate();
-            OwnerApplyPositionWrapAroundInLobby();
-        
-            ServerSnapshot s;
-            s.grounded = _clientInputs.grounded;
-            s.position = _physicalPlayer.transform.position;
-            s.velocity = _ownerRigidbody.linearVelocity;
-
-            SendSnapshotOwnerRpc(s);
-
-            if (!_playerHeader.Alive.Value || _playerHeader.HasWon.Value || !_playerHeader.PlayerExistsInWorld.Value)
-            {
-                //_ownerRigidbody.linearVelocity = Vector3.zero;
-                return;
-            }
-
+            _jumpInputTracked = jumpInputBuffer;
         }
 
-        if (!IsOwner)
+        if (_jumpInputTracked > 0)
         {
-            if (IsServer)
-            {
-                ServerPhysicsPredict();
-            }
+            // TODO: Casting to double here may be problematic?
+            _jumpInputTracked -= (double)CustomPhysics.TimeBetweenTicks;
         }
-    }
+        if (_jumpDisabledTracked > 0) {
+            _jumpDisabledTracked -= (double)CustomPhysics.TimeBetweenTicks;
+        }
 
-    public void LateUpdate()
-    {
-        if (!IsOwner)
+        if(_jumpInputTracked > 0)
         {
-            ReconcilePositionWithOwner();
-        }
-    }
-
-    public void ReconcilePositionWithOwner()
-    {
-        if (!_isReconciling)
-        {
-            return;
+            Jump(true);
+            _jumpInputTracked = 0;
         }
 
-        _reconcileTimer += Time.deltaTime;
-
-        float t = _reconcileTimer / reconcileDuration;
-        t = Mathf.Clamp01(t);
-
-        // convert t value to smoothstep, this feels better than linear
-        //t = t * t * (3f - 2f * t);
-
-        Vector2 pos = Vector2.Lerp(
-            _reconcileStartPos,
-            _reconcileTargetPos,
-            t
-        );
-
-        _visualRigidBody.MovePosition(pos);
-
-        if (t >= 1f){
-            _isReconciling = false;
-        }
+        ApplyPositionWrapAroundInLobby();
+        ApplyMovementPhysics();
     }
 
-    /// <summary>
-    /// Predicts the players movement locally on the client, this is done to prevent latency from server physics updates
-    /// </summary>
-    public void ServerPhysicsPredict()
+
+    public void ApplyMovementPhysics()
     {
-       ApplyMovementPhysics(_visualRigidBody);
+        float targetSpeed = _driver.PlayerInputs.GetMoveDirection() * maxSpeed;
+
+        _physicsBody.LinearVelocityX = (Fix64)targetSpeed;
     }
 
 
-    /// <summary>
-    /// Simulates the players physics on the server, this is done on the server to allow the clients to interact with physics objects over the network.
-    /// </summary>
-    public void OwnerPhysicsCalculate()
-    {
-        ApplyMovementPhysics(_ownerRigidbody);
-    }
-
-
-    public void ApplyMovementPhysics(Rigidbody2D rb)
-    {
-        float targetSpeed = _clientInputs.inputMoveX * maxSpeed;
-        float speedDiff = targetSpeed - rb.linearVelocity.x;
-
-        float accelRate;
-        accelRate = Mathf.Abs(targetSpeed) > 0.01f ? airAcceleration : airDeceleration;
-
-        // if (_grounded)
-        //     accelRate = Mathf.Abs(targetSpeed) > 0.01f ? groundAcceleration : groundDeceleration;
-        // else
-        //     accelRate = Mathf.Abs(targetSpeed) > 0.01f ? airAcceleration : airDeceleration;
-
-        float movement = accelRate * speedDiff;
-
-        rb.AddForce(new Vector2(Vector2.right.x * movement * Time.fixedDeltaTime,
-                            -GameStateManager.Singleton.enviromentalVariables.rigidBodyGravityScale * Time.fixedDeltaTime));
-
-        rb.linearVelocity = ClampVelocity(rb.linearVelocity);
-    }
-
-
-    [Rpc(SendTo.Everyone, InvokePermission = RpcInvokePermission.Owner)]
-    void SendSnapshotOwnerRpc(ServerSnapshot snapshot)
-    {
-        OnOwnerSnapshot(snapshot);
-    }
-
-    /// <param name="snapshot">A snapshot of the actual physics state for this player, dictated by the owner</param>
-    void OnOwnerSnapshot(ServerSnapshot s)
-    {
-        Vector2 error = new Vector2(s.position.x - _visualPlayer.position.x, s.position.y - _visualPlayer.position.y);
-
-        if (error.magnitude < softError)
-        {
-            return;
-        }
-        // hard correction if huge
-        if (error.magnitude > hardError)
-        {
-            _visualPlayer.transform.position = s.position;
-            _visualRigidBody.linearVelocity = s.velocity;
-            _isReconciling = false;
-            return;
-        }
-        else if(error.magnitude > softError)
-        {
-            // reconcile smoothly
-            _reconcileStartPos = _visualRigidBody.transform.position;
-            _reconcileTargetPos = s.position;
-            _visualRigidBody.linearVelocity = s.velocity;
-            _reconcileTimer = 0f;
-            _isReconciling = true;
-        }
-    }
-
-
-    /// <summary>
-    /// Clamps the provided velocity input and returns it
-    /// </summary>
-    /// <param name="velocity">input to clamp</param>
-    /// <returns>velocity input clamped to (-velocityCeiling, velocityCeiling) parameters</returns>
-    private Vector2 ClampVelocity(Vector2 velocity)
-    {
-        // Clamp horizontal speed
-        velocity.x = Mathf.Clamp(velocity.x, -velocityCeiling, velocityCeiling);
-
-        // Optional: clamp vertical too
-        velocity.y = Mathf.Clamp(velocity.y, -velocityCeiling, velocityCeiling);
-
-        return velocity;
-    }
-
-    private void OwnerApplyPositionWrapAroundInLobby()
+    private void ApplyPositionWrapAroundInLobby()
     {
         // we are not in lobby...
         if(GameStateManager.Singleton.NetworkedState.Value != GameStateManager.GameStateEnum.GameState_SelectingLevel)
@@ -499,7 +293,7 @@ public class Player : NetworkBehaviour
 
         Bounds bounds = Camera.main.GetComponent<BoxCollider2D>().bounds;
 
-        Vector3 pos = _physicalPlayer.transform.position;
+        Vector3 pos = transform.position;
 
         float padding = 0.1f; // small buffer so we don't jitter on the edge
 
@@ -523,22 +317,22 @@ public class Player : NetworkBehaviour
             pos.x = bounds.min.x - padding;
         }
 
-        _ownerRigidbody.position = pos;
+        transform.position = pos;
     }
 
 
-    void ReflectSpriteState(Rigidbody2D rb, float moveX, bool inAir)
+    void ReflectSpriteState()
     {
         PlayerSpriteJiggleAnimations localAnimState = PlayerSpriteJiggleAnimations.ANIM_IDLE;
 
-        if(inAir)
+        if(_grounded)
         {
             localAnimState = PlayerSpriteJiggleAnimations.ANIM_IN_AIR;
             _isLeftFootForward = false;
             _stepSpriteDurationTracked = 0;
 
 
-            if(rb.linearVelocity.y > 0)
+            if((float)_physicsBody.LinearVelocityY > 0)
             {
                 _inAirRotationFactor += inAirRotationSpeed * Time.deltaTime;
             }
@@ -548,13 +342,13 @@ public class Player : NetworkBehaviour
             }
 
             _inAirRotationFactor = Mathf.Clamp(_inAirRotationFactor, -1, 1);
-            playerRenderer.transform.rotation = Quaternion.Euler(0,0,_inAirRotationFactor * stepRotation * _ownerDirectionFacing.Value);
+            playerRenderer.transform.rotation = Quaternion.Euler(0,0,_inAirRotationFactor * stepRotation * _directionFacing);
 
         }
         else
         {
             _inAirRotationFactor = 0;
-            if(moveX != 0){
+            if(_driver.PlayerInputs.InputMoveDirection != PlayerMoveInput.None){
 
                 _stepSpriteDurationTracked += Time.deltaTime;
                 if(_stepSpriteDurationTracked > stepSpriteDuration)
@@ -576,12 +370,12 @@ public class Player : NetworkBehaviour
 
                 if (_isLeftFootForward)
                 {
-                    playerRenderer.transform.rotation = Quaternion.Euler(0,0,stepRotation * _ownerDirectionFacing.Value);
+                    playerRenderer.transform.rotation = Quaternion.Euler(0,0,stepRotation * _directionFacing);
                     localAnimState = PlayerSpriteJiggleAnimations.ANIM_STEP_LEFT;
                 }
                 else
                 {
-                    playerRenderer.transform.rotation = Quaternion.Euler(0,0,-stepRotation * _ownerDirectionFacing.Value);
+                    playerRenderer.transform.rotation = Quaternion.Euler(0,0,-stepRotation * _directionFacing);
                     localAnimState = PlayerSpriteJiggleAnimations.ANIM_STEP_RIGHT;
                 }
             }
@@ -594,143 +388,27 @@ public class Player : NetworkBehaviour
         }
 
         _animState.SetState(_spriteJiggleAnimationMappings[(int)localAnimState]);
-        playerRenderer.transform.localScale = new Vector3((1 - Mathf.Abs(horizontalCounterStretch * rb.linearVelocityY)) * _ownerDirectionFacing.Value, 1 + Mathf.Abs(verticalStretch * rb.linearVelocityY), 1);
+        playerRenderer.transform.localScale = new Vector3((1 - Mathf.Abs(horizontalCounterStretch * (float)_physicsBody.LinearVelocityY)) * _directionFacing, 1 + Mathf.Abs(verticalStretch * (float)_physicsBody.LinearVelocityY), 1);
     }
 
-
-    void OwnerDetectMovement()
-    {
-        float moveX = 0;
-        if(_inputHandler.Input.mouseCursorVelocity.x > 0.1f)
-        {
-            moveX = 1;
-        }
-        else if(_inputHandler.Input.mouseCursorVelocity.x < -0.1f)
-        {
-            moveX = -1;
-        }
-        if (!canMove)
-        {
-            moveX = 0;
-        }
-
-        // Facing sprite & moving state
-        _moving = moveX != 0;
-        if (_moving)
-        {
-            _ownerDirectionFacing.Value = moveX > 0 ? 1 : -1;
-        }
-
-        bool shouldJump = false;
-
-        if (_inputHandler.Input.mainButtonIsPressed)
-        {
-            _jumpInputTracked = jumpInputBuffer;
-        }
-        if (_jumpInputTracked > 0)
-        {
-            _jumpInputTracked -= Time.deltaTime;
-        }
-        if (_jumpDisabledTracked > 0) {
-            _jumpDisabledTracked -= Time.deltaTime;
-        }
-
-        if(_grounded && _jumpInputTracked > 0 && _jumpDisabledTracked <= 0){
-            shouldJump = true;
-            _jumpInputTracked = 0;
-            _jumpDisabledTracked = jumpDisableBuffer;
-            Jump(_visualRigidBody);
-        }
-
-        ReflectSpriteState(_ownerRigidbody, moveX, !_grounded || (_jumpDisabledTracked > 0));
-        SetInputRpc(moveX, shouldJump, _grounded, _clientInputs.tick);
-    }
-
-    [Rpc(SendTo.Everyone, InvokePermission = RpcInvokePermission.Owner)]
-    void SetInputRpc(float moveX, bool jump, bool grounded, int tick)
-    {
-        _clientInputs.inputMoveX = moveX;
-        _clientInputs.inputJump = jump;
-        _clientInputs.grounded = grounded;
-        _clientInputs.tick = tick;
-
-        if (jump)
-        {
-            // if isOwner, no need to play sound again
-            Jump(_ownerRigidbody, !IsOwner);
-        }
-    }
 
     void OwnerHandleGrounding()
     {
-        Bounds bounds = _ownerRigidbody.GetComponent<Collider2D>().bounds;
-
-        Vector2 center = new Vector2(bounds.center.x, bounds.min.y);
-        Vector2 left   = new Vector2(bounds.min.x + groundRayInset, bounds.min.y);
-        Vector2 right  = new Vector2(bounds.max.x - groundRayInset, bounds.min.y);
-
-        RaycastHit2D hitCenter = Physics2D.Raycast(center, Vector2.down, groundRayLength, groundLayer);
-        RaycastHit2D hitLeft   = Physics2D.Raycast(left,   Vector2.down, groundRayLength, groundLayer);
-        RaycastHit2D hitRight  = Physics2D.Raycast(right,  Vector2.down, groundRayLength, groundLayer);
-
-        RaycastHit2D bestHit = default;
-        bool hasHit = false;
-
-        // Prefer center hit
-        if (hitCenter.collider != null)
-        {
-            bestHit = hitCenter;
-            hasHit = true;
-        }
-
-        if (hitLeft.collider != null && (!hasHit || hitLeft.normal.y > bestHit.normal.y)){
-            bestHit = hitLeft;
-            hasHit = true;
-        }
-
-        if (hitRight.collider != null && (!hasHit || hitRight.normal.y > bestHit.normal.y)){
-            bestHit = hitRight;
-            hasHit = true;
-        }
-
-        _trueGrounded = hasHit;
+        _trueGrounded = true;
 
         if (_trueGrounded)
         {
-            _groundNormal = bestHit.normal;
-            _groundAngle = Vector2.Angle(_groundNormal, Vector2.up);
-            _groundedTracked = groundedBuffer;
+            // TODO: Change this..
+            _groundedTracked = Fix64.MaxValue;
+            //_groundedTracked = groundedBuffer;
         }
 
         _grounded = false;
-        if (_groundedTracked > 0)
+        if (_groundedTracked > Fix64.Zero)
         {
             _grounded = true;
-            _groundedTracked -= Time.deltaTime;
+            _groundedTracked -= CustomPhysics.TimeBetweenTicks;
         }
-    }
-
-    void OnDrawGizmos()
-    {
-        if (!Application.isPlaying) return;
-
-        Bounds bounds = _physicalPlayer.GetComponent<Collider2D>().bounds;
-
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawLine(
-            new Vector2(bounds.center.x, bounds.min.y),
-            new Vector2(bounds.center.x, bounds.min.y - groundRayLength)
-        );
-
-        Gizmos.DrawLine(
-            new Vector2(bounds.min.x + groundRayInset, bounds.min.y),
-            new Vector2(bounds.min.x + groundRayInset, bounds.min.y - groundRayLength)
-        );
-
-        Gizmos.DrawLine(
-            new Vector2(bounds.max.x - groundRayInset, bounds.min.y),
-            new Vector2(bounds.max.x - groundRayInset, bounds.min.y - groundRayLength)
-        );
     }
 
 

@@ -68,9 +68,9 @@ namespace Volatile
     public object UserData { get; set; }
     public VoltBody Body { get; private set; }
 
-    internal Fix64 Density { get; private set; }
-    internal Fix64 Friction { get; private set; }
-    internal Fix64 Restitution { get; private set; }
+    internal Fix64 Density { get; set; }
+    internal Fix64 Friction { get; set; }
+    internal Fix64 Restitution { get; set; }
 
     /// <summary>
     /// The world-space bounding AABB for this shape.

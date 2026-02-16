@@ -20,6 +20,7 @@
 
 using FixMath.NET;
 using System;
+using System.Diagnostics;
 
 #if UNITY
 using UnityEngine;
@@ -97,7 +98,7 @@ namespace Volatile
     public bool IsEnabled { get; set; } = true;
 
     public bool IsTrigger { get; set; } = false;
-    
+
     public bool IgnoreRaycasts { get; set; } = false;
 
     public bool IsInWorld { get { return this.World != null; } }
@@ -129,6 +130,8 @@ namespace Volatile
     public Fix64 Angle { get; private set; }
 
     public bool IsFixedAngle { get; set; }
+    public bool IsFixedPositionX { get; set; }
+    public bool IsFixedPositionY { get; set; }
 
     public VoltVector2 LinearVelocity { get; set; }
     public Fix64 AngularVelocity { get; set; }
@@ -144,7 +147,7 @@ namespace Volatile
 
     public VoltVector2 Force { get; private set; }
     public Fix64 Torque { get; private set; }
-    
+
     /// <summary>
     /// Sets whether or not the body will be affected by the World's gravity. 
     /// </summary>
@@ -169,7 +172,7 @@ namespace Volatile
 
     public void ClearOnCollisionEvent()
     {
-      OnCollision = null;
+    	OnCollision = null;
     }
 
     /// <summary>
@@ -347,7 +350,7 @@ namespace Volatile
       if (IsEnabled == false) return false;
 
       if (IgnoreRaycasts == true) return false;
-      
+
       // AABB check done in world space (because it keeps changing)
       if (bypassAABB == false)
         if (AABB.RayCast(ref ray) == false)
@@ -552,16 +555,34 @@ namespace Volatile
 
     internal void ApplyImpulse(VoltVector2 j, VoltVector2 r)
     {
-      if (IsEnabled == false) return;
-      this.LinearVelocity += j * this.InvMass;
-      this.AngularVelocity -= this.InvInertia * VoltMath.Cross(j, r);
+        if (IsEnabled == false) return;
+        
+        // Apply linear impulse with axis locks
+        VoltVector2 deltaV = j * this.InvMass;
+        Fix64 newVX = IsFixedPositionX ? this.LinearVelocity.x : this.LinearVelocity.x + deltaV.x;
+        Fix64 newVY = IsFixedPositionY ? this.LinearVelocity.y : this.LinearVelocity.y + deltaV.y;
+        this.LinearVelocity = new VoltVector2(newVX, newVY);
+
+        // Apply angular impulse with lock
+        if (!IsFixedAngle){
+            this.AngularVelocity -= this.InvInertia * VoltMath.Cross(j, r);
+        }
     }
 
     internal void ApplyBias(VoltVector2 j, VoltVector2 r)
     {
       if (IsEnabled == false) return;
-      this.BiasVelocity += j * this.InvMass;
-      this.BiasRotation -= this.InvInertia * VoltMath.Cross(j, r);
+      
+      // Apply linear bias with axis locks
+      VoltVector2 deltaB = j * this.InvMass;
+      Fix64 newBX = IsFixedPositionX ? this.BiasVelocity.x : this.BiasVelocity.x + deltaB.x;
+      Fix64 newBY = IsFixedPositionY ? this.BiasVelocity.y : this.BiasVelocity.y + deltaB.y;
+      this.BiasVelocity = new VoltVector2(newBX, newBY);
+
+      // Apply angular bias with lock
+      if (!IsFixedAngle){
+          this.BiasRotation -= this.InvInertia * VoltMath.Cross(j, r);
+      }
     }
     #endregion
 
@@ -657,13 +678,39 @@ namespace Volatile
 
     private void IntegrateVelocity()
     {
-      //TODO
-      //if (!IsFixedPosition)
-        this.Position +=
-          this.World.DeltaTime * this.LinearVelocity + this.BiasVelocity;
-      if (!IsFixedAngle)
-        this.Angle +=
+
+      VoltVector2 translation = this.World.DeltaTime * this.LinearVelocity + this.BiasVelocity;
+      Fix64 xOut = this.Position.x;
+      Fix64 yOut = this.Position.y;
+
+
+
+      if (IsFixedPositionX)
+      {
+        translation = new VoltVector2(Fix64.Zero, translation.y);
+        this.LinearVelocity = new VoltVector2(Fix64.Zero, this.LinearVelocity.y);
+      }
+      if (IsFixedPositionY)
+      {
+        translation = new VoltVector2(translation.x, Fix64.Zero);
+        this.LinearVelocity = new VoltVector2(this.LinearVelocity.x, Fix64.Zero);
+      }
+
+      xOut += translation.x;
+      yOut += translation.y;
+      this.Position = new VoltVector2(xOut, yOut);
+
+
+      if (IsFixedAngle)
+      {
+        this.AngularVelocity = Fix64.Zero;
+        this.BiasRotation = Fix64.Zero;
+      }
+      else
+      {
+          this.Angle +=
           this.World.DeltaTime * this.AngularVelocity + this.BiasRotation;
+      }
       this.Facing = VoltMath.Polar(this.Angle);
     }
 
@@ -697,6 +744,7 @@ namespace Volatile
         this.collInertia += curMass * curInertia;
       }
 
+      UnityEngine.Debug.Log(this.collMass);
       if (this.collMass < VoltConfig.MINIMUM_DYNAMIC_MASS)
       {
         throw new InvalidOperationException("Mass of dynamic too small");
@@ -722,7 +770,7 @@ namespace Volatile
     }
     #endregion
 
-#region World-Space to Body-Space Transformations
+    #region World-Space to Body-Space Transformations
     internal VoltVector2 WorldToBodyPoint(VoltVector2 vector)
     {
       return VoltMath.WorldToBodyPoint(this.Position, this.Facing, vector);
