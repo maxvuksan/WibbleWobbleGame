@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class Helpers : MonoBehaviour
@@ -64,6 +65,30 @@ public class Helpers : MonoBehaviour
         for(int i = 0; i < array.Length; i++)
         {
             array[i].SetActive(state);
+        }
+    }
+
+    /// <summary>
+    /// Invokes an action, catching an exceptions raised by subscribed events
+    /// </summary>
+    public static void SafeInvoke(Action action, string functionLabel)
+    {
+        if (action == null){
+            return;
+        }
+
+        foreach (var subscriber in action.GetInvocationList())
+        {
+            try
+            {
+                ((Action)subscriber).Invoke();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError(
+                    $"Exception during {functionLabel} from " +
+                    $"{subscriber.Target?.GetType().Name}: {ex}");
+            }
         }
     }
 

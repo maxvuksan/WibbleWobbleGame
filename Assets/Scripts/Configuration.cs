@@ -22,6 +22,9 @@ public class Configuration : MonoBehaviour
 
     void Start()
     {
-        QualitySettings.vSyncCount = 1;
+        Application.targetFrameRate = 200;
+
+        //TODO: V-sync is turned off becuase physics runs at 120 fps
+        //QualitySettings.vSyncCount = 1;
     }
 }

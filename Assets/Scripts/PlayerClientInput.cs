@@ -24,8 +24,20 @@ public enum PlayerJumpInput : byte {
 [System.Serializable]
 public class PlayerClientInputs : INetworkSerializable
 {
-    public PlayerMoveInput InputMoveDirection = PlayerMoveInput.None;
-    public PlayerJumpInput InputJump = PlayerJumpInput.None;
+    public PlayerMoveInput InputMoveDirection;
+    public PlayerJumpInput InputJump;
+
+    public PlayerClientInputs()
+    {
+        InputJump = PlayerJumpInput.None;
+        InputMoveDirection = PlayerMoveInput.None;
+    }
+
+    public PlayerClientInputs(PlayerClientInputs other)
+    {
+        InputMoveDirection = other.InputMoveDirection;
+        InputJump = other.InputJump;
+    }
 
     /// <summary>
     /// Required for Netcode serialization

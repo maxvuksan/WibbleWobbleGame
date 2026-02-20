@@ -155,8 +155,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SpriteJiggle
   target: {fileID: 1024447458764328496}
   state:
-    onSprite: {fileID: 27685210, guid: 10d0da31704faa048b42e39f581fd249, type: 3}
-    offSprite: {fileID: 1002951251, guid: 10d0da31704faa048b42e39f581fd249, type: 3}
+    onSprite: {fileID: -7361935669122291364, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
+    offSprite: {fileID: -2078535033211160682, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
 --- !u!50 &8277102883712775491
 Rigidbody2D:
   serializedVersion: 5
@@ -209,7 +209,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 318034811
+  GlobalObjectIdHash: 1031273712
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1

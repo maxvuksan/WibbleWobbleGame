@@ -209,7 +209,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 2
-  m_Sprite: {fileID: 942602263, guid: 10d0da31704faa048b42e39f581fd249, type: 3}
+  m_Sprite: {fileID: -2880035774045676689, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -438,8 +438,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SpriteJiggle
   target: {fileID: 6661631054828881543}
   state:
-    onSprite: {fileID: 1602793595, guid: 10d0da31704faa048b42e39f581fd249, type: 3}
-    offSprite: {fileID: 1435275639, guid: 10d0da31704faa048b42e39f581fd249, type: 3}
+    onSprite: {fileID: -7944306057156956249, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
+    offSprite: {fileID: -1366291371, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
 --- !u!50 &1240038206661517779
 Rigidbody2D:
   serializedVersion: 5
@@ -492,7 +492,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 2925341188
+  GlobalObjectIdHash: 1042588098
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1

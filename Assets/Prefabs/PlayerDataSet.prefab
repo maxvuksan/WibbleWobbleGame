@@ -48,7 +48,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 4289917413
+  GlobalObjectIdHash: 351663768
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -217,7 +217,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 2
-  m_Sprite: {fileID: -1322825474, guid: c2dc290688b897e41a9f4c31bfce3fae, type: 3}
+  m_Sprite: {fileID: -2311659948842064771, guid: c2dc290688b897e41a9f4c31bfce3fae, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -242,8 +242,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SpriteJiggle
   target: {fileID: 6695744250585645009}
   state:
-    onSprite: {fileID: -1322825474, guid: c2dc290688b897e41a9f4c31bfce3fae, type: 3}
-    offSprite: {fileID: 438055858, guid: c2dc290688b897e41a9f4c31bfce3fae, type: 3}
+    onSprite: {fileID: 721553671, guid: c2dc290688b897e41a9f4c31bfce3fae, type: 3}
+    offSprite: {fileID: 535432472, guid: c2dc290688b897e41a9f4c31bfce3fae, type: 3}
 --- !u!1 &3236701187178444731
 GameObject:
   m_ObjectHideFlags: 0
@@ -616,7 +616,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 151
-  m_Sprite: {fileID: -125672411, guid: 3e6957a04c4b64a48ab8aa41bfd461cf, type: 3}
+  m_Sprite: {fileID: 641132773, guid: 3e6957a04c4b64a48ab8aa41bfd461cf, type: 3}
   m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -641,8 +641,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SpriteJiggle
   target: {fileID: 6920403961768767130}
   state:
-    onSprite: {fileID: -125672411, guid: 3e6957a04c4b64a48ab8aa41bfd461cf, type: 3}
-    offSprite: {fileID: 1356993963, guid: 3e6957a04c4b64a48ab8aa41bfd461cf, type: 3}
+    onSprite: {fileID: 641132773, guid: 3e6957a04c4b64a48ab8aa41bfd461cf, type: 3}
+    offSprite: {fileID: -1290855366162983238, guid: 3e6957a04c4b64a48ab8aa41bfd461cf, type: 3}
 --- !u!114 &7850520872855834137
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -932,16 +932,16 @@ MonoBehaviour:
   states:
   - name: Idle
     onSprite: {fileID: -2311659948842064771, guid: c2dc290688b897e41a9f4c31bfce3fae, type: 3}
-    offSprite: {fileID: 721553671, guid: c2dc290688b897e41a9f4c31bfce3fae, type: 3}
+    offSprite: {fileID: -179158466, guid: c2dc290688b897e41a9f4c31bfce3fae, type: 3}
   - name: InAir
     onSprite: {fileID: 642868790, guid: c2dc290688b897e41a9f4c31bfce3fae, type: 3}
-    offSprite: {fileID: -868802181, guid: c2dc290688b897e41a9f4c31bfce3fae, type: 3}
+    offSprite: {fileID: -833640826, guid: c2dc290688b897e41a9f4c31bfce3fae, type: 3}
   - name: StepLeft
     onSprite: {fileID: -833640826, guid: c2dc290688b897e41a9f4c31bfce3fae, type: 3}
-    offSprite: {fileID: -1070743283, guid: c2dc290688b897e41a9f4c31bfce3fae, type: 3}
+    offSprite: {fileID: 642868790, guid: c2dc290688b897e41a9f4c31bfce3fae, type: 3}
   - name: StepRight
-    onSprite: {fileID: -179158466, guid: c2dc290688b897e41a9f4c31bfce3fae, type: 3}
-    offSprite: {fileID: 535432472, guid: c2dc290688b897e41a9f4c31bfce3fae, type: 3}
+    onSprite: {fileID: -1070743283, guid: c2dc290688b897e41a9f4c31bfce3fae, type: 3}
+    offSprite: {fileID: 438055858, guid: c2dc290688b897e41a9f4c31bfce3fae, type: 3}
   _currentState: 
 --- !u!95 &2829270620690801660
 Animator:
@@ -1122,7 +1122,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 150
-  m_Sprite: {fileID: 641132773, guid: 3e6957a04c4b64a48ab8aa41bfd461cf, type: 3}
+  m_Sprite: {fileID: -339526375, guid: 3e6957a04c4b64a48ab8aa41bfd461cf, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -1147,5 +1147,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SpriteJiggle
   target: {fileID: 1159031728909612989}
   state:
-    onSprite: {fileID: 641132773, guid: 3e6957a04c4b64a48ab8aa41bfd461cf, type: 3}
+    onSprite: {fileID: -2248273014285675650, guid: 3e6957a04c4b64a48ab8aa41bfd461cf, type: 3}
     offSprite: {fileID: -339526375, guid: 3e6957a04c4b64a48ab8aa41bfd461cf, type: 3}

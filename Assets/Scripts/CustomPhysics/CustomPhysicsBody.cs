@@ -53,7 +53,7 @@ public class CustomPhysicsBody : MonoBehaviour
         set => SetVelocityY(value);
     }
 
-    public VoltBody Body { get; private set; }
+    public VoltBody Body { get; private set; } = new();
 
 
     [Header("Configuration")]

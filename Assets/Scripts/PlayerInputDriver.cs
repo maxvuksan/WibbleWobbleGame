@@ -9,7 +9,22 @@ using UnityEngine.InputSystem;
 public class PlayerInputAtTick
 {
     public PlayerClientInputs Inputs;
-    public bool wasPredicted = false; // was the input actually recieved, or was it predicted
+    public long Tick;
+    public bool WasPredicted; // was the input actually recieved, or was it predicted
+
+    public PlayerInputAtTick()
+    {
+        Inputs = new();
+        Tick = 0;
+        WasPredicted = false;
+    }
+
+    public PlayerInputAtTick(PlayerInputAtTick other)
+    {
+        Inputs = other.Inputs;
+        Tick = other.Tick;
+        WasPredicted = other.WasPredicted;
+    }
 }
 
 
@@ -18,6 +33,8 @@ public class PlayerInputAtTick
 /// </summary>
 public class PlayerInputDriver : NetworkBehaviour
 {
+
+    public static readonly int InputHistoryLength = CustomPhysics.HistoryLength;
 
     /// <summary>
     /// Determines the number of ticks an input is buffered for
@@ -31,22 +48,34 @@ public class PlayerInputDriver : NetworkBehaviour
         get => _playerInputs;
         private set => _playerInputs = value;
     }
-    private PlayerClientInputs _playerInputs;
+    private PlayerClientInputs _playerInputs = new();
 
 
     [SerializeField] private NetworkPlayerHeader _playerHeader;
 
+    /// <summary>
+    /// We fill the first ticks of the input buffer with empty inputs, to account for the drivers input latency (InputBufferTickDelay)
+    /// </summary>
     private bool _hasPrefilledBuffer;
-    private Dictionary<long, PlayerInputAtTick> _inputBuffer = new();
+    
+    // TODO: When actually in game, it may be wise to dynamically increase this input ring buffer so that 
+    private List<PlayerInputAtTick> _inputHistoryRingBuffer = new();
+
     private ControllerInputHandler _input;
     
 
     void Awake()
-    {
+    {   
+        // resize the ring buffer to match the history length
+        _inputHistoryRingBuffer = new List<PlayerInputAtTick>();
+        for(int i = 0; i < InputHistoryLength; i++)
+        {
+            _inputHistoryRingBuffer.Add(null);
+        }
+
         _input = FindFirstObjectByType<ControllerInputHandler>();
 
-        CustomPhysics.OnPhysicsTick += OnPhysicsTick;
-        CustomPhysics.OnPostPhysicsTick += OnPostPhysicsTick;
+        CustomPhysics.OnPrePhysicsTick += OnPrePhysicsTick;
 
         _hasPrefilledBuffer = true;
         _playerInputs = new();
@@ -56,8 +85,7 @@ public class PlayerInputDriver : NetworkBehaviour
     {
         base.OnDestroy();
 
-        CustomPhysics.OnPhysicsTick -= OnPhysicsTick;
-        CustomPhysics.OnPostPhysicsTick -= OnPostPhysicsTick;
+        CustomPhysics.OnPrePhysicsTick -= OnPrePhysicsTick;
     }
 
     public override void OnNetworkSpawn()
@@ -73,60 +101,92 @@ public class PlayerInputDriver : NetworkBehaviour
             {
                 long tick = i;
                 PlayerInputAtTick defaultInput = new();
-                _inputBuffer[tick] = defaultInput;
+                defaultInput.WasPredicted = true;
+                defaultInput.Tick = tick;
+
+                RecordInputToHistory(defaultInput);
 
                 BroadcastInputsForTickRpc(defaultInput.Inputs, tick);
             }
         }
     }
 
-    void OnPhysicsTick()
+    /// <summary>
+    /// Adds an input to the history ring buffer, the position in the buffer is relative to how far the provided tick value is from the current tick 
+    /// </summary>
+    public void RecordInputToHistory(PlayerInputAtTick inputs) 
+    { 
+        long tickDifference = CustomPhysics.Tick - inputs.Tick; 
+        
+        if(Mathf.Abs(tickDifference) > InputHistoryLength) { 
+            Debug.LogError("trying to call RecordInputToHistory() but the provided tick is too far in the past or future"); 
+            return; 
+        } 
+        
+        long bufferIndex = CustomPhysics.Tick - tickDifference; 
+        bufferIndex %= InputHistoryLength; 
+        
+        _inputHistoryRingBuffer[(int)bufferIndex] = inputs; 
+    }
+
+    public void Rollback(long previousTick)
     {
-        if (IsOwner)
+        long tickDifference = CustomPhysics.Tick - previousTick;
+
+        if(Mathf.Abs(tickDifference) > InputHistoryLength)
+        {
+            Debug.LogError("trying to call RecordInputToHistory() but the provided tick is too far in the past or future");
+            return;
+        }
+
+        CustomPhysics.Rollback(previousTick);
+    }
+
+    /// <summary>
+    /// For the current tick, returns the buffer index
+    /// </summary>
+    public int GetCurrentBufferIndex(long offset = 0)
+    {
+        return (int)(CustomPhysics.Tick + offset) % InputHistoryLength;
+    }
+
+    void OnPrePhysicsTick()
+    {   
+        if (!CustomPhysics.Resimulating && IsOwner)
         {
             // store current input in buffer, offset by out input delay
 
-            long tick = CustomPhysics.Tick + InputBufferTickDelay + 1;
+            long tickOffset = InputBufferTickDelay + 1;
+            long tick = tickOffset + CustomPhysics.Tick;
 
             PlayerInputAtTick inputAtTick = new();
-            _inputBuffer[tick] = inputAtTick;
-            _inputBuffer[tick].Inputs = CalculatePlayerInput(); 
+            inputAtTick.Tick = tick;
+            inputAtTick.WasPredicted = false;
+            inputAtTick.Inputs = CalculatePlayerInput(); 
 
-            BroadcastInputsForTickRpc(_inputBuffer[tick].Inputs, tick);
+            RecordInputToHistory(inputAtTick);
+
+            BroadcastInputsForTickRpc(_inputHistoryRingBuffer[GetCurrentBufferIndex(tickOffset)].Inputs, tick);
         }
 
-        _playerInputs= CalculatePlayerInput(); 
+        AssignPlayerInputs();
     }
 
-    void OnPostPhysicsTick()
+    private void AssignPlayerInputs()
     {
-        EvaluateIfWeCanAdvanceNextPhysicsTick();
-        PopCurrentInputTicksInBuffer();
-    }
-
-
-    /// Gets the input at the current CustomPhysics.Tick setting it as the active input, then removes its key value pair from the buffer
-    /// </summary>
-    private void PopCurrentInputTicksInBuffer()
-    {
-        if (_inputBuffer.TryGetValue(CustomPhysics.Tick, out PlayerInputAtTick bufferedInputs))
+        PlayerClientInputs inputs = new();
+        
+        if(_inputHistoryRingBuffer[GetCurrentBufferIndex()]?.Tick == CustomPhysics.Tick)
         {
-            _playerInputs = bufferedInputs.Inputs;
-
-            // TODO: NEED A WAY TO CLEAN UP OLD INPUTS
-            /*
-                Maybe introduce a holdInputsForXTicks variable, any inputs that are X ticks in the past we discard,
-                this should be sigificantly large, so in the case of a rollback we have inputs to go back to.
-
-                if a rollback is super large, throw an ingame error (saying you have been disconnected from the game/round)
-            */
-            _inputBuffer.Remove(CustomPhysics.Tick); // Clean up old inputs
+            inputs = _inputHistoryRingBuffer[GetCurrentBufferIndex()].Inputs;
         }
         else
         {
-            // we dont have said input... predict?
-            //_playerInputs = PredictInputForTick(CustomPhysics.Tick);
+            inputs = PredictInputForTick(CustomPhysics.Tick);
         }
+
+        _playerInputs.InputJump = inputs.InputJump;
+        _playerInputs.InputMoveDirection = inputs.InputMoveDirection;
     }
 
     private PlayerClientInputs PredictInputForTick(long tick)
@@ -165,43 +225,24 @@ public class PlayerInputDriver : NetworkBehaviour
     /// <summary>
     /// Sends the players input from the owner to each other client
     /// </summary>
-    [Rpc(SendTo.Everyone, InvokePermission = RpcInvokePermission.Owner)]
+    [Rpc(SendTo.NotOwner, InvokePermission = RpcInvokePermission.Owner)]
     void BroadcastInputsForTickRpc(PlayerClientInputs inputs, long tick)
     {
-        PlayerInputAtTick inputAtTick = new PlayerInputAtTick();
+        PlayerInputAtTick inputAtTick = new();
         inputAtTick.Inputs = inputs;
-        inputAtTick.wasPredicted = false;
+        inputAtTick.WasPredicted = false;
+        inputAtTick.Tick = tick; 
 
         // no rollback required
-        if(CustomPhysics.Tick < tick)
+
+        RecordInputToHistory(inputAtTick);
+        
+        long currentTick = CustomPhysics.Tick;
+
+        if(currentTick > tick)
         {
-            _inputBuffer[tick] = inputAtTick;
-            return;
-        }
-
-        // if the tick is in the past, we must rollback to said tick, 
-        // if input at that tick does not match the current input in the buffer, 
-
-        _inputBuffer[tick] = inputAtTick;
-    }
-
-
-    /// <summary>
-    /// Should be called after a player input is received for a specific tick. Determines if we have received inputs from each player for that tick
-    /// </summary>
-    private void EvaluateIfWeCanAdvanceNextPhysicsTick()
-    {
-        foreach(PlayerDataSet player in PlayerDataManager.Singleton.PlayerData)
-        {   
-            bool hasInput = player.playerInputDriver._inputBuffer.ContainsKey(CustomPhysics.Tick);
-
-            if (!hasInput)
-            {
-                Debug.Log($"No input at {CustomPhysics.Tick} for player {player.networkedPlayerHeader.PlayerIndex.Value}, will predict input until recieved");
-                break;
-            }
+            Rollback(tick);
+            CustomPhysics.SimulateFuture(currentTick);
         }
     }
-
-
 }

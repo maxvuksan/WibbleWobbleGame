@@ -29,5 +29,9 @@ public class FPSDisplay : MonoBehaviour
         float fps = 1.0f / deltaTime;
         string text = "DEBUG MODE: " + string.Format("{0:0.0} ms ({1:0.} FPS)", msec, fps);
         GUI.Label(rect, text, style);
+
+        rect = new Rect(10, 60, w, h * 2 / 100);
+        text = "Physics Tick:" + CustomPhysics.Tick.ToString();
+        GUI.Label(rect, text, style);
     }
 }

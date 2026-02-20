@@ -86,7 +86,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 3
-  m_Sprite: {fileID: -845109552, guid: 10d0da31704faa048b42e39f581fd249, type: 3}
+  m_Sprite: {fileID: -2121092470347180042, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -135,7 +135,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 6, y: 4}
+    oldSize: {x: 6.125, y: 4.125}
     newSize: {x: 6, y: 4}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -181,7 +181,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 6, y: 4}
+    oldSize: {x: 6.125, y: 4.125}
     newSize: {x: 6, y: 4}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -203,8 +203,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SpriteJiggle
   target: {fileID: 1024447458764328496}
   state:
-    onSprite: {fileID: -845109552, guid: 10d0da31704faa048b42e39f581fd249, type: 3}
-    offSprite: {fileID: 930509047, guid: 10d0da31704faa048b42e39f581fd249, type: 3}
+    onSprite: {fileID: -2121092470347180042, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
+    offSprite: {fileID: -7517845432512654029, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
 --- !u!114 &6895141508156125244
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -258,9 +258,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8e80e72817d95e41bd6acdeaf91824d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CustomPhysicsBody
-  _isStatic: 1
+  BodyType: 0
   _gravity: 1
   _restitution: 0.05
+  _friction: 0
+  _mass: 1
   _constrainRotation: 0
   _constrainXPosition: 0
   _constrainYPosition: 0

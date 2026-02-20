@@ -217,5 +217,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SpriteJiggle
   target: {fileID: 3657690524114087110}
   state:
-    onSprite: {fileID: -1579184428, guid: 10d0da31704faa048b42e39f581fd249, type: 3}
-    offSprite: {fileID: -1464672424, guid: 10d0da31704faa048b42e39f581fd249, type: 3}
+    onSprite: {fileID: 2587766382346407471, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
+    offSprite: {fileID: 5754416226095949464, guid: f13f9b077554bdc418f4b9603b210115, type: 3}

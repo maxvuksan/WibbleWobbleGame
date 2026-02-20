@@ -79,7 +79,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 4
-  m_Sprite: {fileID: 942602263, guid: 10d0da31704faa048b42e39f581fd249, type: 3}
+  m_Sprite: {fileID: -2880035774045676689, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -173,7 +173,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 3
-  m_Sprite: {fileID: 1602793595, guid: 10d0da31704faa048b42e39f581fd249, type: 3}
+  m_Sprite: {fileID: -7944306057156956249, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -198,8 +198,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SpriteJiggle
   target: {fileID: 6661631054828881543}
   state:
-    onSprite: {fileID: 1602793595, guid: 10d0da31704faa048b42e39f581fd249, type: 3}
-    offSprite: {fileID: 1435275639, guid: 10d0da31704faa048b42e39f581fd249, type: 3}
+    onSprite: {fileID: -1366291371, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
+    offSprite: {fileID: -7944306057156956249, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
 --- !u!61 &413567399676754046
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -238,7 +238,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 2, y: 2}
+    oldSize: {x: 2.125, y: 2}
     newSize: {x: 9, y: 9.875}
     adaptiveTilingThreshold: 0.5
     drawMode: 0

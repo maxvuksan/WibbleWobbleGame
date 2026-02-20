@@ -393,7 +393,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -982978726, guid: 10d0da31704faa048b42e39f581fd249, type: 3}
+  m_Sprite: {fileID: -2456843305575056116, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -442,7 +442,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 2.5, y: 2}
+    oldSize: {x: 2.625, y: 2}
     newSize: {x: 6, y: 4}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -505,11 +505,11 @@ MonoBehaviour:
   target: {fileID: 1614353831077708688}
   states:
   - name: Idle
-    onSprite: {fileID: -982978726, guid: 10d0da31704faa048b42e39f581fd249, type: 3}
-    offSprite: {fileID: -982978726, guid: 10d0da31704faa048b42e39f581fd249, type: 3}
+    onSprite: {fileID: -2456843305575056116, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
+    offSprite: {fileID: -2456843305575056116, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
   - name: Pressed
-    onSprite: {fileID: -866035449, guid: 10d0da31704faa048b42e39f581fd249, type: 3}
-    offSprite: {fileID: -866035449, guid: 10d0da31704faa048b42e39f581fd249, type: 3}
+    onSprite: {fileID: -8807470564923635314, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
+    offSprite: {fileID: -8807470564923635314, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
   _currentState: Idle
 --- !u!114 &1392350815261969426
 MonoBehaviour:

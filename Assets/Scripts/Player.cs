@@ -86,7 +86,6 @@ public class Player : NetworkBehaviour
     }
     private NetworkPlayerHeader _playerHeader;    
 
-
     // state
     private Vector2 _groundNormal = Vector2.up;
     private Fix64 _groundedTracked;

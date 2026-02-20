@@ -24,24 +24,30 @@ public class CustomPhysics : MonoBehaviour
     /// <summary>
     /// How many ticks in the past are snapshots recorded for. This history would be useful for performing rollbacks
     /// </summary>
-    public static readonly int HistoryLength = s_ticksPerSecond * 3;
+    public static readonly int HistoryLength = s_ticksPerSecond * 30;
+
+    /// <summary>
+    /// Is true if the physics simulation is resimulating (catching up ticks)
+    /// </summary>
+    public static bool Resimulating { get; private set; } = false;
 
     /// <summary>
     /// A list of simulation states in the past, index 0 represents the most recent past tick
     /// </summary>
-    private List<CustomSimulationSnapshot> _historyRingBuffer;
-    private int _historyRingBufferPointer = 0;
+    private static List<CustomSimulationSnapshot> _historyRingBuffer;
+    private static int _historyRingBufferPointer = 0;
 
     /// <summary>
     /// The current tick of the physics simulation. How many ticks have passed
     /// </summary>
     public static long Tick { get; private set; } = 0;
 
-    private double _timeAccumulator;
+    private static double _timeAccumulator;
 
     /// <summary>
     /// All physics operations should be performed in this callback
     /// </summary>
+    public static Action OnPrePhysicsTick;
     public static Action OnPhysicsTick;
     public static Action OnPostPhysicsTick;
 
@@ -51,7 +57,7 @@ public class CustomPhysics : MonoBehaviour
     public static bool IsAllowedToTick = true;
 
 
-
+    
     void Awake()
     {
         _historyRingBuffer = new List<CustomSimulationSnapshot>();
@@ -65,11 +71,14 @@ public class CustomPhysics : MonoBehaviour
     /// <summary>
     /// Is called whenever physics ticks forward
     /// </summary>
-    public void PhysicsTick()
+    public static void PhysicsTick()
     {
+        Helpers.SafeInvoke(OnPrePhysicsTick, "OnPrePhysicsTick()");
+        Helpers.SafeInvoke(OnPhysicsTick, "OnPhysicsTick()");
+
         CustomPhysicsSpace.Singleton.UpdateSimulation(TimeBetweenTicks);
-        OnPhysicsTick?.Invoke();
-        OnPostPhysicsTick?.Invoke();
+
+        Helpers.SafeInvoke(OnPostPhysicsTick, "OnPostPhysicsTick()");
         
         RecordSnapshotToHistory();
 
@@ -95,22 +104,20 @@ public class CustomPhysics : MonoBehaviour
     /// <summary>
     /// Serializes the physics space, adding the result to the history ring buffer
     /// </summary>
-    private void RecordSnapshotToHistory()
+    private static void RecordSnapshotToHistory()
     {
         var snapshot = CustomPhysicsSpace.Singleton.SerializeSimulationSnapshot();
         snapshot.Tick = Tick;
         
-        _historyRingBuffer[_historyRingBufferPointer] = snapshot;
-
-        _historyRingBufferPointer++;
-        _historyRingBufferPointer %= HistoryLength;
+        int index = (int)(Tick % HistoryLength);
+        _historyRingBuffer[index] = snapshot;
     }
 
     /// <summary>
     /// Returns the physics simulation to a tick in the past, this can only be done to recently elapsed ticks 
     /// </summary>
     /// <param name="previousTick">The tick we wish to rollback to</param>
-    public void Rollback(long previousTick)
+    public static void Rollback(long previousTick)
     {
         long tickDifference = Tick - previousTick;
 
@@ -120,13 +127,8 @@ public class CustomPhysics : MonoBehaviour
             return;
         }
         
-        int shiftedIndex = _historyRingBufferPointer - (int)tickDifference;
+        int shiftedIndex = (int)(tickDifference % HistoryLength); 
 
-        if(shiftedIndex < 0)
-        {
-            shiftedIndex += HistoryLength;
-        }
-        
         if(_historyRingBuffer[shiftedIndex].Tick != previousTick)
         {
             Debug.LogError("The tick in the history buffer does not match the desired tick to rollback to");
@@ -134,26 +136,28 @@ public class CustomPhysics : MonoBehaviour
         }
 
         CustomPhysicsSpace.Singleton.RestoreSimulationSnapshot(_historyRingBuffer[shiftedIndex]);
+
+        Tick = shiftedIndex;
     }
     
     /// <summary>
     /// Simulates the 
     /// </summary>
     /// <param name="futureTick">The tick we wish to simulate up to</param>
-    public void SimulateFuture(long futureTick)
+    public static void SimulateFuture(long futureTick)
     {
         // TODO: Prevent death spiral
-
-
-    }
-
-    /// <summary>
-    /// Rollback the simulation and resimulate the game from a past tick to the current tick
-    /// </summary>
-    /// <param name="originTick"></param>
-    void ResimulateFromTick(int originTick)
-    {
         
+        Resimulating = true;
+        
+        // add i to prevent potential infinite loop
+        while(Tick <= futureTick)
+        {
+            PhysicsTick();
+        }
+
+        Resimulating = false;
+
     }
 
 }

@@ -84,7 +84,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -736070137, guid: 10d0da31704faa048b42e39f581fd249, type: 3}
+  m_Sprite: {fileID: -2723984124850611009, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -133,7 +133,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 4, y: 4}
+    oldSize: {x: 4.125, y: 4.125}
     newSize: {x: 6, y: 4}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -155,8 +155,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SpriteJiggle
   target: {fileID: 1024447458764328496}
   state:
-    onSprite: {fileID: -736070137, guid: 10d0da31704faa048b42e39f581fd249, type: 3}
-    offSprite: {fileID: -1022904068, guid: 10d0da31704faa048b42e39f581fd249, type: 3}
+    onSprite: {fileID: -2723984124850611009, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
+    offSprite: {fileID: -7054349218698941110, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
 --- !u!50 &7934030954478257586
 Rigidbody2D:
   serializedVersion: 5
@@ -209,7 +209,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 2104959428
+  GlobalObjectIdHash: 4116516667
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1

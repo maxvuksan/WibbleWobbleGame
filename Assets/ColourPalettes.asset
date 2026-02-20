@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ColourPaletteGroup
   palettes:
   - primaryBlockColours:
+    - {r: 0.16470589, g: 0.2, b: 0.34509805, a: 1}
+    - {r: 0.16470589, g: 0.2509804, b: 0.34509805, a: 1}
+    backgroundColourSilouttes: {r: 0, g: 0, b: 0, a: 0}
+    backgroundColour: {r: 0.078431375, g: 0.08627451, b: 0.16862746, a: 1}
+  - primaryBlockColours:
     - {r: 0.27581626, g: 0.26214847, b: 0.4056604, a: 1}
     - {r: 0.2252303, g: 0.21293166, b: 0.31132078, a: 1}
     backgroundColourSilouttes: {r: 0.11885713, g: 0.109714285, b: 0.16, a: 1}
     backgroundColour: {r: 0.101960786, g: 0.09411765, b: 0.13725491, a: 1}
-  - primaryBlockColours:
-    - {r: 0.80784315, g: 0.2, b: 0.34509805, a: 1}
-    - {r: 0.8666667, g: 0.49803922, b: 0.30980393, a: 1}
-    backgroundColourSilouttes: {r: 0, g: 0, b: 0, a: 0}
-    backgroundColour: {r: 0.11764706, g: 0.11764706, b: 0.20784314, a: 1}
