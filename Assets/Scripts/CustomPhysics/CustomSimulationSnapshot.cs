@@ -23,6 +23,27 @@ public class CustomSimulationSnapshot
         public VoltVector2 Velocity;
         public Fix64 Angle;
         public Fix64 AngularVelocity;
+        //public VoltVector2 Force;
+        //public Fix64 Torque;
+        //public VoltVector2 BiasVelocity;
+        //public Fix64 BiasRotation;
         public CustomPhysicsBody BodyComponent; 
+        public ICustomTickState CustomState;
     } 
+}
+
+/// <summary>
+/// Implement this interface for state that needs to be account for when rolling back and resimulating
+/// </summary>
+public interface ICustomTickState
+{
+    ICustomTickState Clone();
+}
+
+public interface ICustomTickState<T> : ICustomTickState where T : ICustomTickState<T>
+{
+    new T Clone();
+
+    // Route the non-generic call to the typed one automatically
+    ICustomTickState ICustomTickState.Clone() => Clone();
 }

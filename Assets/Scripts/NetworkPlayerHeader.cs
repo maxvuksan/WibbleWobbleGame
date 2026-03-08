@@ -33,7 +33,7 @@ public class NetworkPlayerHeader : NetworkBehaviour
     }
 
     private void OnSelectedTrapChanged(int oldValue, int newValue)
-    {
+    {   
         if(GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.GameState_SelectingTrap)
         {
             GameStateManager.Singleton.SuggestFinishSelectingTrapRpc();
@@ -63,12 +63,15 @@ public class NetworkPlayerHeader : NetworkBehaviour
     [Rpc(SendTo.Owner, InvokePermission = RpcInvokePermission.Everyone)]
     public void SetSelectedTrapRpc(int trapIndex)
     {
+        OnSelectedTrapChanged(SelectedTrap.Value, trapIndex);
         SelectedTrap.Value = trapIndex;
+
     }
 
     [Rpc(SendTo.Owner, InvokePermission = RpcInvokePermission.Everyone)]
     public void SetPlacedTrapRpc(bool hasPlacedTrap)
     {
+        OnPlacedTrapChanged(PlacedTrap.Value, hasPlacedTrap);
         PlacedTrap.Value = hasPlacedTrap;
     }
 
@@ -122,7 +125,9 @@ public class NetworkPlayerHeader : NetworkBehaviour
         Score.Value = 0;
         SelectedTrap.Value = -1;
         PlayerExistsInWorld.Value = true;
-        PlayerDataManager.Singleton.PlayerData[(int)PlayerIndex.Value].player.SetPositionRpc(Vector3.zero);
+        
+        //TODO: This should SetPosition for this player on every client not just its own
+        //PlayerDataManager.Singleton.PlayerData[(int)PlayerIndex.Value].player.SetPosition(Vector2.zero);
         PlayerDataManager.Singleton.PlayerData[(int)PlayerIndex.Value].player.ResetState();
     }
 

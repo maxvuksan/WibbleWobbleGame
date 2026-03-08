@@ -31,7 +31,7 @@ namespace Volatile
   public static class VoltConfig
   {
     public static Fix64 ResolveSlop = (Fix64)0.01M;
-    public static Fix64 ResolveRate = (Fix64)0.1M;
+    public static Fix64 ResolveRate = (Fix64)0.9M;
     public static Fix64 AreaMassRatio = (Fix64)0.01M;
 
     // Defaults

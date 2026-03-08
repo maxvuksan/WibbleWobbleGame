@@ -1,3 +1,4 @@
+using System;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -37,8 +38,16 @@ public class TrapButton : NetworkBehaviour
             return;
         }
 
-        trapVisual = Instantiate(trapDictionary.traps[trapIndex].staticPrefab, wrldUiButtonObject.transform);
-        
+        try
+        {
+            trapVisual = Instantiate(trapDictionary.traps[trapIndex].behaviorPrefab, wrldUiButtonObject.transform);
+        }
+        catch(InvalidOperationException exception)
+        {
+            Debug.Log("Exception caught on object with trapIndex: " + trapIndex + ", and name: " + gameObject.name);
+            throw exception;
+        }
+                
         trapVisual.transform.localPosition = Vector3.zero;
 
         trapVisual.layer = uiLayer;

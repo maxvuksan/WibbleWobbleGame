@@ -35,25 +35,41 @@ public class SteamPersistant : MonoBehaviour
 
     private void Awake() 
     {
-        if (_Singleton != null)
+        if (Configuration.Singleton.UseSteamTransport)
         {
-            Destroy(this);
-            return;
+            if (_Singleton != null)
+            {
+                Destroy(this);
+                return;
+            }
+
+            _Singleton = this;
+            Context = new SteamContext();
+
+            DontDestroyOnLoad(this);
         }
-
-
-        _Singleton = this;
-        Context = new SteamContext();
-
-        DontDestroyOnLoad(this);
+        else
+        {
+            Destroy(this.gameObject);
+        }
     }
 
     private void Start()
     {
+        if (!Configuration.Singleton.UseSteamTransport)
+        {
+            return;
+        }
+        
         SteamMatchmaking.OnLobbyDataChanged += OnLobbyDataChanged;
     }
     private void OnDestroy()
     {
+        if (!Configuration.Singleton.UseSteamTransport)
+        {
+            return;
+        }
+
         SteamMatchmaking.OnLobbyDataChanged -= OnLobbyDataChanged;
     }
 

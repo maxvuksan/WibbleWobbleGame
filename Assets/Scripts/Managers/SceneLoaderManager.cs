@@ -13,6 +13,8 @@ public class SceneLoaderManager : MonoBehaviour
     IEnumerator LoadMainScene()
     {
         yield return new WaitUntil(() => NetworkManager.Singleton != null);
+        yield return new WaitForSeconds(2);
+
         SceneManager.LoadScene("MenuScene");
     }
 }

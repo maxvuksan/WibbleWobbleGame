@@ -1,5 +1,7 @@
 using System;
+using FixMath.NET;
 using UnityEngine;
+using Volatile;
 
 public class Helpers : MonoBehaviour
 {
@@ -90,6 +92,32 @@ public class Helpers : MonoBehaviour
                     $"{subscriber.Target?.GetType().Name}: {ex}");
             }
         }
+    }
+
+
+    /// <summary>
+    /// Given a transform component converts a local point to world space deterministcally using Fix64 maths
+    /// </summary>
+    /// <returns>World space point</returns>
+    public static VoltVector2 TransformPointFix64(CustomTransform customTransform, VoltVector2 localPoint)
+    {
+        // Convert transform values to Fix64
+        Fix64 posX = customTransform.GetPositionFix64().x;
+        Fix64 posY = customTransform.GetPositionFix64().y;
+        
+        // Rotation
+        Fix64 angleRad = customTransform.GetRotationRadiansFix64();
+        Fix64 cos = Fix64.Cos(angleRad);
+        Fix64 sin = Fix64.Sin(angleRad);
+        
+        // In our use case do not care about scale...
+        
+        // Rotate
+        Fix64 rotatedX = localPoint.x * cos - localPoint.y * sin;
+        Fix64 rotatedY = localPoint.x * sin + localPoint.y * cos;
+        
+        // Translate
+        return new VoltVector2(posX + rotatedX, posY + rotatedY);
     }
 
 }

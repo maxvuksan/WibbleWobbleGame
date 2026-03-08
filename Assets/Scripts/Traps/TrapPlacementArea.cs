@@ -1,31 +1,34 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
 
 
 
 [System.Serializable]
-public struct NetworkedTrapPlacedData : INetworkSerializable, IEquatable<NetworkedTrapPlacedData>{
-
+public struct NetworkedTrapPlacedData : INetworkSerializable, IEquatable<NetworkedTrapPlacedData>
+{
     public int trapTypeIndex;
-    public Vector2 position;
-    public float rotationEuler;
+    public int positionXHundredths;
+    public int positionYHundredths;
+    public int rotationHundredths;
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer)
         where T : IReaderWriter
     {
         serializer.SerializeValue(ref trapTypeIndex);
-        serializer.SerializeValue(ref position);
-        serializer.SerializeValue(ref rotationEuler);
+        serializer.SerializeValue(ref positionXHundredths);
+        serializer.SerializeValue(ref positionYHundredths);
+        serializer.SerializeValue(ref rotationHundredths);
     }
 
     public bool Equals(NetworkedTrapPlacedData other)
     {
-        return trapTypeIndex == other.trapTypeIndex && position == other.position && rotationEuler == other.rotationEuler;
+        return trapTypeIndex == other.trapTypeIndex
+            && positionXHundredths == other.positionXHundredths
+            && positionYHundredths == other.positionYHundredths
+            && rotationHundredths == other.rotationHundredths;
     }
-
 }
 
 
@@ -42,8 +45,7 @@ public class TrapPlacementArea : NetworkBehaviour
     private Transform _trapBehaviorInstanceParent;
 
     private NetworkList<NetworkedTrapPlacedData> _networkedPlacedTrapDataList; 
-    private List<GameObject> _staticTrapInstances; 
-    private List<NetworkObject> _behaviouralTrapInstances;
+    private List<GameObject> _trapInstances; 
     private List<GameObject> _scopedObjectsList;
     private Dictionary<string, int> _trapNameToIndexMap; 
 
@@ -59,11 +61,10 @@ public class TrapPlacementArea : NetworkBehaviour
             return;    
         }
 
-        Singleton = this;
+        Singleton = this; 
 
         _networkedPlacedTrapDataList = new NetworkList<NetworkedTrapPlacedData>();
-        _staticTrapInstances = new List<GameObject>();
-        _behaviouralTrapInstances = new List<NetworkObject>();
+        _trapInstances = new List<GameObject>();
 
         _scopedObjectsList = new List<GameObject>();
         _trapNameToIndexMap = new Dictionary<string, int>();
@@ -83,14 +84,15 @@ public class TrapPlacementArea : NetworkBehaviour
         _trapBehaviorInstanceParent = new GameObject().transform;
         _trapBehaviorInstanceParent.name = "[BEHAVIOR TRAPS]";
         _trapBehaviorInstanceParent.parent = this.transform;
+
+        CustomPhysics.OnRecomputeEntityIds += OnRecomputeEntityIds;
     }
 
 
     public override void OnNetworkSpawn()
     {
         _networkedPlacedTrapDataList.OnListChanged += OnPlacedTrapsChanged;
-
-        SpawnAllStaticInstances();
+        SpawnAllTrapInstances();
     }
 
     public override void OnNetworkDespawn()
@@ -104,48 +106,6 @@ public class TrapPlacementArea : NetworkBehaviour
     }
 
     /// <summary>
-    /// Applies the active colour palette to this trap object (could be either static or behaviour instance)
-    /// </summary>
-    /// <param name="trapName">The name of the trap</param>
-    /// <param name="trapObject">The instantiated instance of the trap</param>
-    public void ApplyColourPaletteToTrap(string trapName, GameObject trapObject)
-    {
-        if(trapName == "")
-        {
-            Debug.LogError("The TrapName field has not been set on a trap prefab instance");
-            return;
-        }
-
-        TrapData data = TrapPlacementArea.Singleton.GetTrapDataByName(trapName);
-
-
-        if(data.colourTarget == ColourTarget.COLOUR_UNCHANGED)
-        {
-            return;
-        }
-
-        Color colour = ColourPaletteManager.Singleton.GetColour(data.colourTarget, data.colourTargetIndexOffset);
-
-        SpriteRenderer sr = trapObject.GetComponent<SpriteRenderer>();
-        if(sr != null)
-        {
-            sr.color = colour;
-        }
-
-        // apply colour to children as well if possible
-
-        for(int i = 0; i < transform.childCount; i++)
-        {
-            sr = trapObject.GetComponent<SpriteRenderer>();
-            if(sr != null)
-            {
-                sr.color = colour;
-            }
-        }
-    }
-
-
-    /// <summary>
     /// Reacting to a change in the networked traps list
     /// </summary>
     private void OnPlacedTrapsChanged(NetworkListEvent<NetworkedTrapPlacedData> changeEvent)
@@ -156,9 +116,7 @@ public class TrapPlacementArea : NetworkBehaviour
            GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.GameState_CreativeMode
         )
         {
-            print("NUM OF STATIC: " + _staticTrapInstances.Count);
-
-            SpawnAllStaticInstances();
+            SpawnAllTrapInstances();
         }
     }
 
@@ -169,6 +127,7 @@ public class TrapPlacementArea : NetworkBehaviour
 
     private void OnDestroy()
     {
+        CustomPhysics.OnRecomputeEntityIds -= OnRecomputeEntityIds;
         PlayerDataManager.Singleton.OnRoundEnd -= DestroyAllScopedObjects;
     }
 
@@ -187,7 +146,7 @@ public class TrapPlacementArea : NetworkBehaviour
     /// <summary>
     /// Spawns a game object with a lifetime scoped to the duration of the game round, when the round ends all scoped game objects are destroyed.
     /// </summary>
-    public GameObject InstantiateScopedObject(GameObject prefab, Vector3 position, float rotationEulerZ = 0)
+    public GameObject InstantiateScopedObject(GameObject prefab, Vector2 position, float rotationEulerZ = 0)
     {
         GameObject newObj = Instantiate(
             prefab,
@@ -207,9 +166,7 @@ public class TrapPlacementArea : NetworkBehaviour
     /// </summary>
     public void ServerClearTraps()
     {
-        DestroyAndClearAllStaticInstances();
-        NetworkedDestroyAndClearAllBehavioralInstances();
-
+        DestroyAndClearAllTrapInstances();
         _networkedPlacedTrapDataList.Clear();
     }
 
@@ -240,10 +197,17 @@ public class TrapPlacementArea : NetworkBehaviour
             return;
         }
 
-        NetworkedTrapPlacedData data = new NetworkedTrapPlacedData();
-        data.position = position;
-        data.trapTypeIndex = trapTypeIndex;
-        data.rotationEuler = zRotationEuler;
+        // Since we know this code will always run on the server (the host will always perform this math)
+        // We should not need to worry about deterministic problems when converting between floats
+        // Any potential error will be treated as the truth, we trust the servers values
+
+        NetworkedTrapPlacedData data = new NetworkedTrapPlacedData
+        {
+            trapTypeIndex = trapTypeIndex,
+            positionXHundredths = Mathf.RoundToInt(position.x * 100f),
+            positionYHundredths = Mathf.RoundToInt(position.y * 100f),
+            rotationHundredths = Mathf.RoundToInt(zRotationEuler * 100f)
+        };
 
         _networkedPlacedTrapDataList.Add(data);
 
@@ -255,103 +219,105 @@ public class TrapPlacementArea : NetworkBehaviour
         ServerAddTrap(position, zRotationEuler, trapTypeIndex);
     }
 
-    /// <summary>
-    /// Permanently removes a trap from the placement area using the static instance as a reference for what to remove
-    /// </summary>
-    public void RemoveTrapThroughStaticInstance(GameObject staticInstance)
+
+    public void OnRecomputeEntityIds()
     {
-        return;
-        // for(int i = 0; i < _placedTrapsList.Count; i++)
-        // {
-        //     if(staticInstance == _placedTrapsList[i].staticInstance)
-        //     {
-        //         DestroyStaticInstance(_placedTrapsList, i);
+        if (Configuration.Singleton.DebugMode)
+        {
+            string msg = "Recomputing EntityIds for trapInstances, number of traps = " + _trapInstances.Count;
 
-        //         _placedTrapsList.RemoveAt(i);
-        //         return;
-        //     }
-        // }
+            Debug.Log(msg);
+            DeterminismLogger.LogExtraInfo(msg);
+        }
 
+        for(int i = 0; i < _trapInstances.Count; i++)
+        {
+            // add +100 offset to ensure players ids are before traps
+            _trapInstances[i].GetComponent<CustomPhysicsBody>().Body.EntityId = (ulong)i + 100ul;
+
+            if (Configuration.Singleton.DebugMode)
+            {
+                DeterminismLogger.LogExtraInfo("RecomputeEntityIds for trap: " + _trapInstances[i].name + ", new EntityId: " +  _trapInstances[i].GetComponent<CustomPhysicsBody>().Body.EntityId);
+            }
+        }
     }
 
     /// <summary>
     /// Spawns every trap in the placement area as their static prefabs
     /// </summary>
-    public void SpawnAllStaticInstances()
+    public void SpawnAllTrapInstances()
     {
-        DestroyAndClearAllStaticInstances();
+        DestroyAndClearAllTrapInstances();
 
-        for(int i = 0; i < _networkedPlacedTrapDataList.Count; i++)
+        // Sort the network trap placed data list, to ensure we introduce traps to the physics simulation in the same order
+
+        var sortedTrapsToPlace = new List<NetworkedTrapPlacedData>();
+        
+        for (int i = 0; i < _networkedPlacedTrapDataList.Count; i++){
+            sortedTrapsToPlace.Add(_networkedPlacedTrapDataList[i]);
+        }
+
+        sortedTrapsToPlace.Sort((a, b) => {
+
+            int cmp = a.positionXHundredths.CompareTo(b.positionXHundredths);
+            if (cmp != 0){ 
+                return cmp;
+            }
+            return a.positionYHundredths.CompareTo(b.positionYHundredths);
+        });
+
+
+        for(int i = 0; i < sortedTrapsToPlace.Count; i++)
         {
-            GameObject newObj = Instantiate(trapDictionary.traps[_networkedPlacedTrapDataList[i].trapTypeIndex].staticPrefab, _trapStaticInstanceParent);
-            newObj.transform.position = _networkedPlacedTrapDataList[i].position;
-            newObj.transform.rotation = Quaternion.Euler(0,0,_networkedPlacedTrapDataList[i].rotationEuler);
+            IntHundredth rotationDegrees = new IntHundredth { ValueHundredths = sortedTrapsToPlace[i].rotationHundredths };
+            IntHundredth positionX = new IntHundredth { ValueHundredths = sortedTrapsToPlace[i].positionXHundredths };
+            IntHundredth positionY = new IntHundredth { ValueHundredths = sortedTrapsToPlace[i].positionYHundredths };
 
-            _staticTrapInstances.Add(newObj);
+            Debug.Log("Spawning: " + trapDictionary.traps[sortedTrapsToPlace[i].trapTypeIndex].name);
+            GameObject newObj = Instantiate(trapDictionary.traps[sortedTrapsToPlace[i].trapTypeIndex].behaviorPrefab, _trapStaticInstanceParent);
+            newObj.SetActive(false);
 
-            // ensure static trap has the correct component, this is necassary for all static traps
-            StaticTrap staticTrap = newObj.GetComponent<StaticTrap>();
+            newObj.transform.position = new Vector2(positionX.AsFloat(), positionY.AsFloat());
+            newObj.transform.rotation = Quaternion.Euler(0,0, rotationDegrees.AsFloat());
 
-            if(staticTrap == null)
+            // Set the CustomTransform values to the IntHundredth values, to ensure deterministic position and rotation on every client...
+            
+            CustomTransform customTransform = newObj.GetComponent<CustomTransform>();
+            if(customTransform == null)
             {
-                Debug.LogError("A trap is trying to be placed without a StaticTrap component, please ensure all traps have this for other behaviour to work");
+                Debug.LogError("No CustomTransform attached to placed trap, SpawnAllTrapInstances()");
+            }
+
+            customTransform.SetValues(positionX, positionY, rotationDegrees);
+            // TODO: We may need to update the child CustomTransform, will see
+
+            // trigger start to run
+            newObj.SetActive(true);
+
+            _trapInstances.Add(newObj);
+
+            // Ensure the trap has the TrapHeader, this script is required by all traps
+            TrapHeader trapHeader = newObj.GetComponent<TrapHeader>();
+
+            if(trapHeader == null)
+            {
+                Debug.LogError("A trap is trying to be placed without a TrapHeader component, please ensure all traps have this for other behaviour to work");
             }
         }
     }
 
-    
-    /// <summary>
-    /// Spawns every trap in the placement area as their behavioural prefabs (this is the actual trap)
-    /// </summary>
-    
-    public void NetworkedSpawnBehaviorInstances()
-    {
-        NetworkedDestroyAndClearAllBehavioralInstances();
-
-        for(int i = 0; i < _networkedPlacedTrapDataList.Count; i++)
-        {
-            GameObject newObj = Instantiate(trapDictionary.traps[_networkedPlacedTrapDataList[i].trapTypeIndex].behaviorPrefab, _networkedPlacedTrapDataList[i].position, Quaternion.Euler(0,0,_networkedPlacedTrapDataList[i].rotationEuler));
-            NetworkObject networkObj = newObj.GetComponent<NetworkObject>();
-            networkObj.Spawn();
-
-            _behaviouralTrapInstances.Add(networkObj);
-
-            Rigidbody2D rb = networkObj.gameObject.GetComponent<Rigidbody2D>();
-            if(rb != null)
-            {
-                rb.gravityScale = GameStateManager.Singleton.enviromentalVariables.rigidBodyGravityScale;
-            }
-        }
-    }
     
     
     /// <summary>
     /// Destroys all the static instances from the placement area
     /// </summary>
-    public void DestroyAndClearAllStaticInstances()
+    public void DestroyAndClearAllTrapInstances()
     {
-        print("static before: " + _staticTrapInstances.Count);
-        for(int i = 0; i < _staticTrapInstances.Count; i++)
+        for(int i = 0; i < _trapInstances.Count; i++)
         {
-            Destroy(_staticTrapInstances[i]);
+            Destroy(_trapInstances[i]);
         }
-        _staticTrapInstances.Clear();
-        print("static after: " + _staticTrapInstances.Count);
+        _trapInstances.Clear();
     
     }
-
-    /// <summary>
-    /// Destroys all the behavioural instances and clears the behavioural trap list
-    /// </summary>
-    public void NetworkedDestroyAndClearAllBehavioralInstances()
-    {
-        for(int i = 0; i < _behaviouralTrapInstances.Count; i++)
-        {
-            _behaviouralTrapInstances[i].Despawn(true);
-        }
-        _behaviouralTrapInstances.Clear();
-    }
-
-
-
 }

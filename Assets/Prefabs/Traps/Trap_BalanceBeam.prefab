@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 459191966200666619}
   - component: {fileID: 2086153994519906339}
   - component: {fileID: 3476964834851207766}
+  - component: {fileID: 7724655032284729042}
   m_Layer: 6
   m_Name: Trap_BalanceBeam
   m_TagString: Untagged
@@ -50,10 +51,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CustomPhysicsBody
   BodyType: 1
-  _gravity: 30
-  _restitution: 0.05
-  _friction: 0
-  _mass: 99
+  _isTrigger: 0
+  _parentBody: {fileID: 0}
+  _gravity:
+    ValueHundredths: 0
+  _restitution:
+    ValueHundredths: 0
+  _friction:
+    ValueHundredths: 0
+  _mass:
+    ValueHundredths: 1200
   _constrainRotation: 0
   _constrainXPosition: 1
   _constrainYPosition: 1
@@ -82,8 +89,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e093d5263ee1a704fb116eedc6d81070, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CustomColliderCircle
-  Offset: {x: 0, y: 3}
-  _radius: 0.8
+  OffsetX:
+    ValueHundredths: 0
+  OffsetY:
+    ValueHundredths: 300
+  _radius:
+    ValueHundredths: 80
 --- !u!114 &2086153994519906339
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -96,8 +107,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e093d5263ee1a704fb116eedc6d81070, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CustomColliderCircle
-  Offset: {x: 0, y: -3}
-  _radius: 0.8
+  OffsetX:
+    ValueHundredths: 0
+  OffsetY:
+    ValueHundredths: -300
+  _radius:
+    ValueHundredths: 80
 --- !u!114 &3476964834851207766
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -110,8 +125,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c7ee075d777dca4194707a5a6525e44, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CustomColliderRectangle
-  Offset: {x: 0, y: 0}
-  _size: {x: 1.6, y: 6}
+  OffsetX:
+    ValueHundredths: 0
+  OffsetY:
+    ValueHundredths: 0
+  _sizeX:
+    ValueHundredths: 160
+  _sizeY:
+    ValueHundredths: 600
+--- !u!114 &7724655032284729042
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4886874729649364179}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 800eea881453e7442b3d558ac39483ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CustomTransform
+  _positionX:
+    ValueHundredths: -1339
+  _positionY:
+    ValueHundredths: -202
+  _rotationDegrees:
+    ValueHundredths: 9000
 --- !u!1 &9000235845033944380
 GameObject:
   m_ObjectHideFlags: 0

@@ -12,7 +12,6 @@ public enum CustomBodyType : byte
     Kinematic,
 }
 
-
 public class CustomPhysicsBody : MonoBehaviour
 {
     
@@ -20,6 +19,13 @@ public class CustomPhysicsBody : MonoBehaviour
     /// Determines whether the physics body can move and rotate in response to forces
     /// </summary>
     public CustomBodyType BodyType = CustomBodyType.Static;
+    public ICustomTickState CustomState;
+
+    public bool IsTrigger { get => _isTrigger; }
+    [SerializeField] private bool _isTrigger = false;
+    public CustomPhysicsBody ParentBody { get=> _parentBody; }
+    [SerializeField] private CustomPhysicsBody _parentBody; // if is Trigger, we perform a search for a parent body to move said trigger, we may not always find a parent
+    private VoltVector2 _parentBodyPositionOffset;
 
     public Fix64 Angle
     {
@@ -36,6 +42,16 @@ public class CustomPhysicsBody : MonoBehaviour
         get => Body.Position;
         set => Body.Set(value, Body.Angle);
     }
+    public Fix64 PositionX
+    {
+        get => Body.Position.x;
+        set => Body.Set(new VoltVector2(value, Body.Position.y), Body.Angle);
+    }
+    public Fix64 PositionY
+    {
+        get => Body.Position.y;
+        set => Body.Set(new VoltVector2(Body.Position.x, value), Body.Angle);
+    }
 
     public VoltVector2 LinearVelocity
     {
@@ -47,6 +63,7 @@ public class CustomPhysicsBody : MonoBehaviour
         get => Body.LinearVelocity.x;
         set => SetVelocityX(value);
     }
+
     public Fix64 LinearVelocityY
     {
         get => Body.LinearVelocity.y;
@@ -54,31 +71,76 @@ public class CustomPhysicsBody : MonoBehaviour
     }
 
     public VoltBody Body { get; private set; } = new();
-
+    private ulong _desiredEntityId = 0;
 
     [Header("Configuration")]
     // the fields should not be modified via the inspector checkbox, rather use IsStatic public field via code
-    [SerializeField] private float _gravity = 1;
-    [SerializeField] private float _restitution = 0.05f;
-    [SerializeField] private float _friction = 0;
-    [SerializeField] private float _mass = 1;
+    [SerializeField] private IntHundredth _gravity = 0;
+    [SerializeField] private IntHundredth _restitution = 0;
+    [SerializeField] private IntHundredth _friction = 0;
+    [SerializeField] private IntHundredth _mass = 1;
 
     [Header("Constraints")]
     [SerializeField] private bool _constrainRotation = false;
     [SerializeField] private bool _constrainXPosition = false;
     [SerializeField] private bool _constrainYPosition = false;
 
+    public Action<CustomPhysicsBody> OnTrigger;
+
     private List<CustomCollider> _colliderList = new();
     private Fix64 _radiansZFix64;
     private VoltVector2 _positionFix64;
+    private bool _constructed = false;
+    public CustomTransform CustomTransform { get; private set; }
 
-
-    private void Start()
+    void Awake()
     {
-        _radiansZFix64 = (Fix64)(transform.eulerAngles.z * Mathf.Deg2Rad);
-        _positionFix64 = new VoltVector2((Fix64)transform.position.x, (Fix64)transform.position.y);
+        CustomTransform = GetComponent<CustomTransform>();
+
+        if(CustomTransform == null)
+        {
+            Debug.LogError("No CustomTransform attached to physics body, this is a requirement, Object: " + gameObject.name);
+            return;
+        }
+    }
+
+    public void SetEntityId(ulong id)
+    {
+        _desiredEntityId = id;
+        
+        if (_constructed)
+        {
+            Body.EntityId = id;    
+        }
+    }
+
+    public void Construct()
+    {
+        if (!enabled)
+        {
+            return;
+        }
+
+        // remove if the body already exists
+        if (_constructed)
+        {   
+            Remove();
+        }
+
+        // if this is a trigger, look for a parent body
+        if (_parentBody != null)
+        {
+            _parentBodyPositionOffset =
+                new VoltVector2(CustomTransform.GetPositionFix64().x, CustomTransform.GetPositionFix64().y) - 
+                new VoltVector2((Fix64)_parentBody.CustomTransform.GetPositionFix64().x, (Fix64)_parentBody.CustomTransform.GetPositionFix64().y);
+        }
+        
+        _radiansZFix64 = CustomTransform.GetRotationRadiansFix64();
+        _positionFix64 = CustomTransform.GetPositionFix64();
 
         List<VoltShape> shapes = new();
+
+        print("create with mass: " + _mass.AsFloat());
 
         foreach(var collider in _colliderList)
         {
@@ -107,21 +169,39 @@ public class CustomPhysicsBody : MonoBehaviour
                 mass = Fix64.MaxValue;
             }
         }
-
         Body.Mass = mass;
         Body.IsFixedAngle = _constrainRotation;
         Body.IsFixedPositionX = _constrainXPosition;
         Body.IsFixedPositionY = _constrainYPosition;
+        Body.EntityId = _desiredEntityId;
         Body.Gravity = new VoltVector2(Fix64.Zero, -(Fix64)_gravity);
+
+        if (_isTrigger)
+        {
+            Body.IsTrigger = true;
+
+            foreach(VoltShape shape in Body.shapes)
+            {
+                shape.IsTrigger = true;
+            }
+
+            Body.OnCollision += OnInternalCollision;
+        }
 
         Body.Set(_positionFix64, _radiansZFix64);
 
         CustomPhysicsSpace.Singleton.AddBody(this);
+
+        _constructed = true;
+
     }
 
-    private void OnDestroy()
+    /// <summary>
+    /// Is called if this body is a trigger and another body has overlapped said trigger. Should be extended with .OnTrigger Action
+    /// </summary>
+    private void OnTriggerCallback(CustomPhysicsBody otherBody)
     {
-        CustomPhysicsSpace.Singleton.RemoveBody(this);
+        OnTrigger?.Invoke(otherBody);
     }
 
     /// <summary>
@@ -129,7 +209,7 @@ public class CustomPhysicsBody : MonoBehaviour
     /// </summary>
     /// <param name="colliderShape"></param>
     public void AddCollider(CustomCollider colliderShape)
-    {
+    {   
         _colliderList.Add(colliderShape);
     }
 
@@ -139,7 +219,20 @@ public class CustomPhysicsBody : MonoBehaviour
     /// the transform position of the gameobject
     /// </summary>
     public void ApplySimulationToGameObject()
-    {
+    {   
+        // make body follow parent if parent is assigned
+        if(_parentBody != null)
+        {
+            Fix64 cos = Fix64.Cos(Fix64.Zero);
+            Fix64 sin = Fix64.Sin(Fix64.Zero);
+
+            VoltVector2 rotatedOffset = new VoltVector2(
+                cos * _parentBodyPositionOffset.x - sin * _parentBodyPositionOffset.y,
+                sin * _parentBodyPositionOffset.x + cos * _parentBodyPositionOffset.y
+            );
+            Body.Set(rotatedOffset + _parentBody.Position, Fix64.Zero);
+        }
+
         // TODO: Update transform position of gameobject
         // TODO: Create enum for interpolation (default should be to true), this will allow simulation to run at specific rate, but interpolation to make it smooth
         
@@ -149,7 +242,7 @@ public class CustomPhysicsBody : MonoBehaviour
         for(int i = 0; i < Body.shapes.Length; i++)
         {
             VoltVector2 shapePos = Body.shapes[i].bodySpaceAABB.Center;
-            _colliderList[i].Offset = new Vector2((float)shapePos.x, (float)shapePos.y);
+            _colliderList[i].Offset = shapePos;
         }
     }
 
@@ -182,5 +275,34 @@ public class CustomPhysicsBody : MonoBehaviour
         Body.LinearVelocity = new VoltVector2(Body.LinearVelocity.x, velocityY);
     }
      
+
+    private void OnInternalCollision(VoltBody bodyA, VoltBody bodyB, VoltVector2 position, VoltVector2 normal, Fix64 penetration)
+    {
+        var otherVoltBody = bodyA == Body ? bodyB : bodyA;
+        var otherBody = CustomPhysicsSpace.Singleton.GetBody(otherVoltBody.EntityId);
+        OnTriggerCallback(otherBody);
+    }
+
+    private void OnDestroy()
+    {
+        Remove();
+    }
+    private void OnDisable()
+    {
+        Remove();
+    }
+
+    private void Remove()
+    {
+        if (!_constructed)
+        {
+            return;
+        }
+        
+        
+        CustomPhysicsSpace.Singleton.SimulationSpace.RemoveBody(Body);
+        CustomPhysicsSpace.Singleton.RemoveBody(this);
+        _constructed = false;
+    }
 
 }

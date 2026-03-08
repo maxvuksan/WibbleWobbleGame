@@ -101,8 +101,12 @@ namespace Volatile
         private IVoltPool<Contact> contactPool;
         private IVoltPool<Manifold> manifoldPool;
 
+        private ulong _entityIdIncrement;
+
         public VoltWorld(Fix64 damping)
         {
+            _entityIdIncrement = 0;
+
             this.LinearDamping = damping;
             this.AngularDamping = damping;
 
@@ -113,7 +117,7 @@ namespace Volatile
             this.manifolds = new List<Manifold>();
 
             this.dynamicBroadphase = new NaiveBroadphase();
-            this.staticBroadphase = new TreeBroadphase();
+            this.staticBroadphase = new NaiveBroadphase(); // TODO: Was TreeBroadphase, changed because suspected determinism problems with TreeBroadphase
 
             this.reusableBuffer = new VoltBuffer<VoltBody>();
             this.reusableOutput = new VoltBuffer<VoltBody>();
@@ -129,6 +133,15 @@ namespace Volatile
         public VoltWorld() : this(VoltConfig.DEFAULT_DAMPING)
         {
 
+        }
+
+        /// <summary>
+        /// Increments the Entity Id Counter and returns it
+        /// </summary>
+        public ulong GetNextEntityId()
+        {
+            _entityIdIncrement++;
+            return _entityIdIncrement;
         }
 
         /// <summary>
@@ -216,6 +229,7 @@ namespace Volatile
           params VoltShape[] shapesToAdd)
         {
             VoltBody body = this.bodyPool.Allocate();
+            body.EntityId = GetNextEntityId();
             body.InitializeStatic(position, radians, shapesToAdd);
             this.AddBodyInternal(body);
             return body;
@@ -230,6 +244,7 @@ namespace Volatile
           params VoltShape[] shapesToAdd)
         {
             VoltBody body = this.bodyPool.Allocate();
+            body.EntityId = GetNextEntityId();
             body.InitializeDynamic(position, radians, shapesToAdd);
             this.AddBodyInternal(body);
             return body;
@@ -287,6 +302,12 @@ namespace Volatile
         /// </summary>
         public void Update()
         {
+            // TODO: This was modified, an additional sort to ensure bodies are in the same order between machines.
+            // A potential problem with this though is ensuring unity calls functions which add said bodies and assign ids in the same order between machine
+            // This sort could potentially be moved to only when bodies are added or removed
+            this.bodies.Sort((a, b) =>
+                    a.EntityId.CompareTo(b.EntityId));
+
             for (int i = 0; i < this.bodies.Count; i++)
             {
                 VoltBody body = this.bodies[i];
@@ -440,6 +461,7 @@ namespace Volatile
             else
                 this.dynamicBroadphase.AddBody(body);
 
+            SortBodies();
             body.AssignWorld(this);
         }
 
@@ -451,6 +473,7 @@ namespace Volatile
             else
                 this.dynamicBroadphase.RemoveBody(body);
 
+            SortBodies();
             body.AssignWorld(null);
         }
 
@@ -470,12 +493,28 @@ namespace Volatile
 
                 // HACK: Don't use dynamic broadphase for global updates for this.
                 // It's faster if we do it manually because we can triangularize.
-                for (int j = i + 1; j < this.bodies.Count; j++)
-                    if (this.bodies[j].IsStatic == false)
+                for (int j = i + 1; j < this.bodies.Count; j++){
+                    if (this.bodies[j].IsStatic == false){
                         this.reusableBuffer.Add(this.bodies[j]);
+                    }
+                }
+                
+                reusableBuffer.Sort((a, b) => 
+                    a.EntityId.CompareTo(
+                    b.EntityId));
 
                 this.TestBuffer(query);
             }
+        }
+        
+        /// <summary>
+        /// Sorts bodies by there id
+        /// </summary>
+        public void SortBodies()
+        {
+            this.bodies.Sort((a, b) => 
+                a.EntityId.CompareTo(
+                b.EntityId));
         }
 
         /// <summary>

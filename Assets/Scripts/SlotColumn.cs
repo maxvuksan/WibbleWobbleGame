@@ -33,7 +33,7 @@ public class SlotColumn : MonoBehaviour
             
             SlotCell cell;
             cell.index = Random.Range(0, traps.traps.Length);
-            cell.gameObject = Instantiate(traps.traps[cell.index].staticPrefab, transform);
+            cell.gameObject = Instantiate(traps.traps[cell.index].behaviorPrefab, transform);
             cell.gameObject.transform.localPosition = Vector3.zero;
 
             cells.Add(cell);

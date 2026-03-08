@@ -5,20 +5,21 @@ using Volatile;
 public class CustomColliderRectangle : CustomCollider
 {
 
-    [SerializeField] private Vector2 _size;
+    [SerializeField] private IntHundredth _sizeX;
+    [SerializeField] private IntHundredth _sizeY;
     private VoltPolygon _rect;
 
 
     public override void ConstructShape()
     {
-        _size.x = Mathf.Abs(_size.x);
-        _size.y = Mathf.Abs(_size.y);
+        Fix64 sizeXFix64 =  Fix64.Abs((Fix64)_sizeX);
+        Fix64 sizeYFix64 =  Fix64.Abs((Fix64)_sizeY);
 
-        VoltVector2 half = new VoltVector2((Fix64)(_size.x / 2.0f), (Fix64)(_size.y / 2.0f)); 
+        VoltVector2 half = new VoltVector2(sizeXFix64 / (Fix64)2, sizeYFix64 / (Fix64)2); 
         
         VoltVector2 offset = new VoltVector2(
-            (Fix64)Offset.x,
-            (Fix64)Offset.y
+            Offset.x,
+            Offset.y
         );
 
         VoltVector2[] verts =
@@ -42,8 +43,8 @@ public class CustomColliderRectangle : CustomCollider
     {
         Gizmos.matrix = transform.localToWorldMatrix;
 
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireCube(new Vector3(Offset.x, Offset.y, 0), new Vector3(_size.x, _size.y, 1));
+        SetGizmoColourDependingIfTriggerOrNot();
+        Gizmos.DrawWireCube(new Vector3((float)OffsetX.AsFloat(), (float)OffsetY.AsFloat(), 0), new Vector3((float)_sizeX.AsFloat(), (float)_sizeY.AsFloat(), 1));
 
         DrawPositionDots();
     }

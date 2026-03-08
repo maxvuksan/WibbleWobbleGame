@@ -51,6 +51,14 @@ namespace Volatile
       this.count++;
     }
 
+    /// <summary>
+    /// Sorts the buffer according to a provided comparision  
+    /// </summary>
+    public void Sort(Comparison<T> comparison)
+    {
+        Array.Sort(this.items, 0, this.count, Comparer<T>.Create(comparison));
+    }
+
     internal void Add(T[] bodies, int count)
     {
       if ((this.count + count) >= this.items.Length)

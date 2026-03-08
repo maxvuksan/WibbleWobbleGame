@@ -50,7 +50,7 @@ public class TrapToPlace : NetworkBehaviour
             return;
         }
 
-        _placementTrapGuideObject = Instantiate(trapDictionary.traps[trapIndex].staticPrefab, transform);
+        _placementTrapGuideObject = Instantiate(trapDictionary.traps[trapIndex].behaviorPrefab, transform);
         _placementTrapGuideObject.transform.localPosition = Vector3.zero;
 
         if (IsHost)
@@ -111,7 +111,7 @@ public class TrapToPlace : NetworkBehaviour
             return;
         }
 
-        _placementTrapGuideObject.GetComponent<StaticTrap>().OnTrapPlace(transform.position);
+        //_placementTrapGuideObject.GetComponent<TrapHeader>().OnTrapPlace(transform.position);
 
         TrapPlacementArea.Singleton.AddTrapRpc(transform.position, _placementTrapGuideObject.transform.eulerAngles.z, _playerHeader.SelectedTrap.Value);
 

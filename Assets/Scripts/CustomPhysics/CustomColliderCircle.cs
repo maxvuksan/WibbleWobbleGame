@@ -5,16 +5,15 @@ using Volatile;
 public class CustomColliderCircle : CustomCollider
 {
 
-    [SerializeField] private float _radius;
+    [SerializeField] private IntHundredth _radius;
     VoltCircle _circle;
 
 
     public override void ConstructShape()
     {
-        Fix64 radiusFix64 = (Fix64)_radius; 
+        Fix64 radiusFix64 = (Fix64)_radius;
 
-        Vector3 finalPos = transform.TransformPoint(new Vector3(Offset.x, Offset.y, 0));
-        VoltVector2 finalPosFix64 = new VoltVector2((Fix64)finalPos.x, (Fix64)finalPos.y);
+        VoltVector2 finalPosFix64 = Helpers.TransformPointFix64(GetCustomTransform(), Offset);
 
         _circle = new VoltCircle();
         _circle.InitializeFromWorldSpace(finalPosFix64, radiusFix64, (Fix64)1, (Fix64)1, (Fix64)1);
@@ -28,9 +27,9 @@ public class CustomColliderCircle : CustomCollider
     public void OnDrawGizmos()
     {
         Gizmos.matrix = transform.localToWorldMatrix;
-
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(new Vector3(Offset.x, Offset.y, 0), _radius);
+        
+        SetGizmoColourDependingIfTriggerOrNot();
+        Gizmos.DrawWireSphere(new Vector3((float)OffsetX.AsFloat(), (float)OffsetY.AsFloat(), 0), (float)_radius.AsFloat());
 
         DrawPositionDots();
     }

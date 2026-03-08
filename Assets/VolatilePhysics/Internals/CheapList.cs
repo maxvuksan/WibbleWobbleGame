@@ -56,27 +56,33 @@ namespace Volatile
       this.count++;
     }
 
+    public void Sort(System.Comparison<T> comparison)
+  {
+      System.Array.Sort(this.values, 0, this.count, System.Collections.Generic.Comparer<T>.Create(comparison));
+
+      // Fix up indices after sort
+      for (int i = 0; i < this.count; i++){
+          this.values[i].Index = i;
+      }
+  }
+
     /// <summary>
     /// Removes the element by swapping it for the last element in the list.
     /// </summary>
     public void Remove(T value)
     {
+      // TODO: This was changed to maintain ordering
       int index = value.Index;
       VoltDebug.Assert(index >= 0);
       VoltDebug.Assert(index < this.count);
 
-      int lastIndex = this.count - 1;
-      if (index < lastIndex)
+      // shift everything down instead of swap
+      for (int i = index; i < this.count - 1; i++)
       {
-        T lastValue = this.values[lastIndex];
-
-        this.values[lastIndex].Index = -1;
-        this.values[lastIndex] = null;
-
-        this.values[index] = lastValue;
-        lastValue.Index = index;
+          this.values[i] = this.values[i + 1];
+          this.values[i].Index = i;
       }
-
+      this.values[this.count - 1] = null;
       this.count--;
     }
 

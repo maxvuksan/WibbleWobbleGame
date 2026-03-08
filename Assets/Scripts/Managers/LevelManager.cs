@@ -4,9 +4,11 @@ using UnityEngine;
 public class LevelManager : NetworkBehaviour
 {
 
+    [SerializeField] private GameObject _lobbyLevelPrefab;
     [SerializeField] private GameObject[] _levelPrefabs;
     [SerializeField] private Transform _levelParent;
     private Level _loadedLevel;
+    public Level LoadedLevel { get => _loadedLevel; }
 
 
     public static LevelManager Singleton;
@@ -39,7 +41,24 @@ public class LevelManager : NetworkBehaviour
     {
         UnloadLevel();
 
-        Level spawnedLevel = Instantiate(_levelPrefabs[levelIndex], _levelParent).GetComponent<Level>();
+        LoadLevel(_levelPrefabs[levelIndex]);
+
+        if (IsServer)
+        {
+            GameStateManager.Singleton.ServerSetGameState(GameStateManager.GameStateEnum.GameState_PreviewLevel);
+        }    
+    }
+
+    [Rpc(SendTo.Everyone, InvokePermission = RpcInvokePermission.Server)]
+    public void LoadLobbyRpc()
+    {
+        UnloadLevel();
+        LoadLevel(_lobbyLevelPrefab);
+    }
+
+    public void LoadLevel(GameObject prefabToLoad)
+    {
+        Level spawnedLevel = Instantiate(prefabToLoad, _levelParent).GetComponent<Level>();
         this._loadedLevel = spawnedLevel;
 
         StaticTrap[] children = spawnedLevel.transform.GetComponentsInChildren<StaticTrap>();
@@ -53,11 +72,6 @@ public class LevelManager : NetworkBehaviour
 
             Destroy(children[i].gameObject);
         }
-
-        if (IsServer)
-        {
-            GameStateManager.Singleton.ServerSetGameState(GameStateManager.GameStateEnum.GameState_PreviewLevel);
-        }    
     }
 
 

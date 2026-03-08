@@ -6,10 +6,16 @@ public abstract class CustomCollider : MonoBehaviour
 {
     [Header("Configuration")]
 
-    public Vector2 Offset;
+    [SerializeField] protected IntHundredth OffsetX = 0;
+    [SerializeField] protected IntHundredth OffsetY = 0;
+    public VoltVector2 Offset { get; set; }
 
-    public void Awake()
+    virtual public void Awake()
     {
+        Offset = new VoltVector2(
+            (Fix64)OffsetX, 
+            (Fix64)OffsetY
+        );
         RegisterWithCustomPhysicsBody();
     }
     /// <summary>
@@ -25,12 +31,7 @@ public abstract class CustomCollider : MonoBehaviour
     /// </summary>
     public void RegisterWithCustomPhysicsBody()
     {
-        CustomPhysicsBody body = GetComponent<CustomPhysicsBody>();
-
-        if(body == null)
-        {
-            body = GetComponentInParent<CustomPhysicsBody>();
-        }
+        CustomPhysicsBody body = GetAssociatedBody();
 
         if(body == null)
         {
@@ -39,6 +40,55 @@ public abstract class CustomCollider : MonoBehaviour
         }
 
         body.AddCollider(this);
+    }
+
+    protected CustomTransform GetCustomTransform()
+    {
+        CustomTransform customTransform = GetComponent<CustomTransform>();
+        if(customTransform == null)
+        {
+            Debug.LogWarning("No CustomTransform on collider " + gameObject.name + ", looking at parent...");
+            customTransform = GetComponentInParent<CustomTransform>();
+
+            if(customTransform == null)
+            {
+                Debug.LogError("No CustomTransform found for CustomColliderCircle, this is a requirement");
+            }
+        }
+
+        return customTransform;
+    }
+
+    protected CustomPhysicsBody GetAssociatedBody()
+    {
+        CustomPhysicsBody body = GetComponent<CustomPhysicsBody>();
+
+        if(body == null)
+        {
+            body = GetComponentInParent<CustomPhysicsBody>();
+        }
+
+        return body;
+    }
+
+    protected void SetGizmoColourDependingIfTriggerOrNot()
+    {
+        CustomPhysicsBody body = GetAssociatedBody();
+
+        if(body == null)
+        {
+            Gizmos.color = Color.red;
+            return;
+        }
+
+        if (body.IsTrigger)
+        {
+            Gizmos.color = Color.green;
+        }
+        else
+        {
+            Gizmos.color = Color.yellow;
+        }
     }
 
     /// <summary>
@@ -50,7 +100,7 @@ public abstract class CustomCollider : MonoBehaviour
 
         Gizmos.color = Color.red;
         Gizmos.DrawSphere(Vector2.zero, 0.1f);
-        Gizmos.DrawSphere(new Vector3(Offset.x, Offset.y, 0), 0.1f);
+        Gizmos.DrawSphere(new Vector3((float)Offset.x, (float)Offset.y, 0), 0.1f);
 
         Gizmos.matrix = Matrix4x4.zero;
     }

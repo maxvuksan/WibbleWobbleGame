@@ -48,7 +48,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 351663768
+  GlobalObjectIdHash: 4289917413
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -835,6 +835,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6721923171045540948}
+  - component: {fileID: 4056382493590072618}
   - component: {fileID: 5886699787865061013}
   - component: {fileID: 6618150875036219770}
   - component: {fileID: 2829270620690801660}
@@ -869,6 +870,24 @@ Transform:
   - {fileID: 7418016986415010820}
   m_Father: {fileID: 2621140378664079447}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4056382493590072618
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7559033247729341858}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 800eea881453e7442b3d558ac39483ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  _positionX:
+    ValueHundredths: 0
+  _positionY:
+    ValueHundredths: 0
+  _rotationDegrees:
+    ValueHundredths: 0
 --- !u!114 &5886699787865061013
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -886,31 +905,21 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   groundCheckPosition: {fileID: 7731998416984380706}
-  groundCheckSize: {x: 0.89, y: 0.19}
+  groundCheckSize: {x: 0.89, y: 3}
   wallCheckSize: {x: 0, y: 0}
-  moveSpeed: 500
-  jumpDisableBuffer: 0.5
-  jumpInputBuffer: 0.2
-  groundedBuffer: 0.2
-  jumpHeight: 16
-  canMove: 1
-  takeHitKnockbackForce: 100
-  velocityCeiling: 40
-  maxSpeed: 8
-  groundAcceleration: 400
-  groundDeceleration: 600
-  airAcceleration: 200
-  airDeceleration: 300
-  maxSlopeAngle: 40
-  slopeStickForce: 50
-  groundRayLength: 0.3
-  groundRayInset: 0.02
+  _jumpTickDisableBuffer: 15
+  _jumpTickInputBuffer: 18
+  _groundedTickBuffer: 10
+  _jumpHeightTenths: 160
+  _maxSpeedTenths: 80
+  _groundRayLengthTenths: 2
+  _groundRayYOffsetTenths: 15
   inAirRotationSpeed: 15
   verticalStretch: 0.01
   horizontalCounterStretch: 0.005
   stepRotation: 6
   stepSpriteDuration: 0.15
-  footstepPrefab: {fileID: 5385310486094509353, guid: ce7c403880c8cb146b99f2721da876da, type: 3}
+  footstepPrefab: {fileID: 1984085572172503019, guid: 6ca0ccd7f29f5f747a356b05ed40689e, type: 3}
   playerRenderer: {fileID: 3849084462165430682}
   eyeRenderer: {fileID: 6695744250585645009}
   animator: {fileID: 2829270620690801660}
@@ -993,10 +1002,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CustomPhysicsBody
   BodyType: 1
-  _gravity: 30
-  _restitution: 0.05
-  _friction: 0
-  _mass: 10
+  _isTrigger: 0
+  _parentBody: {fileID: 0}
+  _gravity:
+    ValueHundredths: 3000
+  _restitution:
+    ValueHundredths: 0
+  _friction:
+    ValueHundredths: 0
+  _mass:
+    ValueHundredths: 100
   _constrainRotation: 1
   _constrainXPosition: 0
   _constrainYPosition: 0
@@ -1012,8 +1027,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c7ee075d777dca4194707a5a6525e44, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CustomColliderRectangle
-  Offset: {x: 0, y: -0.085}
-  _size: {x: 1.2, y: 1.17}
+  OffsetX:
+    ValueHundredths: 0
+  OffsetY:
+    ValueHundredths: -8
+  _sizeX:
+    ValueHundredths: 120
+  _sizeY:
+    ValueHundredths: 116
 --- !u!114 &1356037585818277973
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1026,8 +1047,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e093d5263ee1a704fb116eedc6d81070, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CustomColliderCircle
-  Offset: {x: 0, y: -0.67}
-  _radius: 0.6
+  OffsetX:
+    ValueHundredths: 0
+  OffsetY:
+    ValueHundredths: -66
+  _radius:
+    ValueHundredths: 60
 --- !u!114 &949218344616956050
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1040,8 +1065,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e093d5263ee1a704fb116eedc6d81070, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CustomColliderCircle
-  Offset: {x: 0, y: 0.5}
-  _radius: 0.6
+  OffsetX:
+    ValueHundredths: 0
+  OffsetY:
+    ValueHundredths: 51
+  _radius:
+    ValueHundredths: 60
 --- !u!1 &8146404841840046264
 GameObject:
   m_ObjectHideFlags: 0

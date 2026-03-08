@@ -11,7 +11,7 @@ public class StaticTrap : MonoBehaviour
 
     public void Awake()
     {
-        TrapPlacementArea.Singleton.ApplyColourPaletteToTrap(trapName, this.gameObject);
+        
     }
 
     /// <summary>
@@ -19,7 +19,7 @@ public class StaticTrap : MonoBehaviour
     /// </summary>
     public void RemoveTrap()
     {
-        FindFirstObjectByType<TrapPlacementArea>().RemoveTrapThroughStaticInstance(this.gameObject);
+        //FindFirstObjectByType<TrapPlacementArea>().RemoveTrapThroughStaticInstance(this.gameObject);
     }
 
     /// <summary>

@@ -16,7 +16,7 @@ public class CreativeMode : NetworkBehaviour
     {
         for(int i = 0; i < _trapDictionary.traps.Length; i++)
         {
-            GameObject trapUi = Instantiate(_trapDictionary.traps[i].staticPrefab, _uiParent);
+            GameObject trapUi = Instantiate(_trapDictionary.traps[i].behaviorPrefab, _uiParent);
             trapUi.transform.localPosition = new Vector3(i * _uiSpacing, 0, 0);     
         }
     }

@@ -12,9 +12,17 @@ public class TrapHeader : MonoBehaviour
 
     void Awake()
     {
-        TrapPlacementArea.Singleton.ApplyColourPaletteToTrap(trapName, this.gameObject);
+        
     }
 
+    /// <summary>
+    /// Is called when this trap is placed
+    /// </summary>
+    // virtual public void OnTrapPlace()
+    // {
+        
+    // }
+    
     /// <summary>
     /// Bolt a child trap to this block. makes the child move with this block
     /// </summary>
@@ -22,5 +30,6 @@ public class TrapHeader : MonoBehaviour
     {
         bolt.transform.parent = this.transform;
     }
+
 
 }

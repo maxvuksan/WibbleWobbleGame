@@ -103,9 +103,6 @@ public class LobbyUiManager : MonoBehaviour
         await SteamMatchmaking.CreateLobbyAsync(8);
     }
 
-
-
-
     /// <summary>
     /// Recomputes which game objects should be active depending on the lobby authority. Additionally refreshes the lobbies member list if connected
     /// </summary>

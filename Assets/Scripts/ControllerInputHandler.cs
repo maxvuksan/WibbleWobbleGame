@@ -9,6 +9,7 @@ public struct InputState
     // held refers to the sustained duration an input is held.
 
     public bool mainButtonIsPressed;
+    public bool jumpButtonIsPressed;
     public bool rotateForwardButtonIsHeld;
     public bool rotateBackButtonIsHeld;
     public Vector2 mouseCursorVelocity;
@@ -28,8 +29,13 @@ public class ControllerInputHandler : MonoBehaviour
 
     void Awake()
     {
+        CustomPhysics.OnPostPhysicsTick += OnPostPhysicsTick;
     }
 
+    public void OnPostPhysicsTick()
+    {
+        _input.jumpButtonIsPressed = false;
+    }
 
     public void LateUpdate()
     {
@@ -50,6 +56,7 @@ public class ControllerInputHandler : MonoBehaviour
     {
         if(ctx.phase == InputActionPhase.Started || ctx.phase == InputActionPhase.Performed){
             _input.mainButtonIsPressed = true;
+            _input.jumpButtonIsPressed = true;
         }
     }
     public void Input_RotateForwardButton(InputAction.CallbackContext ctx)

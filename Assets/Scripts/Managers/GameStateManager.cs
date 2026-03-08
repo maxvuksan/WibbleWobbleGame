@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
+using Volatile;
 
 public class GameStateManager : NetworkBehaviour
 {
@@ -66,13 +67,35 @@ public class GameStateManager : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        NetworkedState.OnValueChanged += OnGameStateChanged;
+        base.OnNetworkSpawn();
 
-        // Apply initial state when a client joins late
+        ApplyGameState(NetworkedState.Value);
+        StartCoroutine(ApplyInitialStateWhenReady());
+
+    }
+
+    IEnumerator ApplyInitialStateWhenReady()
+    {
+        yield return new WaitUntil(() => 
+            PlayerDataManager.Singleton != null &&
+            LevelManager.Singleton != null &&
+            TrapPlacementArea.Singleton != null
+        );
+        
         ApplyGameState(NetworkedState.Value);
     }
 
-    private void OnGameStateChanged(GameStateEnum oldState, GameStateEnum newState)
+    public void SchedulePhysicsForEnable()
+    {
+        // will only sucessfully call on host
+        for(int i = 0; i < PlayerDataManager.Singleton.PlayerCount; i++)
+        {
+            PlayerDataManager.Singleton.PlayerData[i].playerInputDriver.SyncClockThenStartPhysics();
+        }
+    }
+
+    [Rpc(SendTo.Everyone, InvokePermission = RpcInvokePermission.Server)]
+    private void OnGameStateChangedRpc(GameStateEnum newState)
     {
         ApplyGameState(newState);
     }
@@ -162,16 +185,13 @@ public class GameStateManager : NetworkBehaviour
 
     }
 
-
     public void ServerSetGameState(GameStateEnum state)
     {
         // only the network host can change the game state
-        if (IsHost)
+        if (IsServer)
         {
-            Debug.Log("Game state is changing to: " + state);
             NetworkedState.Value = state;
-
-            ApplyGameState(state);
+            OnGameStateChangedRpc(state);
         }
     }
 
@@ -209,15 +229,15 @@ public class GameStateManager : NetworkBehaviour
     /// <param name="_state">The new game state we are transition to</param>
     public void ApplyGameState(GameStateEnum _state)
     {
+        Debug.Log("Game state is changing to: " + _state);
+
         switch (_state)
         {
-
             case GameStateEnum.GameState_CreativeMode:
             {
-                
-                TrapPlacementArea.Singleton.NetworkedDestroyAndClearAllBehavioralInstances();
+                CustomPhysics.TurnOffSimulation();
                 TrapPlacementArea.Singleton.DestroyAllScopedObjects();
-                TrapPlacementArea.Singleton.SpawnAllStaticInstances();
+                TrapPlacementArea.Singleton.SpawnAllTrapInstances();
 
                 // reset placed trap
                 List<NetworkPlayerHeader> headers = PlayerDataManager.Singleton.GetOwnedNetworkPlayerHeaders();
@@ -248,16 +268,26 @@ public class GameStateManager : NetworkBehaviour
 
             case GameStateEnum.GameState_SelectingLevel:
             {
+                CustomPhysics.TurnOffSimulation();
+
+                for(int i = 0; i < PlayerDataManager.Singleton.PlayerCount; i++){
+                    
+                    PlayerDataManager.Singleton.PlayerData[i].player.SetPosition(VoltVector2.zero);
+                }
+
                 TrapPlacementArea.Singleton.DestroyAllScopedObjects();
+                TrapPlacementArea.Singleton.DestroyAndClearAllTrapInstances();
 
                 //PlayerDataManager.Singleton.SetActiveAllPlayers(false);
                 PlayerDataManager.Singleton.SetActiveAllMouseCursors(true, true);
-                LevelManager.Singleton.UnloadLevel();
 
                 PlayerRoundOverScreen.Singleton.Clear();
 
                 if (IsServer)
                 {
+                    LevelManager.Singleton.LoadLobbyRpc();
+
+                    SchedulePhysicsForEnable();
                     PlayerDataManager.Singleton.ServerResetAllPlayerStates();
                     
                     if (PlayerDataManager.Singleton.IsSpawned) // TO DO: The additional is spawned check is to ensure PlayerDataManager has been spawned
@@ -266,6 +296,7 @@ public class GameStateManager : NetworkBehaviour
                         PlayerDataManager.Singleton.ServerSetActiveAllTrapToPlaceRpc(false);
                     }
                 }
+
 
                 Helpers.SetActiveGameObjectArray(onlyWhenPlacingTrap, false);
                 Helpers.SetActiveGameObjectArray(onlyWhenSelectingTrap, false);
@@ -279,11 +310,11 @@ public class GameStateManager : NetworkBehaviour
             }
             case GameStateEnum.GameState_PreviewLevel:
             {
-
+                CustomPhysics.TurnOffSimulation();
                 PlayerDataManager.Singleton.SetActiveAllMouseCursors(false, false);
 
                 if (IsServer)
-                {
+                {                    
                     for(int i = 0; i < PlayerDataManager.Singleton.PlayerCount; i++){
                             
                         PlayerDataManager.Singleton.PlayerData[i].networkedPlayerHeader.SetPlayerExistsInWorldRpc(false);  
@@ -305,8 +336,8 @@ public class GameStateManager : NetworkBehaviour
             }
             case GameStateEnum.GameState_SelectingTrap:
             {
-
-                TrapPlacementArea.Singleton.SpawnAllStaticInstances();
+                CustomPhysics.TurnOffSimulation();
+                TrapPlacementArea.Singleton.SpawnAllTrapInstances();
                 //PlayerDataManager.Singleton.SetActiveAllPlayers(false);
                 PlayerDataManager.Singleton.SetActiveAllMouseCursors(true, true);
 
@@ -323,7 +354,7 @@ public class GameStateManager : NetworkBehaviour
                 if(IsServer){
 
                     PlayerDataManager.Singleton.ServerSetActiveAllTrapToPlaceRpc(false);
-                    TrapPlacementArea.Singleton.NetworkedDestroyAndClearAllBehavioralInstances();
+                    TrapPlacementArea.Singleton.DestroyAndClearAllTrapInstances();
                     
                     // reset trap flags on all players
                     for(int i = 0; i < PlayerDataManager.Singleton.PlayerCount; i++){
@@ -340,7 +371,8 @@ public class GameStateManager : NetworkBehaviour
 
             case GameStateEnum.GameState_PlacingTrap:
             {
-                TrapPlacementArea.Singleton.SpawnAllStaticInstances();
+                CustomPhysics.TurnOffSimulation();
+                TrapPlacementArea.Singleton.SpawnAllTrapInstances();
 
                 // reset placed trap
                 List<NetworkPlayerHeader> headers = PlayerDataManager.Singleton.GetOwnedNetworkPlayerHeaders();
@@ -348,8 +380,6 @@ public class GameStateManager : NetworkBehaviour
                 {
                     headers[i].PlacedTrap.Value = false;
                 }
-                
-
 
                 PlayerDataManager.Singleton.SetActiveAllMouseCursors(true, false);
 
@@ -371,12 +401,21 @@ public class GameStateManager : NetworkBehaviour
             }
             case GameStateEnum.GameState_Play:
             {
-                TrapPlacementArea.Singleton.DestroyAndClearAllStaticInstances();
+                CustomPhysics.TurnOffSimulation();
+                TrapPlacementArea.Singleton.SpawnAllTrapInstances();
 
+                for(int i = 0; i < PlayerDataManager.Singleton.PlayerCount; i++){
+                    
+                    // TODO: Im not sure if the PlayerData list will be the same order for each player. we should check back on this
+                    PlayerDataManager.Singleton.PlayerData[i].player.SetPosition(LevelManager.Singleton.LoadedLevel.GetSpawnpoint(i));
+                    PlayerDataManager.Singleton.PlayerData[i].player.ResetState();
+
+                }
 
                 if(IsServer){
                     
-                    TrapPlacementArea.Singleton.NetworkedSpawnBehaviorInstances();
+                    SchedulePhysicsForEnable();
+
                     PlayerDataManager.Singleton.ServerSetActiveAllTrapToPlaceRpc(false);
 
                     // make all players alive again
@@ -384,8 +423,6 @@ public class GameStateManager : NetworkBehaviour
                         
                         PlayerDataManager.Singleton.PlayerData[i].networkedPlayerHeader.SetPlayerExistsInWorldRpc(true);  
                         PlayerDataManager.Singleton.PlayerData[i].networkedPlayerHeader.SetPlayerAliveRpc(true);
-                        PlayerDataManager.Singleton.PlayerData[i].player.ResetState();
-                        PlayerDataManager.Singleton.PlayerData[i].player.SetPositionRpc(transform.position);
                     }
                     
                 }
@@ -404,14 +441,11 @@ public class GameStateManager : NetworkBehaviour
             }
             case GameStateEnum.GameState_ShowingRoundResults:
             {
-                TrapPlacementArea.Singleton.DestroyAndClearAllStaticInstances();
+                CustomPhysics.TurnOffSimulation();
+                //TrapPlacementArea.Singleton.DestroyAndClearAllTrapInstances();
 
-                if(IsServer){
-                    
-                    TrapPlacementArea.Singleton.NetworkedDestroyAndClearAllBehavioralInstances();
-                }
                 PlayerRoundOverScreen.Singleton.Populate();
-                TrapPlacementArea.Singleton.SpawnAllStaticInstances();
+                //TrapPlacementArea.Singleton.SpawnAllStaticInstances();
                 //PlayerDataManager.Singleton.SetActiveAllPlayers(false);
 
                 Helpers.SetActiveGameObjectArray(onlyWhenSelectingLevel, false);

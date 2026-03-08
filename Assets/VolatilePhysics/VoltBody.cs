@@ -120,6 +120,8 @@ namespace Volatile
     /// </summary>
     public object UserData { get; set; }
 
+    public ulong EntityId { get; set; }
+
     public VoltWorld World { get; private set; }
     public VoltBodyType BodyType { get; private set; }
     public VoltCollisionFilter CollisionFilter { private get; set; }
@@ -145,8 +147,8 @@ namespace Volatile
     /// </summary>
     public Fix64 AngularDamping { get; set; } = (Fix64)1;
 
-    public VoltVector2 Force { get; private set; }
-    public Fix64 Torque { get; private set; }
+    public VoltVector2 Force { get; set; }
+    public Fix64 Torque { get; set; }
 
     /// <summary>
     /// Sets whether or not the body will be affected by the World's gravity. 
@@ -231,8 +233,8 @@ namespace Volatile
     public Fix64 InvMass { get; private set; }
     public Fix64 InvInertia { get; private set; }
 
-    public VoltVector2 BiasVelocity { get; private set; }
-    public Fix64 BiasRotation { get; private set; }
+    public VoltVector2 BiasVelocity { get; set; }
+    public Fix64 BiasRotation { get; set; }
 
     // Used for broadphase structures
     internal int ProxyId { get; set; }
@@ -620,9 +622,9 @@ namespace Volatile
     private void UpdateAABB()
     {
       Fix64 top = Fix64.MinValue;
-      Fix64 right = Fix64.MaxValue;
+      Fix64 right = Fix64.MinValue; // TODO: Was .MaxValue, changed because i suspect a bug.
       Fix64 bottom = Fix64.MaxValue;
-      Fix64 left = Fix64.MinValue;
+      Fix64 left = Fix64.MaxValue;// TODO: Was .MaxValue, changed because i suspect a bug.
 
       for (int i = 0; i < this.shapeCount; i++)
       {

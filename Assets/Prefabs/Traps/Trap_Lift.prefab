@@ -10,8 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 7542137508883700422}
   - component: {fileID: 420298326279749191}
-  - component: {fileID: 4827998226797777189}
   - component: {fileID: 3526882801882290721}
+  - component: {fileID: 4228120301861411487}
   m_Layer: 6
   m_Name: Trap_Lift
   m_TagString: Untagged
@@ -51,31 +51,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrapHeader
   trapName: Lift
---- !u!114 &4827998226797777189
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1967868990143498241}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 2194239524
-  InScenePlacedSourceGlobalObjectIdHash: 318034811
-  DeferredDespawnTick: 0
-  Ownership: 1
-  AlwaysReplicateAsRoot: 0
-  SynchronizeTransform: 1
-  ActiveSceneSynchronization: 0
-  SceneMigrationSynchronization: 0
-  SpawnWithObservers: 1
-  DontDestroyWithOwner: 0
-  AutoObjectParentSync: 1
-  SyncOwnerTransformWhenParented: 1
-  AllowOwnerToParent: 0
 --- !u!114 &3526882801882290721
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -88,12 +63,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 652415effc71eb640b1aafd304d46b4c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  _baseRb: {fileID: 474253913665229098}
   _spriteState: {fileID: 5408498979230157386}
   _initalPosition: {fileID: 8215767007652110590}
   _endPosition: {fileID: 4929384377760614154}
+  _triggerBody: {fileID: 4075815425644812839}
+  _collisionBody: {fileID: 2035312255179220503}
   _speedIncreaseFactor: 2
   _maxSpeed: 3
+--- !u!114 &4228120301861411487
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1967868990143498241}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ebf2adb2caf32143b4e5d636c880367, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ApplyColourPalette
+  _targets:
+  - SpriteRenderers:
+    - {fileID: 3674387223976754413}
+    - {fileID: 1756357859111498546}
+    - {fileID: 120261818069221201}
+    ColourData:
+      ColourTarget: 2
+      ColourTargetIndexOffset: 0
 --- !u!1 &2091426905631922304
 GameObject:
   m_ObjectHideFlags: 0
@@ -317,12 +313,10 @@ GameObject:
   m_Component:
   - component: {fileID: 3652888964601914219}
   - component: {fileID: 1614353831077708688}
-  - component: {fileID: 3241063643184196921}
-  - component: {fileID: 474253913665229098}
   - component: {fileID: 4824894758755841146}
   - component: {fileID: 5408498979230157386}
-  - component: {fileID: 1392350815261969426}
-  - component: {fileID: 8305263622732336112}
+  - component: {fileID: 8762984470699314595}
+  - component: {fileID: 2035312255179220503}
   m_Layer: 6
   m_Name: Trap_Lift_Base
   m_TagString: Untagged
@@ -404,79 +398,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!61 &3241063643184196921
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4940491727951572997}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0.0016850829}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 2.625, y: 2}
-    newSize: {x: 6, y: 4}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  m_Size: {x: 2.54, y: 1.2424654}
-  m_EdgeRadius: 0
---- !u!50 &474253913665229098
-Rigidbody2D:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4940491727951572997}
-  m_BodyType: 1
-  m_Simulated: 1
-  m_UseFullKinematicContacts: 0
-  m_UseAutoMass: 0
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_GravityScale: 10
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_Interpolate: 1
-  m_SleepingMode: 1
-  m_CollisionDetection: 0
-  m_Constraints: 4
 --- !u!114 &4824894758755841146
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -490,6 +411,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   fixedRotation: 0
+  _bodyToApplyTo: {fileID: 0}
 --- !u!114 &5408498979230157386
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -511,7 +433,7 @@ MonoBehaviour:
     onSprite: {fileID: -8807470564923635314, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
     offSprite: {fileID: -8807470564923635314, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
   _currentState: Idle
---- !u!114 &1392350815261969426
+--- !u!114 &8762984470699314595
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -520,44 +442,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 4940491727951572997}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e96cb6065543e43c4a752faaa1468eb1, type: 3}
+  m_Script: {fileID: 11500000, guid: 7c7ee075d777dca4194707a5a6525e44, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.Components.NetworkTransform
-  ShowTopMostFoldoutHeaderGroup: 1
-  NetworkTransformExpanded: 0
-  AutoOwnerAuthorityTickOffset: 1
-  PositionInterpolationType: 0
-  RotationInterpolationType: 0
-  ScaleInterpolationType: 0
-  PositionLerpSmoothing: 1
-  PositionMaxInterpolationTime: 0.1
-  RotationLerpSmoothing: 1
-  RotationMaxInterpolationTime: 0.1
-  ScaleLerpSmoothing: 1
-  ScaleMaxInterpolationTime: 0.1
-  AuthorityMode: 0
-  TickSyncChildren: 0
-  UseUnreliableDeltas: 0
-  SyncPositionX: 1
-  SyncPositionY: 1
-  SyncPositionZ: 0
-  SyncRotAngleX: 0
-  SyncRotAngleY: 0
-  SyncRotAngleZ: 0
-  SyncScaleX: 0
-  SyncScaleY: 0
-  SyncScaleZ: 0
-  PositionThreshold: 0.001
-  RotAngleThreshold: 0.01
-  ScaleThreshold: 0.01
-  UseQuaternionSynchronization: 0
-  UseQuaternionCompression: 0
-  UseHalfFloatPrecision: 0
-  InLocalSpace: 0
-  SwitchTransformSpaceWhenParented: 0
-  Interpolate: 1
-  SlerpPosition: 0
---- !u!114 &8305263622732336112
+  m_EditorClassIdentifier: Assembly-CSharp::CustomColliderRectangle
+  Offset: {x: 0, y: -0.05}
+  _size: {x: 2.48, y: 1.2}
+--- !u!114 &2035312255179220503
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -566,14 +456,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 4940491727951572997}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 80d7c879794dfda4687da0e400131852, type: 3}
+  m_Script: {fileID: 11500000, guid: c8e80e72817d95e41bd6acdeaf91824d, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.Components.NetworkRigidbody2D
-  ShowTopMostFoldoutHeaderGroup: 1
-  NetworkRigidbodyBaseExpanded: 0
-  UseRigidBodyForMotion: 0
-  AutoUpdateKinematicState: 1
-  AutoSetKinematicOnDespawn: 1
+  m_EditorClassIdentifier: Assembly-CSharp::CustomPhysicsBody
+  BodyType: 1
+  _isTrigger: 0
+  _parentBody: {fileID: 0}
+  _gravity: 0
+  _restitution: 0
+  _friction: 0
+  _mass: 1
+  _constrainRotation: 0
+  _constrainXPosition: 0
+  _constrainYPosition: 0
 --- !u!1 &5924612125246723389
 GameObject:
   m_ObjectHideFlags: 0
@@ -704,8 +599,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5432700430690156415}
-  - component: {fileID: 2342278326133596431}
-  - component: {fileID: 598031172088356718}
+  - component: {fileID: 8194369440061776796}
+  - component: {fileID: 4075815425644812839}
   m_Layer: 6
   m_Name: Trigger
   m_TagString: Untagged
@@ -728,53 +623,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 3652888964601914219}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!61 &2342278326133596431
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8589279833169987392}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 0.0046129227, y: -0.8408614}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0, y: 0}
-    oldSize: {x: 0, y: 0}
-    newSize: {x: 0, y: 0}
-    adaptiveTilingThreshold: 0
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  m_Size: {x: 2.11, y: 0.90509737}
-  m_EdgeRadius: 0
---- !u!114 &598031172088356718
+--- !u!114 &8194369440061776796
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -783,6 +632,30 @@ MonoBehaviour:
   m_GameObject: {fileID: 8589279833169987392}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a5b140fbb7e52541ad803092ff33da8, type: 3}
+  m_Script: {fileID: 11500000, guid: 7c7ee075d777dca4194707a5a6525e44, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TrapLiftTrigger
+  m_EditorClassIdentifier: Assembly-CSharp::CustomColliderRectangle
+  Offset: {x: 0, y: -0.77}
+  _size: {x: 2.22, y: 0.21}
+--- !u!114 &4075815425644812839
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8589279833169987392}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8e80e72817d95e41bd6acdeaf91824d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CustomPhysicsBody
+  BodyType: 1
+  _isTrigger: 1
+  _parentBody: {fileID: 2035312255179220503}
+  _gravity: 0
+  _restitution: 0
+  _friction: 0
+  _mass: 1
+  _constrainRotation: 1
+  _constrainXPosition: 0
+  _constrainYPosition: 0

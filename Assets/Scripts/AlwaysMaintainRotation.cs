@@ -1,13 +1,43 @@
+using FixMath.NET;
 using UnityEngine;
 
 public class AlwaysMaintainRotation : MonoBehaviour
 {
 
     [SerializeField] private float fixedRotation = 0;
+    [SerializeField] private CustomPhysicsBody _bodyToApplyTo; // if this is left blank, we set the transform rotation directly.
+
+
+    void Awake()
+    {
+        if(_bodyToApplyTo != null)
+        {
+            CustomPhysics.OnPostPhysicsTick += OnPostPhysicsTick;    
+        }
+    }
+
+    void OnDestroy()
+    {
+        if(_bodyToApplyTo != null)
+        {
+            CustomPhysics.OnPostPhysicsTick -= OnPostPhysicsTick;    
+        }
+    }
+
+    void OnPostPhysicsTick()
+    {
+        if(_bodyToApplyTo != null)
+        {
+            _bodyToApplyTo.Angle = (Fix64)fixedRotation;
+        }
+    }
 
     void LateUpdate()
     {
-        transform.rotation = Quaternion.Euler(0, 0, fixedRotation);
+        if(_bodyToApplyTo == null)
+        {
+            transform.rotation = Quaternion.Euler(0, 0, fixedRotation);
+        }
     }
 
 }

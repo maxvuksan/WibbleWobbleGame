@@ -112,6 +112,29 @@ public class PlayerDataManager : NetworkBehaviour
         _playerData = new List<PlayerDataSet>();
 
         _keyboardMouseJoined = false;
+
+        CustomPhysics.OnRecomputeEntityIds += OnRecomputeEntityIds;
+    }
+
+    void OnDestroy()
+    {
+        CustomPhysics.OnRecomputeEntityIds -= OnRecomputeEntityIds;
+    }
+
+    private void OnRecomputeEntityIds()
+    {
+        for(int i = 0; i < PlayerCount; i++)
+        {
+            var body = PlayerData[i].player.GetComponent<CustomPhysicsBody>();
+            var networkObject = PlayerData[i].networkedPlayerHeader.GetComponent<NetworkObject>();
+            
+            body.SetEntityId(networkObject.NetworkObjectId);
+
+            if (Configuration.Singleton.DebugMode)
+            {
+                DeterminismLogger.LogExtraInfo($"RecomputeEntityIds for player index={PlayerData[i].index} networkObjectId={networkObject.NetworkObjectId} entityId={body.Body.EntityId}");
+            }
+        }
     }
 
     private HashSet<InputDevice> joinedDevices = new HashSet<InputDevice>();

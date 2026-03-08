@@ -10,7 +10,7 @@ public class SteamIntergration : MonoBehaviour
     private static SteamIntergration Singleton = null;
 
 
-    private void Awake() 
+    private void Start() 
     {
         if (Singleton != null)
         {
@@ -24,6 +24,11 @@ public class SteamIntergration : MonoBehaviour
 
     static public void UnlockAchievement(string achievementId)
     {
+        if (!Configuration.Singleton.UseSteamTransport)
+        {
+            return;
+        }
+
         var ach = new Steamworks.Data.Achievement(achievementId);
         ach.Trigger();
 
@@ -32,6 +37,11 @@ public class SteamIntergration : MonoBehaviour
 
     static public void ClearAchievementStatus(string achievementId)
     {
+        if (!Configuration.Singleton.UseSteamTransport)
+        {
+            return;
+        }
+
         var ach = new Steamworks.Data.Achievement(achievementId);
         ach.Clear();
         Debug.Log($"Achievement {achievementId} cleared");
@@ -40,11 +50,21 @@ public class SteamIntergration : MonoBehaviour
 
     void Update()
     {
+        if (!Configuration.Singleton.UseSteamTransport)
+        {
+            return;
+        }
+
         SteamClient.RunCallbacks();
     }
 
     void OnApplicationQuit()
     {
+        if (!Configuration.Singleton.UseSteamTransport)
+        {
+            return;
+        }
+
         SteamClient.Shutdown();
     }
     

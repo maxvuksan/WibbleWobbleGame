@@ -9,9 +9,4 @@ public class TrapData
     
     [Header("Prefabs")]
     public GameObject behaviorPrefab;
-    public GameObject staticPrefab;
-
-    [Header("Colours")]
-    public ColourTarget colourTarget;
-    public int colourTargetIndexOffset = 0;
 }

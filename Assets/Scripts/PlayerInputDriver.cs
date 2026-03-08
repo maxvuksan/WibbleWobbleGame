@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Steamworks;
 using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -33,13 +34,12 @@ public class PlayerInputAtTick
 /// </summary>
 public class PlayerInputDriver : NetworkBehaviour
 {
-
     public static readonly int InputHistoryLength = CustomPhysics.HistoryLength;
 
     /// <summary>
     /// Determines the number of ticks an input is buffered for
     /// </summary>
-    public const int InputBufferTickDelay = 2;
+    public const int InputBufferTickDelay = 3; //2; TODO: This should not be set to zero for multiplayer, we need some delay because infomation over the network is not instant
 
     /// <summary>
     /// Encapsulates the players input (is the player pressing move or jump?)
@@ -50,36 +50,28 @@ public class PlayerInputDriver : NetworkBehaviour
     }
     private PlayerClientInputs _playerInputs = new();
 
-
     [SerializeField] private NetworkPlayerHeader _playerHeader;
 
-    /// <summary>
-    /// We fill the first ticks of the input buffer with empty inputs, to account for the drivers input latency (InputBufferTickDelay)
-    /// </summary>
-    private bool _hasPrefilledBuffer;
-    
     // TODO: When actually in game, it may be wise to dynamically increase this input ring buffer so that 
     private List<PlayerInputAtTick> _inputHistoryRingBuffer = new();
 
     private ControllerInputHandler _input;
+
+    private double _clockOffset = 0;
     
 
     void Awake()
     {   
-        // resize the ring buffer to match the history length
-        _inputHistoryRingBuffer = new List<PlayerInputAtTick>();
-        for(int i = 0; i < InputHistoryLength; i++)
-        {
-            _inputHistoryRingBuffer.Add(null);
-        }
+        ClearHistoryRingBuffer();
 
         _input = FindFirstObjectByType<ControllerInputHandler>();
 
         CustomPhysics.OnPrePhysicsTick += OnPrePhysicsTick;
+        CustomPhysics.OnTurnOffPhysicsSimulation += OnTurnOffPhysicsSimulation;
 
-        _hasPrefilledBuffer = true;
         _playerInputs = new();
     }
+
 
     public override void OnDestroy()
     {
@@ -91,24 +83,112 @@ public class PlayerInputDriver : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
-        
-        if (IsOwner)
+    }
+
+    public void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.U))
         {
-            Debug.Log($"Player {_playerHeader.PlayerIndex} pre-filling buffer from tick 0 to {InputBufferTickDelay}");
-            
-            // Pre-fill buffer with default inputs so simulation can start
-            for (int i = 0; i <= InputBufferTickDelay; i++)
+            SyncClockThenStartPhysics();
+        }
+    }
+
+
+    public void SyncClockThenStartPhysics()
+    {
+        if (IsServer)
+        {
+            // Host has no offset
+            _clockOffset = 0;
+            // wait for ping pong to start simulation... MAY NEED REFACTOR FOR MULTIPLE CLIENTS
+            // TODO: WILL NEVER START IF ONLY ONLY 1 PLAYER (NO CLIENTS TO PING PONG WITH)
+
+            if(NetworkManager.ConnectedClients.Count == 1)
             {
-                long tick = i;
-                PlayerInputAtTick defaultInput = new();
-                defaultInput.WasPredicted = true;
-                defaultInput.Tick = tick;
-
-                RecordInputToHistory(defaultInput);
-
-                BroadcastInputsForTickRpc(defaultInput.Inputs, tick);
+                ServerBeginPhysicsSimulation(0.0d);
+            }
+            else
+            {
+                RequestClientsToSyncRpc();
             }
         }
+    }
+
+    public PlayerInputAtTick GetLatestInputAtTick()
+    {
+        return _inputHistoryRingBuffer[GetCurrentBufferIndex()];
+    }
+
+    void ServerBeginPhysicsSimulation(double startDelay = 2.0d)
+    {
+        // tell other clicks when this t
+        double startTime = Time.realtimeSinceStartupAsDouble + startDelay; //start delay so the message has time to travel
+        ScheduleSimulationRpc(startTime);   
+    }
+
+    [Rpc(SendTo.NotServer, InvokePermission = RpcInvokePermission.Server)]
+    void RequestClientsToSyncRpc()
+    {
+        PingServerRpc(Time.realtimeSinceStartupAsDouble);
+    }
+
+    /// <summary>
+    /// Ensures nobody ticks before the everyone has loaded in
+    /// </summary>
+    [Rpc(SendTo.Everyone, InvokePermission = RpcInvokePermission.Server)]
+    void ScheduleSimulationRpc(double serverStartTime)
+    {
+        double localStartTime = serverStartTime - _clockOffset;
+        CustomPhysics.ScheduleStart(localStartTime);
+    }
+
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
+    void PingServerRpc(double clientSendTime)
+    {
+        PongClientRpc(clientSendTime, Time.realtimeSinceStartupAsDouble);
+        ServerBeginPhysicsSimulation();
+    }
+
+    [Rpc(SendTo.NotServer)]
+    void PongClientRpc(double clientSendTime, double serverReceiveTime)
+    {
+        double clientReceiveTime = Time.realtimeSinceStartupAsDouble;
+        double rtt = clientReceiveTime - clientSendTime;
+        double oneWayLatency = rtt / 2.0;
+
+        // What is the server's clock right now, from my perspective
+        double estimatedServerNow = serverReceiveTime + oneWayLatency;
+        _clockOffset = estimatedServerNow - clientReceiveTime;
+    }
+
+
+    // public override void OnNetworkSpawn()
+    // {
+    //     base.OnNetworkSpawn();
+        
+    //     if (IsOwner)
+    //     { 
+    //         Debug.Log($"Player {_playerHeader.PlayerIndex} pre-filling buffer from tick 0 to {InputBufferTickDelay}");
+            
+    //         // Pre-fill buffer with default inputs so simulation can start
+    //         for (int i = 0; i <= InputBufferTickDelay; i++)
+    //         {
+    //             long tick = i;
+    //             PlayerInputAtTick defaultInput = new();
+    //             defaultInput.WasPredicted = true;
+    //             defaultInput.Tick = tick;
+
+    //             RecordInputToHistory(defaultInput);
+
+    //             BroadcastInputsForTickRpc(defaultInput.Inputs, tick);
+    //         }
+    //     }
+    // }
+
+
+    public int GetHistoryBufferIndex(long tick)
+    {
+        return (int)((tick % InputHistoryLength) + InputHistoryLength) % InputHistoryLength;
     }
 
     /// <summary>
@@ -118,18 +198,17 @@ public class PlayerInputDriver : NetworkBehaviour
     { 
         long tickDifference = CustomPhysics.Tick - inputs.Tick; 
         
-        if(Mathf.Abs(tickDifference) > InputHistoryLength) { 
+        if(tickDifference > InputHistoryLength || tickDifference < -InputHistoryLength) { 
             Debug.LogError("trying to call RecordInputToHistory() but the provided tick is too far in the past or future"); 
             return; 
         } 
         
-        long bufferIndex = CustomPhysics.Tick - tickDifference; 
-        bufferIndex %= InputHistoryLength; 
+        long bufferIndex = GetHistoryBufferIndex(inputs.Tick);
         
         _inputHistoryRingBuffer[(int)bufferIndex] = inputs; 
     }
 
-    public void Rollback(long previousTick)
+    public void RequestRollbackAndResimulate(long previousTick)
     {
         long tickDifference = CustomPhysics.Tick - previousTick;
 
@@ -139,7 +218,7 @@ public class PlayerInputDriver : NetworkBehaviour
             return;
         }
 
-        CustomPhysics.Rollback(previousTick);
+        CustomPhysics.RequestRollbackAndResimulate(previousTick);
     }
 
     /// <summary>
@@ -147,7 +226,23 @@ public class PlayerInputDriver : NetworkBehaviour
     /// </summary>
     public int GetCurrentBufferIndex(long offset = 0)
     {
-        return (int)(CustomPhysics.Tick + offset) % InputHistoryLength;
+        long tick = CustomPhysics.Tick + offset;
+        return GetHistoryBufferIndex(tick);
+    }
+
+    void ClearHistoryRingBuffer()
+    {
+        _inputHistoryRingBuffer = new List<PlayerInputAtTick>();
+        for(int i = 0; i < InputHistoryLength; i++)
+        {
+            _inputHistoryRingBuffer.Add(null);
+        }
+    }
+
+    void OnTurnOffPhysicsSimulation()
+    {
+        // clear input ring buffer
+        ClearHistoryRingBuffer();
     }
 
     void OnPrePhysicsTick()
@@ -156,13 +251,18 @@ public class PlayerInputDriver : NetworkBehaviour
         {
             // store current input in buffer, offset by out input delay
 
-            long tickOffset = InputBufferTickDelay + 1;
+            long tickOffset = InputBufferTickDelay;
             long tick = tickOffset + CustomPhysics.Tick;
 
             PlayerInputAtTick inputAtTick = new();
             inputAtTick.Tick = tick;
             inputAtTick.WasPredicted = false;
-            inputAtTick.Inputs = CalculatePlayerInput(); 
+            inputAtTick.Inputs = CalculatePlayerInput();
+
+            if (inputAtTick.Inputs.InputJump == PlayerJumpInput.JumpPressed)
+            {
+                Debug.Log("Jump pressed at:  " + CustomPhysics.Tick);
+            }
 
             RecordInputToHistory(inputAtTick);
 
@@ -174,24 +274,54 @@ public class PlayerInputDriver : NetworkBehaviour
 
     private void AssignPlayerInputs()
     {
+
         PlayerClientInputs inputs = new();
         
         if(_inputHistoryRingBuffer[GetCurrentBufferIndex()]?.Tick == CustomPhysics.Tick)
         {
-            inputs = _inputHistoryRingBuffer[GetCurrentBufferIndex()].Inputs;
+            inputs = new PlayerClientInputs(_inputHistoryRingBuffer[GetCurrentBufferIndex()].Inputs);
+
+            if (inputs.InputJump == PlayerJumpInput.JumpPressed)
+            {
+                Debug.Log("Jump simulated at:  " + CustomPhysics.Tick);
+            } 
         }
         else
         {
-            inputs = PredictInputForTick(CustomPhysics.Tick);
+            inputs = PredictInputForTick();
+            
+            // Store the prediction...
+
+            PlayerInputAtTick predicted = new();
+            predicted.Inputs = inputs;
+            predicted.Tick = CustomPhysics.Tick;
+            predicted.WasPredicted = true; 
+
+            RecordInputToHistory(predicted);
         }
 
         _playerInputs.InputJump = inputs.InputJump;
         _playerInputs.InputMoveDirection = inputs.InputMoveDirection;
     }
 
-    private PlayerClientInputs PredictInputForTick(long tick)
+    /// <summary>
+    /// Predict input for CustomPhysics.Tick using the previous tick as reference
+    /// </summary>
+    /// <returns></returns>
+    private PlayerClientInputs PredictInputForTick()
     {
-        return new PlayerClientInputs();
+        PlayerClientInputs inputs = new();
+
+        // get the previous tick if it exists
+        if(_inputHistoryRingBuffer[GetCurrentBufferIndex(-1)]?.Tick == CustomPhysics.Tick - 1)
+        {
+            inputs = new PlayerClientInputs(_inputHistoryRingBuffer[GetCurrentBufferIndex(-1)].Inputs);
+        }
+
+        // we assume jump is a momentary input, only lasts 1 tick 
+        inputs.InputJump = PlayerJumpInput.None;
+
+        return inputs;
     }
 
     /// <summary>
@@ -203,7 +333,7 @@ public class PlayerInputDriver : NetworkBehaviour
 
         // Jump
         playerInput.InputJump = PlayerJumpInput.None;
-        if (_input.Input.mainButtonIsPressed)
+        if (_input.Input.jumpButtonIsPressed)
         {
             playerInput.InputJump = PlayerJumpInput.JumpPressed;
         }
@@ -225,24 +355,53 @@ public class PlayerInputDriver : NetworkBehaviour
     /// <summary>
     /// Sends the players input from the owner to each other client
     /// </summary>
-    [Rpc(SendTo.NotOwner, InvokePermission = RpcInvokePermission.Owner)]
+    /// TODO: Rpc should be set to NotOwner, set to everyone for everyone
+    /// 
+    [Rpc(SendTo.Everyone, InvokePermission = RpcInvokePermission.Owner)]
     void BroadcastInputsForTickRpc(PlayerClientInputs inputs, long tick)
+    {
+        RecieveBroadcastInputsForTick(inputs, tick);
+    }
+
+    private void RecieveBroadcastInputsForTick(PlayerClientInputs inputs, long tick, bool forceRollbackForTesting = false)
     {
         PlayerInputAtTick inputAtTick = new();
         inputAtTick.Inputs = inputs;
         inputAtTick.WasPredicted = false;
         inputAtTick.Tick = tick; 
-
-        // no rollback required
-
-        RecordInputToHistory(inputAtTick);
-        
-        long currentTick = CustomPhysics.Tick;
-
-        if(currentTick > tick)
+    
+        if(CustomPhysics.Tick > tick)
         {
-            Rollback(tick);
-            CustomPhysics.SimulateFuture(currentTick);
+            int bufferIndex = GetHistoryBufferIndex(tick);
+            PlayerInputAtTick predicted = _inputHistoryRingBuffer[bufferIndex];
+            
+            // Only rollback if we actually HAD a prediction that was wrong
+            bool predictionWrong = predicted != null 
+                && predicted.Tick == tick
+                && predicted.WasPredicted  // ← Only if it was actually predicted
+                && (predicted.Inputs.InputMoveDirection != inputs.InputMoveDirection
+                    || predicted.Inputs.InputJump != inputs.InputJump)
+                || forceRollbackForTesting;
+
+            RecordInputToHistory(inputAtTick);
+
+            if(inputs.InputJump == PlayerJumpInput.JumpPressed)
+            {
+                string predictedInfo = predicted == null 
+                    ? "predicted=NULL" 
+                    : $"predicted.Tick={predicted.Tick}, predicted.Jump={predicted.Inputs.InputJump}, predicted.Move={predicted.Inputs.InputMoveDirection}";
+
+                Debug.Log($"Jump Pressed | tick={tick} currentTick={CustomPhysics.Tick} predictionWrong={predictionWrong} | actual.Jump={inputs.InputJump} actual.Move={inputs.InputMoveDirection} | {predictedInfo}");
+            }
+
+            if (predictionWrong)
+            {
+                RequestRollbackAndResimulate(tick);
+            }
+        }
+        else
+        {
+            RecordInputToHistory(inputAtTick);
         }
     }
 }

@@ -496,8 +496,8 @@ namespace Volatile
 
         Fix64 area = indexNode.aabb.Perimeter;
 
-        VoltAABB combinedAABB = new VoltAABB();
-        VoltAABB.CreateMerged(indexNode.aabb, leafAABB);
+        // TODO: This line was changed to get rid of not needed additional object
+        VoltAABB combinedAABB = VoltAABB.CreateMerged(indexNode.aabb, leafAABB);
         Fix64 combinedArea = combinedAABB.Perimeter;
 
         // Cost of creating a new parent for this node and the new leaf

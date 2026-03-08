@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 
@@ -31,8 +32,10 @@ public class ColourPaletteManager : MonoBehaviour
 
     // ______________________________
 
-
-
+    /// <summary>
+    /// Callback is triggered when the colour palette is set
+    /// </summary>
+    public Action OnColourPaletteChange;
 
     public static ColourPaletteManager Singleton;
 
@@ -56,11 +59,16 @@ public class ColourPaletteManager : MonoBehaviour
 
     public Color GetColour(ColourTarget target, int colourIndex)
     {
-        if(target == ColourTarget.COLOUR_PRIMARY){
+        switch(target){
+            
+            case ColourTarget.COLOUR_PRIMARY: 
 
-            colourIndex %= colourPalettes.palettes[_activePaletteIndex].primaryBlockColours.Length;
-            return colourPalettes.palettes[_activePaletteIndex].primaryBlockColours[colourIndex];
-        }
+                colourIndex %= colourPalettes.palettes[_activePaletteIndex].primaryBlockColours.Length;
+                return colourPalettes.palettes[_activePaletteIndex].primaryBlockColours[colourIndex];
+            
+            case ColourTarget.COLOUR_BACKGROUND_SILOUTTES:
+                return colourPalettes.palettes[_activePaletteIndex].backgroundColourSilouttes;
+        }        
         
         return Color.black;
     }
@@ -76,6 +84,8 @@ public class ColourPaletteManager : MonoBehaviour
         ColourPalette palette = colourPalettes.palettes[_activePaletteIndex];
 
         backgroundRenderer.color = palette.backgroundColour;
+
+        OnColourPaletteChange?.Invoke();
     }
 
 

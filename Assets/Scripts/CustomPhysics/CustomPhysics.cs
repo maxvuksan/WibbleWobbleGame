@@ -2,7 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using FixMath.NET;
+using Unity.VisualScripting;
 using UnityEngine;
+using Volatile;
+
 
 /// <summary>
 /// An interface for interacting with the custom physics scripts. 
@@ -29,7 +32,9 @@ public class CustomPhysics : MonoBehaviour
     /// <summary>
     /// Is true if the physics simulation is resimulating (catching up ticks)
     /// </summary>
-    public static bool Resimulating { get; private set; } = false;
+    public static bool Resimulating => _resimulatingDepth > 0;
+    private static int _resimulatingDepth = 0;
+
 
     /// <summary>
     /// A list of simulation states in the past, index 0 represents the most recent past tick
@@ -50,15 +55,53 @@ public class CustomPhysics : MonoBehaviour
     public static Action OnPrePhysicsTick;
     public static Action OnPhysicsTick;
     public static Action OnPostPhysicsTick;
+    public static Action OnTurnOffPhysicsSimulation;
+    public static Action OnRecomputeEntityIds;
+
+    private static long? _pendingRollbackTick = null;
+    private static double _simulationStartTime = -1;
+        
+    void Awake()
+    {
+        ClearSnapshotHistoryRingBuffer();
+    }
+
+    public static void ScheduleStart(double startTime)
+    {   
+        if(_simulationStartTime != -1)
+        {
+            Debug.LogWarning("Ignoring simulation ScheduleStart, the simulation has already started");
+            return;
+        }
+        
+        _simulationStartTime = startTime;
+    }
 
     /// <summary>
-    /// Determines if the simulation is allowed to proceed to the next tick
+    /// Is called whenever physics ticks forward
     /// </summary>
-    public static bool IsAllowedToTick = true;
+    public static void PhysicsTick()
+    {
+        OnPrePhysicsTick?.Invoke();
+        OnPhysicsTick?.Invoke();
+        //Helpers.SafeInvoke(OnPrePhysicsTick, "OnPrePhysicsTick()");
+        //Helpers.SafeInvoke(OnPhysicsTick, "OnPhysicsTick()");
 
+        CustomPhysicsSpace.Singleton.UpdateSimulation(TimeBetweenTicks);
 
-    
-    void Awake()
+        Helpers.SafeInvoke(OnPostPhysicsTick, "OnPostPhysicsTick()");
+        
+        RecordSnapshotToHistory();
+        
+        Tick++;
+    }
+
+    public static void ResetTickToZero()
+    {
+        Tick = 0;
+    }
+
+    private static void ClearSnapshotHistoryRingBuffer()
     {
         _historyRingBuffer = new List<CustomSimulationSnapshot>();
 
@@ -68,36 +111,79 @@ public class CustomPhysics : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Is called whenever physics ticks forward
-    /// </summary>
-    public static void PhysicsTick()
+    public static void TurnOffSimulation()
     {
-        Helpers.SafeInvoke(OnPrePhysicsTick, "OnPrePhysicsTick()");
-        Helpers.SafeInvoke(OnPhysicsTick, "OnPhysicsTick()");
+        ResetTickToZero();
+        _simulationStartTime = -1;
+        ClearSnapshotHistoryRingBuffer();
+        OnTurnOffPhysicsSimulation?.Invoke();
 
-        CustomPhysicsSpace.Singleton.UpdateSimulation(TimeBetweenTicks);
-
-        Helpers.SafeInvoke(OnPostPhysicsTick, "OnPostPhysicsTick()");
-        
-        RecordSnapshotToHistory();
-
-        Tick++;
     }
-    
+
     void Update()
     {
-        _timeAccumulator += Time.unscaledDeltaTime;
-
-        if(_timeAccumulator >= (double)TimeBetweenTicks && IsAllowedToTick)
+        if (_simulationStartTime < 0)
         {
-            PhysicsTick();
-            _timeAccumulator -= (double)TimeBetweenTicks;
+            return;
+        } 
+
+        if (Time.realtimeSinceStartupAsDouble < _simulationStartTime)
+        {
+            return;
         }
 
-        if (Input.GetKeyDown(KeyCode.R))
+        if(Tick == 0)
         {
-            Rollback(Tick - HistoryLength + 1);
+            DeterminismLogger.ClearLog();
+            
+            OnRecomputeEntityIds?.Invoke(); 
+            CustomPhysicsSpace.Singleton.RebuildBodyDictionary();
+            CustomPhysicsSpace.Singleton.SortWorld();
+        }
+
+        long targetTick = (long)((Time.realtimeSinceStartupAsDouble - _simulationStartTime) * s_ticksPerSecond);
+
+        ActOnPendingRollback(targetTick);
+        PerformNecassaryPhysicsTicks(targetTick);
+    }
+
+    private static void PerformNecassaryPhysicsTicks(long targetTick)
+    {
+        while(Tick < targetTick)
+        {
+            PhysicsTick();
+            targetTick = ActOnPendingRollback(targetTick);
+        }
+    }
+
+    /// <returns>The updated targetTick variable</returns>
+    private static long ActOnPendingRollback(long targetTick)
+    {
+        if (_pendingRollbackTick.HasValue)
+        {
+            long rollbackTo = _pendingRollbackTick.Value;
+            _pendingRollbackTick = null;
+
+            _resimulatingDepth++;
+            Rollback(rollbackTo);
+            _resimulatingDepth--;
+
+            // expand futureTick if needed to ensure we still reach original target
+            return Math.Max(targetTick, Tick);
+        }
+        return targetTick;
+    }
+
+
+
+    /// <summary>
+    /// Schedules a rollback, can be called multiple times per tick. Rollsback to the minimum of the 'previousTick' argument
+    /// </summary>
+    public static void RequestRollbackAndResimulate(long previousTick)
+    {
+        if (_pendingRollbackTick == null || previousTick < _pendingRollbackTick.Value)
+        {
+            _pendingRollbackTick = previousTick;
         }
     }
 
@@ -111,14 +197,33 @@ public class CustomPhysics : MonoBehaviour
         
         int index = (int)(Tick % HistoryLength);
         _historyRingBuffer[index] = snapshot;
+
+        // If we are in DebugMode, record current frame to log
+        if (Configuration.Singleton.DebugMode)
+        {
+            List<PlayerInputDriver> playerDrivers = new();
+
+            for(int i = 0; i < PlayerDataManager.Singleton.PlayerCount; i++)
+            {
+                playerDrivers.Add(PlayerDataManager.Singleton.PlayerData[i].playerInputDriver);
+            }
+
+            DeterminismLogger.LogTick(Tick, snapshot, playerDrivers);
+        }
     }
 
     /// <summary>
     /// Returns the physics simulation to a tick in the past, this can only be done to recently elapsed ticks 
     /// </summary>
     /// <param name="previousTick">The tick we wish to rollback to</param>
-    public static void Rollback(long previousTick)
+    private static void Rollback(long previousTick)
     {
+        if (previousTick <= 0)
+        {
+            Debug.LogWarning("Cannot rollback to tick 0 or below, ignoring");
+            return;
+        }
+
         long tickDifference = Tick - previousTick;
 
         if(tickDifference > HistoryLength)
@@ -127,9 +232,10 @@ public class CustomPhysics : MonoBehaviour
             return;
         }
         
-        int shiftedIndex = (int)(tickDifference % HistoryLength); 
+        long snapshotTick = previousTick - 1; // restore state BEFORE previousTick ran;
+        int shiftedIndex = (int)(snapshotTick % HistoryLength); 
 
-        if(_historyRingBuffer[shiftedIndex].Tick != previousTick)
+        if(_historyRingBuffer[shiftedIndex].Tick != snapshotTick)
         {
             Debug.LogError("The tick in the history buffer does not match the desired tick to rollback to");
             return;
@@ -137,7 +243,7 @@ public class CustomPhysics : MonoBehaviour
 
         CustomPhysicsSpace.Singleton.RestoreSimulationSnapshot(_historyRingBuffer[shiftedIndex]);
 
-        Tick = shiftedIndex;
+        Tick = previousTick;
     }
     
     /// <summary>
@@ -146,18 +252,40 @@ public class CustomPhysics : MonoBehaviour
     /// <param name="futureTick">The tick we wish to simulate up to</param>
     public static void SimulateFuture(long futureTick)
     {
-        // TODO: Prevent death spiral
+        // TODO: Prevent death spiral, enforce a max resimulatingDepth
+        _resimulatingDepth++;
         
-        Resimulating = true;
-        
-        // add i to prevent potential infinite loop
-        while(Tick <= futureTick)
+        PerformNecassaryPhysicsTicks(futureTick);
+
+        _resimulatingDepth--;
+    }
+
+
+    /// <summary>
+    /// Shoots a ray in the CustomPhysics simulation space
+    /// </summary>
+    public static CustomPhysicsRayResult Raycast(VoltVector2 origin, VoltVector2 direction, Fix64 distance)
+    {
+        VoltRayCast ray = new VoltRayCast(origin, direction, distance);
+        VoltRayResult result = new();
+
+        CustomPhysicsRayResult customResult = new() { Hit = false};
+        customResult.Hit = CustomPhysicsSpace.Singleton.SimulationSpace.RayCast(ref ray, ref result, null);
+        customResult.Origin = origin;
+        customResult.Direction = direction;
+
+        if (!customResult.Hit)
         {
-            PhysicsTick();
+            customResult.Destination = ray.origin + ray.direction * ray.distance;
+            return customResult;
         }
 
-        Resimulating = false;
-
+        customResult.Destination = result.ComputePoint(ref ray);
+        customResult.Normal = result.normal;
+        
+        customResult.Body = CustomPhysicsSpace.Singleton.GetBody(result.Body.EntityId);
+    
+        return customResult;
     }
 
 }

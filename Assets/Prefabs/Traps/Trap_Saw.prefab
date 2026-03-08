@@ -46,6 +46,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AlwaysMaintainRotation
   fixedRotation: 0
+  _bodyToApplyTo: {fileID: 0}
 --- !u!1 &1551359529758071312
 GameObject:
   m_ObjectHideFlags: 0
@@ -55,8 +56,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4776770872372402512}
-  - component: {fileID: 7229662866345234322}
   - component: {fileID: 248461089073878316}
+  - component: {fileID: 2891200814827332429}
   m_Layer: 0
   m_Name: hurtbox
   m_TagString: Untagged
@@ -79,42 +80,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2376864383030997602}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!58 &7229662866345234322
-CircleCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1551359529758071312}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 4.29}
-  m_Radius: 0.58
 --- !u!114 &248461089073878316
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -127,6 +92,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 907e68ea622e56044adc07e38e787922, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HurtBox
+--- !u!114 &2891200814827332429
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1551359529758071312}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e093d5263ee1a704fb116eedc6d81070, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CustomColliderCircle
+  OffsetX:
+    ValueHundredths: 0
+  OffsetY:
+    ValueHundredths: 425
+  _radius:
+    ValueHundredths: 70
 --- !u!1 &2434558581931510970
 GameObject:
   m_ObjectHideFlags: 0
@@ -138,7 +121,8 @@ GameObject:
   - component: {fileID: 2376864383030997602}
   - component: {fileID: 5090454866834072585}
   - component: {fileID: 6953277524167064414}
-  - component: {fileID: 6111415603113332486}
+  - component: {fileID: 1142440177249331008}
+  - component: {fileID: 6989800892065437799}
   m_Layer: 12
   m_Name: rotator
   m_TagString: Untagged
@@ -155,7 +139,7 @@ Transform:
   m_GameObject: {fileID: 2434558581931510970}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.02999878, y: -0.020000458, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -232,9 +216,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 86a8ac73c54c3c642bbe5e96f154c0c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  ShowTopMostFoldoutHeaderGroup: 1
-  speed: -200
---- !u!114 &6111415603113332486
+  _speed: -4
+  _bodyToApplyTo: {fileID: 1142440177249331008}
+--- !u!114 &1142440177249331008
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -243,43 +227,41 @@ MonoBehaviour:
   m_GameObject: {fileID: 2434558581931510970}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e96cb6065543e43c4a752faaa1468eb1, type: 3}
+  m_Script: {fileID: 11500000, guid: c8e80e72817d95e41bd6acdeaf91824d, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.Components.NetworkTransform
-  ShowTopMostFoldoutHeaderGroup: 1
-  NetworkTransformExpanded: 0
-  AutoOwnerAuthorityTickOffset: 1
-  PositionInterpolationType: 0
-  RotationInterpolationType: 0
-  ScaleInterpolationType: 0
-  PositionLerpSmoothing: 1
-  PositionMaxInterpolationTime: 0.1
-  RotationLerpSmoothing: 1
-  RotationMaxInterpolationTime: 0.1
-  ScaleLerpSmoothing: 1
-  ScaleMaxInterpolationTime: 0.1
-  AuthorityMode: 0
-  TickSyncChildren: 0
-  UseUnreliableDeltas: 0
-  SyncPositionX: 0
-  SyncPositionY: 0
-  SyncPositionZ: 0
-  SyncRotAngleX: 0
-  SyncRotAngleY: 0
-  SyncRotAngleZ: 1
-  SyncScaleX: 0
-  SyncScaleY: 0
-  SyncScaleZ: 0
-  PositionThreshold: 0.001
-  RotAngleThreshold: 0.01
-  ScaleThreshold: 0.01
-  UseQuaternionSynchronization: 0
-  UseQuaternionCompression: 0
-  UseHalfFloatPrecision: 0
-  InLocalSpace: 0
-  SwitchTransformSpaceWhenParented: 0
-  Interpolate: 1
-  SlerpPosition: 0
+  m_EditorClassIdentifier: Assembly-CSharp::CustomPhysicsBody
+  BodyType: 1
+  _isTrigger: 1
+  _parentBody: {fileID: 0}
+  _gravity:
+    ValueHundredths: 0
+  _restitution:
+    ValueHundredths: 0
+  _friction:
+    ValueHundredths: 0
+  _mass:
+    ValueHundredths: 100
+  _constrainRotation: 0
+  _constrainXPosition: 1
+  _constrainYPosition: 1
+--- !u!114 &6989800892065437799
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2434558581931510970}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 800eea881453e7442b3d558ac39483ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CustomTransform
+  _positionX:
+    ValueHundredths: 0
+  _positionY:
+    ValueHundredths: 0
+  _rotationDegrees:
+    ValueHundredths: 0
 --- !u!1 &4967037026206012188
 GameObject:
   m_ObjectHideFlags: 0
@@ -290,13 +272,11 @@ GameObject:
   m_Component:
   - component: {fileID: 2820990266188840496}
   - component: {fileID: 6661631054828881543}
-  - component: {fileID: 5846946094433621716}
   - component: {fileID: 6474955180598829484}
-  - component: {fileID: 1240038206661517779}
   - component: {fileID: 2742205648943215771}
-  - component: {fileID: 5879854509121216289}
-  - component: {fileID: 6031988250108992426}
-  - component: {fileID: 7857873259929317021}
+  - component: {fileID: 5258354893559297383}
+  - component: {fileID: 2248448641905021216}
+  - component: {fileID: 3221371708621446860}
   m_Layer: 6
   m_Name: Trap_Saw
   m_TagString: Untagged
@@ -313,7 +293,7 @@ Transform:
   m_GameObject: {fileID: 4967037026206012188}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -38.74962, y: 14.1035595, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -367,7 +347,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 1602793595, guid: 10d0da31704faa048b42e39f581fd249, type: 3}
+  m_Sprite: {fileID: -7944306057156956249, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -378,52 +358,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!61 &5846946094433621716
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4967037026206012188}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 2, y: 2}
-    newSize: {x: 9, y: 9.875}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  m_Size: {x: 2, y: 2}
-  m_EdgeRadius: 0
 --- !u!114 &6474955180598829484
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -440,33 +374,6 @@ MonoBehaviour:
   state:
     onSprite: {fileID: -7944306057156956249, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
     offSprite: {fileID: -1366291371, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
---- !u!50 &1240038206661517779
-Rigidbody2D:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4967037026206012188}
-  m_BodyType: 0
-  m_Simulated: 1
-  m_UseFullKinematicContacts: 0
-  m_UseAutoMass: 0
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_GravityScale: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_Interpolate: 1
-  m_SleepingMode: 1
-  m_CollisionDetection: 0
-  m_Constraints: 7
 --- !u!114 &2742205648943215771
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -480,7 +387,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrapHeader
   trapName: Saw
---- !u!114 &5879854509121216289
+--- !u!114 &5258354893559297383
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -489,23 +396,24 @@ MonoBehaviour:
   m_GameObject: {fileID: 4967037026206012188}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Script: {fileID: 11500000, guid: c8e80e72817d95e41bd6acdeaf91824d, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 1042588098
-  InScenePlacedSourceGlobalObjectIdHash: 0
-  DeferredDespawnTick: 0
-  Ownership: 1
-  AlwaysReplicateAsRoot: 0
-  SynchronizeTransform: 1
-  ActiveSceneSynchronization: 0
-  SceneMigrationSynchronization: 1
-  SpawnWithObservers: 1
-  DontDestroyWithOwner: 0
-  AutoObjectParentSync: 1
-  SyncOwnerTransformWhenParented: 1
-  AllowOwnerToParent: 0
---- !u!114 &6031988250108992426
+  m_EditorClassIdentifier: Assembly-CSharp::CustomPhysicsBody
+  BodyType: 0
+  _isTrigger: 0
+  _parentBody: {fileID: 0}
+  _gravity:
+    ValueHundredths: 0
+  _restitution:
+    ValueHundredths: 0
+  _friction:
+    ValueHundredths: 0
+  _mass:
+    ValueHundredths: 100
+  _constrainRotation: 0
+  _constrainXPosition: 0
+  _constrainYPosition: 0
+--- !u!114 &2248448641905021216
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -514,44 +422,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 4967037026206012188}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e96cb6065543e43c4a752faaa1468eb1, type: 3}
+  m_Script: {fileID: 11500000, guid: 7c7ee075d777dca4194707a5a6525e44, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.Components.NetworkTransform
-  ShowTopMostFoldoutHeaderGroup: 1
-  NetworkTransformExpanded: 0
-  AutoOwnerAuthorityTickOffset: 1
-  PositionInterpolationType: 0
-  RotationInterpolationType: 0
-  ScaleInterpolationType: 0
-  PositionLerpSmoothing: 1
-  PositionMaxInterpolationTime: 0.1
-  RotationLerpSmoothing: 1
-  RotationMaxInterpolationTime: 0.1
-  ScaleLerpSmoothing: 1
-  ScaleMaxInterpolationTime: 0.1
-  AuthorityMode: 0
-  TickSyncChildren: 0
-  UseUnreliableDeltas: 0
-  SyncPositionX: 1
-  SyncPositionY: 1
-  SyncPositionZ: 0
-  SyncRotAngleX: 0
-  SyncRotAngleY: 0
-  SyncRotAngleZ: 1
-  SyncScaleX: 0
-  SyncScaleY: 0
-  SyncScaleZ: 0
-  PositionThreshold: 0.001
-  RotAngleThreshold: 0.01
-  ScaleThreshold: 0.01
-  UseQuaternionSynchronization: 0
-  UseQuaternionCompression: 0
-  UseHalfFloatPrecision: 0
-  InLocalSpace: 0
-  SwitchTransformSpaceWhenParented: 0
-  Interpolate: 1
-  SlerpPosition: 0
---- !u!114 &7857873259929317021
+  m_EditorClassIdentifier: Assembly-CSharp::CustomColliderRectangle
+  OffsetX:
+    ValueHundredths: 0
+  OffsetY:
+    ValueHundredths: 0
+  _sizeX:
+    ValueHundredths: 200
+  _sizeY:
+    ValueHundredths: 200
+--- !u!114 &3221371708621446860
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -560,11 +442,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 4967037026206012188}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 80d7c879794dfda4687da0e400131852, type: 3}
+  m_Script: {fileID: 11500000, guid: 800eea881453e7442b3d558ac39483ab, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.Components.NetworkRigidbody2D
-  ShowTopMostFoldoutHeaderGroup: 1
-  NetworkRigidbodyBaseExpanded: 0
-  UseRigidBodyForMotion: 0
-  AutoUpdateKinematicState: 1
-  AutoSetKinematicOnDespawn: 1
+  m_EditorClassIdentifier: Assembly-CSharp::CustomTransform
+  _positionX:
+    ValueHundredths: 0
+  _positionY:
+    ValueHundredths: 0
+  _rotationDegrees:
+    ValueHundredths: 0

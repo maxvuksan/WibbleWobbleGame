@@ -6,10 +6,35 @@ using Unity.Netcode;
 using UnityEngine;
 using Volatile;
 
+
+
+
+public class CustomPlayerTickState : ICustomTickState<CustomPlayerTickState>
+{
+    public long _lastJumpPhysicsTick = int.MinValue;
+    public long _lastJumpInputPhysicsTick = int.MinValue;
+    public long _lastGroundedPhysicsTick = int.MinValue;
+    public bool _trueGrounded = false;
+    public bool _grounded;
+    public int _directionFacing = 1;
+
+    public CustomPlayerTickState Clone()
+    {
+        return new CustomPlayerTickState
+        {
+            _lastJumpPhysicsTick = this._lastJumpPhysicsTick,
+            _lastJumpInputPhysicsTick = this._lastJumpInputPhysicsTick,
+            _lastGroundedPhysicsTick = this._lastGroundedPhysicsTick,
+            _trueGrounded = this._trueGrounded,
+            _grounded = this._grounded,
+            _directionFacing = this._directionFacing,
+        };
+    }
+}
+
+
 public class Player : NetworkBehaviour
 {
-
-
 
     [Header("Ground Checking")]
     [SerializeField] private LayerMask groundLayer;
@@ -18,32 +43,26 @@ public class Player : NetworkBehaviour
     [SerializeField] private Vector2 wallCheckSize;
  
     [Header("Movement")]
-    [SerializeField] private float moveSpeed;
-    [SerializeField] private float jumpDisableBuffer; // minimum allowed time between jumps (prevents spamming)
-    [SerializeField] private float jumpInputBuffer; // holds onto jump inputs for this amount of time, will then jump when grounded next
-    [SerializeField] private float groundedBuffer; // holds onto being grounded for this amount of time, allows jumping in this period
-    [SerializeField] private float jumpHeight;
-    [SerializeField] private bool canMove = true;
-    [SerializeField] private float takeHitKnockbackForce = 100;
-    [SerializeField] private float velocityCeiling = 40;
+    [SerializeField] private int _jumpTickDisableBuffer = 25; // minimum allowed time between jumps (prevents spamming)
+    [SerializeField] private int _jumpTickInputBuffer = 30; // holds onto jump inputs for this amount of time, will then jump when grounded next
+    [SerializeField] private int _groundedTickBuffer = 20;
+    
+    // some of these variables are stored as var/10 to allow us to store as integer for determinism restriction
+    [SerializeField] private int _jumpHeightTenths = 160;      // 16.0
+    [SerializeField] private int _maxSpeedTenths = 80;         // 8.0
+    [SerializeField] private int _groundRayLengthTenths = 2;   // 0.2
+    [SerializeField] private int _groundRayYOffsetTenths = 15; // 1.5
 
-    [SerializeField] private float maxSpeed = 8f;
-    [SerializeField] private float groundAcceleration = 60f;
-    [SerializeField] private float groundDeceleration = 80f;
-    [SerializeField] private float airAcceleration = 30f;
-    [SerializeField] private float airDeceleration = 20f;
-    [SerializeField] private float maxSlopeAngle = 45f;
-    [SerializeField] private float slopeStickForce = 50f;
+    private Fix64 _jumpHeight => (Fix64)_jumpHeightTenths / (Fix64)10;
+    private Fix64 _maxSpeed => (Fix64)_maxSpeedTenths / (Fix64)10;
+    private Fix64 _groundRayLength => (Fix64)_groundRayLengthTenths / (Fix64)10;
+    private Fix64 _groundRayYOffset => (Fix64)_groundRayYOffsetTenths / (Fix64)10;
 
-    [Header("Ground Rays")]
-    [SerializeField] private float groundRayLength = 0.2f;
-    [SerializeField] private float groundRayInset = 0.02f; // pulls side rays slightly inward
 
     [Header("Visuals")]
 
     [SerializeField] private float inAirRotationSpeed = 1.0f;
     [SerializeField] private float verticalStretch = 1.0f;
-    
     [SerializeField] private float horizontalCounterStretch = 0.5f;
     [SerializeField] private float stepRotation = 15.0f;
     [SerializeField] private float stepSpriteDuration = 0.2f;
@@ -54,6 +73,8 @@ public class Player : NetworkBehaviour
 
     [SerializeField] private CustomPhysicsBody _physicsBody;
     [SerializeField] private PlayerInputDriver _driver;
+
+    private CustomPlayerTickState _tickState = new();
 
 
     enum PlayerSpriteJiggleAnimations
@@ -87,16 +108,10 @@ public class Player : NetworkBehaviour
     private NetworkPlayerHeader _playerHeader;    
 
     // state
-    private Vector2 _groundNormal = Vector2.up;
-    private Fix64 _groundedTracked;
-    private double _jumpInputTracked;
-    private double _jumpDisabledTracked;
-    private bool _grounded;
-    private bool _trueGrounded;
+    private CustomPhysicsRayResult _groundedRaycastResult;
+    private float _inAirRotationFactor = 0;
     private float _stepSpriteDurationTracked;
     private bool _isLeftFootForward;
-    private float _inAirRotationFactor = 0;
-    private int _directionFacing = 1;
 
     void Awake()
     {
@@ -104,17 +119,32 @@ public class Player : NetworkBehaviour
         _animState = GetComponent<SpriteJiggleMultiState>();
         _inputHandler = FindFirstObjectByType<ControllerInputHandler>();
         _physicsBody = GetComponent<CustomPhysicsBody>();
+
+
+        _physicsBody.CustomState = _tickState;
+    }
+
+    private void OnTurnOffPhysicsSimulation()
+    {
+        _tickState = new CustomPlayerTickState();
+        _physicsBody.CustomState = _tickState;
+
+        ResetState();
     }
 
     void Start()
     {
         CustomPhysics.OnPhysicsTick += OnPhysicsTick;
+        CustomPhysics.OnTurnOffPhysicsSimulation += OnTurnOffPhysicsSimulation;
+        CustomPhysics.OnPostPhysicsTick += OnPostPhysicsTick;
     }
 
     public override void OnDestroy()
     {
         base.OnDestroy();
         CustomPhysics.OnPhysicsTick -= OnPhysicsTick;
+        CustomPhysics.OnTurnOffPhysicsSimulation -= OnTurnOffPhysicsSimulation;
+        CustomPhysics.OnPostPhysicsTick -= OnPostPhysicsTick;
     }
 
     public override void OnNetworkSpawn()
@@ -128,11 +158,8 @@ public class Player : NetworkBehaviour
     public void ResetState()
     {
         _originalColour = playerRenderer.color;
-        _jumpInputTracked = 0;
-        _jumpDisabledTracked = 0;
-        _inAirRotationFactor = 0;
-        _trueGrounded = false;
-        _directionFacing = 1;
+        _tickState._trueGrounded = false;
+        _stepSpriteDurationTracked = 0;
 
         animator.SetBool("HasWon", false);
 
@@ -179,7 +206,7 @@ public class Player : NetworkBehaviour
 
     public void SpawnFootstepPrefab()
     {
-        if (!_grounded || footstepPrefab == null)
+        if (!_tickState._grounded || footstepPrefab == null)
         {
             return;
         }
@@ -194,20 +221,26 @@ public class Player : NetworkBehaviour
             return;
         }
 
-        int moveDirection = _driver.PlayerInputs.GetMoveDirection();
-        if(moveDirection != 0)
-        {
-            _directionFacing = moveDirection;
+        // Don't update visuals during resimulation
+        if (CustomPhysics.Resimulating){
+            return;
         }
+
+        // sync with body
+        _tickState = _physicsBody.CustomState as CustomPlayerTickState;
         
         ReflectSpriteState();
     }
 
 
-    [Rpc(SendTo.Owner, InvokePermission = RpcInvokePermission.Owner | RpcInvokePermission.Server)]
-    public void SetPositionRpc(Vector3 position)
+    public void SetPosition(VoltVector2 position)
     {
-        
+        if(_physicsBody?.Body != null)
+        {
+            _physicsBody.Position = new VoltVector2((Fix64)position.x, (Fix64)position.y);
+        }
+
+        transform.position = new Vector2((float)position.x, (float)position.y);
     }
 
     public void HitTrap(Vector2 directionToApplyForce)
@@ -239,7 +272,7 @@ public class Player : NetworkBehaviour
 
     public void Jump(bool playSound = true)
     {
-        _physicsBody.LinearVelocity = new VoltVector2(_physicsBody.LinearVelocityX, (Fix64)jumpHeight);
+        _physicsBody.LinearVelocity = new VoltVector2(_physicsBody.LinearVelocityX, _jumpHeight);
 
         if (playSound)
         {
@@ -249,74 +282,98 @@ public class Player : NetworkBehaviour
 
     public void OnPhysicsTick()
     {
+        // Sync local tickstate with snapshot state...
+        _tickState = _physicsBody.CustomState as CustomPlayerTickState;
+
+
         if (_driver.PlayerInputs.InputJump == PlayerJumpInput.JumpPressed)
         {
-            _jumpInputTracked = jumpInputBuffer;
+             _tickState._lastJumpInputPhysicsTick = CustomPhysics.Tick;
         }
 
-        if (_jumpInputTracked > 0)
+        PerformGroundedCheck();
+
+        int moveDirection = _driver.PlayerInputs.GetMoveDirection();
+        if(moveDirection != 0)
         {
-            // TODO: Casting to double here may be problematic?
-            _jumpInputTracked -= (double)CustomPhysics.TimeBetweenTicks;
-        }
-        if (_jumpDisabledTracked > 0) {
-            _jumpDisabledTracked -= (double)CustomPhysics.TimeBetweenTicks;
+            _tickState._directionFacing = moveDirection;
         }
 
-        if(_jumpInputTracked > 0)
+
+        bool canJump = false;
+        if(_tickState._lastJumpInputPhysicsTick >= CustomPhysics.Tick - _jumpTickInputBuffer &&
+            _tickState._lastJumpPhysicsTick < CustomPhysics.Tick - _jumpTickDisableBuffer
+        )
+        {
+            canJump = true;
+        }
+
+        // ADD THIS
+        if (_driver.PlayerInputs.InputJump == PlayerJumpInput.JumpPressed)
+        {
+            Debug.Log($"OnPhysicsTick | tick={CustomPhysics.Tick} inputJump={_driver.PlayerInputs.InputJump} canJump={canJump} grounded={_tickState._grounded} trueGrounded={_tickState._trueGrounded} lastJumpInput={_tickState._lastJumpInputPhysicsTick} lastJump={_tickState._lastJumpPhysicsTick} lastGrounded={_tickState._lastGroundedPhysicsTick}");
+        }
+
+        if(canJump && _tickState._grounded) // & _jumpInputTracked > 0
         {
             Jump(true);
-            _jumpInputTracked = 0;
+
+            _tickState._lastJumpPhysicsTick = CustomPhysics.Tick;
+            _tickState._lastGroundedPhysicsTick = int.MinValue; // ensure we are no longer considered grounded
+            _tickState._lastJumpInputPhysicsTick = int.MinValue;
         }
 
-        ApplyPositionWrapAroundInLobby();
         ApplyMovementPhysics();
+    }
+
+    public void OnPostPhysicsTick()
+    {
+        ApplyPositionWrapAroundInLobby();
+
+        // reapply custom data
+            _physicsBody.CustomState = _tickState;
     }
 
 
     public void ApplyMovementPhysics()
     {
-        float targetSpeed = _driver.PlayerInputs.GetMoveDirection() * maxSpeed;
+        Fix64 targetSpeed = (Fix64)_driver.PlayerInputs.GetMoveDirection() * _maxSpeed;
 
-        _physicsBody.LinearVelocityX = (Fix64)targetSpeed;
+        _physicsBody.LinearVelocityX = targetSpeed;
     }
 
 
     private void ApplyPositionWrapAroundInLobby()
     {
-        // we are not in lobby...
         if(GameStateManager.Singleton.NetworkedState.Value != GameStateManager.GameStateEnum.GameState_SelectingLevel)
         {
-            return;
+             return;
         }
 
-        Bounds bounds = Camera.main.GetComponent<BoxCollider2D>().bounds;
-
-        Vector3 pos = transform.position;
-
-        float padding = 0.1f; // small buffer so we don't jitter on the edge
+        Fix64 minY = (Fix64)(-25);
+        Fix64 minX = (Fix64)(-41);
+        Fix64 maxY = (Fix64)25;
+        Fix64 maxX = (Fix64)41;
 
         // Vertical wrap
-        if (pos.y < bounds.min.y - padding)
+        if (_physicsBody.Position.y < minY)
         {
-            pos.y = bounds.max.y + padding;
+            _physicsBody.PositionY = maxY;
         }
-        else if (pos.y > bounds.max.y + padding)
+        else if (_physicsBody.Position.y > maxY)
         {
-            pos.y = bounds.min.y - padding;
+            _physicsBody.PositionY = minY;
         }
 
         // Horizontal wrap 
-        if (pos.x < bounds.min.x - padding)
+        if (_physicsBody.Position.x < minX)
         {
-            pos.x = bounds.max.x + padding;
+            _physicsBody.PositionX = maxX;
         }
-        else if (pos.x > bounds.max.x + padding)
+        else if (_physicsBody.Position.x > maxX)
         {
-            pos.x = bounds.min.x - padding;
+            _physicsBody.PositionX = minX;
         }
-
-        transform.position = pos;
     }
 
 
@@ -324,12 +381,11 @@ public class Player : NetworkBehaviour
     {
         PlayerSpriteJiggleAnimations localAnimState = PlayerSpriteJiggleAnimations.ANIM_IDLE;
 
-        if(_grounded)
+        if(!_tickState._trueGrounded)
         {
-            localAnimState = PlayerSpriteJiggleAnimations.ANIM_IN_AIR;
             _isLeftFootForward = false;
             _stepSpriteDurationTracked = 0;
-
+            localAnimState = PlayerSpriteJiggleAnimations.ANIM_IN_AIR;
 
             if((float)_physicsBody.LinearVelocityY > 0)
             {
@@ -341,14 +397,18 @@ public class Player : NetworkBehaviour
             }
 
             _inAirRotationFactor = Mathf.Clamp(_inAirRotationFactor, -1, 1);
-            playerRenderer.transform.rotation = Quaternion.Euler(0,0,_inAirRotationFactor * stepRotation * _directionFacing);
+            playerRenderer.transform.rotation = Quaternion.Euler(0,0,_inAirRotationFactor * stepRotation * _tickState._directionFacing);
 
         }
         else
         {
             _inAirRotationFactor = 0;
-            if(_driver.PlayerInputs.InputMoveDirection != PlayerMoveInput.None){
-
+        
+            // I dont mind doing floating point math here because the result is not stored + its for visuals not actual simulation
+            bool isMoving = Mathf.Abs((float)_physicsBody.LinearVelocityX) > 1.0f;
+            
+            if(isMoving) {
+                
                 _stepSpriteDurationTracked += Time.deltaTime;
                 if(_stepSpriteDurationTracked > stepSpriteDuration)
                 {
@@ -369,45 +429,64 @@ public class Player : NetworkBehaviour
 
                 if (_isLeftFootForward)
                 {
-                    playerRenderer.transform.rotation = Quaternion.Euler(0,0,stepRotation * _directionFacing);
+                    playerRenderer.transform.rotation = Quaternion.Euler(0,0,stepRotation * _tickState._directionFacing);
                     localAnimState = PlayerSpriteJiggleAnimations.ANIM_STEP_LEFT;
                 }
                 else
                 {
-                    playerRenderer.transform.rotation = Quaternion.Euler(0,0,-stepRotation * _directionFacing);
+                    playerRenderer.transform.rotation = Quaternion.Euler(0,0,-stepRotation * _tickState._directionFacing);
                     localAnimState = PlayerSpriteJiggleAnimations.ANIM_STEP_RIGHT;
                 }
             }
             else
             {
                 playerRenderer.transform.rotation = Quaternion.Euler(0,0,0);
-                _stepSpriteDurationTracked = 0;
+                //_stepSpriteDurationTracked = 0;
                 localAnimState = PlayerSpriteJiggleAnimations.ANIM_IDLE;
             }
         }
 
         _animState.SetState(_spriteJiggleAnimationMappings[(int)localAnimState]);
-        playerRenderer.transform.localScale = new Vector3((1 - Mathf.Abs(horizontalCounterStretch * (float)_physicsBody.LinearVelocityY)) * _directionFacing, 1 + Mathf.Abs(verticalStretch * (float)_physicsBody.LinearVelocityY), 1);
+        playerRenderer.transform.localScale = new Vector3((1 - Mathf.Abs(horizontalCounterStretch * (float)_physicsBody.LinearVelocityY)) * _tickState._directionFacing, 1 + Mathf.Abs(verticalStretch * (float)_physicsBody.LinearVelocityY), 1);
     }
 
 
-    void OwnerHandleGrounding()
+    void PerformGroundedCheck()
     {
-        _trueGrounded = true;
+        _groundedRaycastResult = CustomPhysics.Raycast(
+            _physicsBody.Position + new VoltVector2(Fix64.Zero, -(Fix64)_groundRayYOffset), 
+            new VoltVector2(Fix64.Zero, -Fix64.One), 
+            (Fix64)_groundRayLength);
 
-        if (_trueGrounded)
+        
+        _tickState._trueGrounded = _groundedRaycastResult.Hit;
+        if (_tickState._trueGrounded)
         {
-            // TODO: Change this..
-            _groundedTracked = Fix64.MaxValue;
-            //_groundedTracked = groundedBuffer;
+            _tickState._lastGroundedPhysicsTick = CustomPhysics.Tick;
         }
 
-        _grounded = false;
-        if (_groundedTracked > Fix64.Zero)
+        _tickState._grounded = false;
+        if (_tickState._lastGroundedPhysicsTick >= CustomPhysics.Tick - _groundedTickBuffer)//_groundedTracked > Fix64.Zero)
         {
-            _grounded = true;
-            _groundedTracked -= CustomPhysics.TimeBetweenTicks;
+            _tickState._grounded = true;
         }
+    }
+
+    void OnDrawGizmos()
+    {  
+        Gizmos.color = _groundedRaycastResult.Hit ? Color.red : Color.green;
+
+        Vector3 start = new Vector3(
+            (float)_groundedRaycastResult.Origin.x,
+            (float)_groundedRaycastResult.Origin.y,
+            0);
+
+        Vector3 end = new Vector3(
+            (float)_groundedRaycastResult.Destination.x,
+            (float)_groundedRaycastResult.Destination.y,
+            0);
+
+        Gizmos.DrawLine(start, end);
     }
 
 

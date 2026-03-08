@@ -6,7 +6,7 @@ public class Destroy : MonoBehaviour
 
     void Start()
     {
-        Invoke("DoDestroy()", timeToDestroy);
+        Invoke("DoDestroy", timeToDestroy);
     }
 
     public void DoDestroy()
