@@ -15,6 +15,10 @@ public class CustomTransform : MonoBehaviour
     [Tooltip("Rotation in one tenth degrees. Auto-synced from Unity transform.")]
     [SerializeField] private IntHundredth _rotationDegrees;
 
+    public IntHundredth RotationDegreesHundredth { get => _rotationDegrees; }
+    public IntHundredth PositionXHundredth { get => _positionX; }
+    public IntHundredth PositionYHundredth { get => _positionY; }
+
     // Cache the Fix64 values
     private VoltVector2? _cachedPositionFix64;
     private Fix64? _cachedRotationRadians;

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using FixMath.NET;
 using UnityEngine;
 using Volatile;
@@ -22,10 +23,10 @@ public static class VoltExtensions
 public class CustomPhysicsSpace : MonoBehaviour
 {
     [Header("Configuration")]
-    [SerializeField] private float _configWorldDamping = (float)VoltConfig.DEFAULT_DAMPING;
+    public bool VisualInterpolation = true;
+    private Fix64 _configWorldDampingFix64 = VoltConfig.DEFAULT_DAMPING;
 
-    private Fix64 _configWorldDampingFix64;
-
+    public Dictionary<ulong, CustomPhysicsBody> Bodies => _bodies;
     private Dictionary<ulong, CustomPhysicsBody> _bodies;
 
 
@@ -51,20 +52,10 @@ public class CustomPhysicsSpace : MonoBehaviour
 
         _bodies = new Dictionary<ulong, CustomPhysicsBody>();
 
-        InitFix64Constants();
         InitWorld();
 
     }
 
-
-
-    /// <summary>
-    /// Converts configuration variables to Fix64 variants
-    /// </summary>
-    private void InitFix64Constants()
-    {
-        _configWorldDampingFix64 = (Fix64)_configWorldDamping;
-    }
 
     /// <summary>
     /// Initalize the physics simulation space
@@ -85,22 +76,24 @@ public class CustomPhysicsSpace : MonoBehaviour
     public void RebuildBodyDictionary()
     {
         // assign body EntityId to new values
-        CustomPhysicsBody[] bodies = FindObjectsByType<CustomPhysicsBody>(FindObjectsSortMode.None);
+        CustomPhysicsBody[] newBodies = FindObjectsByType<CustomPhysicsBody>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
         _bodies.Clear();
 
-        for(int i = 0; i < bodies.Length; i++)
+        for(int i = 0; i < newBodies.Length; i++)
         {
-            bodies[i].Construct();
-            AddBody(bodies[i]);
+            newBodies[i].Construct();
+            AddBody(newBodies[i]);
         }
 
         if(Configuration.Singleton.DebugMode){
             
-            foreach (var body in _bodies)
+            // Convert dictionary to sorted list for deterministic logging
+            var sortedBodies = _bodies.OrderBy(kvp => kvp.Key).ToList();
+            
+            foreach (var body in sortedBodies)
             {
                 string bodyInDict = "Body Dictionary Entry: " + body.Value.name + ", EntityId: " + body.Key + ", SimulationEntityId: " + body.Value.Body.EntityId;
                 DeterminismLogger.LogExtraInfo(bodyInDict);
-
                 Debug.Log(bodyInDict);
             }
         }
@@ -127,43 +120,11 @@ public class CustomPhysicsSpace : MonoBehaviour
         _bodies.Remove(bodyComponent.Body.EntityId);
     }
 
-
-    public ulong PrintBodyOrderChecksum()
-    {
-        ulong checksum = 1469598103934665603UL;
-        int index = 0;
-
-        foreach (var body in _bodies)
-        {
-            ulong id = body.Value.Body.EntityId;
-
-            checksum ^= id + (ulong)index;
-            checksum *= 1099511628211UL;
-
-            index++;
-        }
-
-        checksum ^= (ulong)index;
-
-        Debug.Log(
-            $"Body Order Checksum: {checksum}");
-
-        return checksum;
-    }
-
     /// <summary>
     /// Steps the physics simulation forward, this should only be called by CustomPhysics.PhysicsTick()
     /// </summary>
     public void UpdateSimulation(Fix64 deltaTime)
     {   
-        // TODO: This is temporary code to calculate a checksum style value of the inserted bodies, this will tell us if the ordering of bodies is the same between machines
-        if(CustomPhysics.Tick == 0){
-            var checksum = PrintBodyOrderChecksum();
-            DeterminismLogger.LogExtraInfo("body order checksum" + checksum);
-        }
-
-
-
         _simulationSpace.DeltaTime = deltaTime;
         _simulationSpace.Update();
 
@@ -183,19 +144,26 @@ public class CustomPhysicsSpace : MonoBehaviour
     {
         CustomSimulationSnapshot snapshot = new();
 
-        foreach(var body in _bodies)
+        // TODO: I dont think this sorting is necassary, but i have included this just incase this would cause problems. 
+        // Once we find the determinsm issue, test without this
+        // ...
+        // Sort by EntityId for deterministic order
+        var sortedBodies = _bodies.OrderBy(kvp => kvp.Key);
+
+        foreach(var body in sortedBodies)
         {
+            VoltBody voltBody = body.Value.Body;
+
             CustomSimulationSnapshot.BodyState bodyState = new()
             {
-                Velocity = body.Value.LinearVelocity,
-                Angle = body.Value.Angle,
-                AngularVelocity = body.Value.AngularVelocity,
-                Position = body.Value.Position,
+                Velocity = voltBody.LinearVelocity,
+                Angle = voltBody.Angle,
+                AngularVelocity = voltBody.AngularVelocity,
+                Position = voltBody.Position,
+                BiasRotation = voltBody.BiasRotation,
+                BiasVelocity = voltBody.BiasVelocity,
+
                 BodyComponent = body.Value,
-                //BiasRotation = body.Value.Body.BiasRotation,
-                //BiasVelocity = body.Value.Body.BiasVelocity,
-                //Torque = body.Value.Body.Torque,
-                //Force = body.Value.Body.Force,
                 CustomState = body.Value.CustomState?.Clone()
             };
 
@@ -207,24 +175,38 @@ public class CustomPhysicsSpace : MonoBehaviour
 
     public void RestoreSimulationSnapshot(CustomSimulationSnapshot snapshot)
     {
+        if (Configuration.Singleton.DebugMode)
+        {
+            DeterminismLogger.LogExtraInfo("RestoreSimulationSnapshot() called, restoring the state before tick " + snapshot.Tick + " ran\n");
+        }
+
         // TODO: Currently snapshots are not taking into account if bodies are added/removed, this will likley cause issues
         foreach(CustomSimulationSnapshot.BodyState body in snapshot.Bodies)
         {
+
             if(body == null)
             {
                 Debug.LogWarning("A body is being ignored because its component is null, was the object deleted? RestoreSimulationSnapshot()");
                 continue;
             }
 
-            body.BodyComponent.Body.LinearVelocity = body.Velocity;
-            body.BodyComponent.Body.AngularVelocity = body.AngularVelocity;
-            //body.BodyComponent.Body.Torque = body.Torque;
-            //body.BodyComponent.Body.BiasRotation = body.BiasRotation;
-            //body.BodyComponent.Body.BiasVelocity = body.BiasVelocity;
-            //body.BodyComponent.Body.Force = body.Force;
+            VoltBody voltBody = body.BodyComponent.Body;
+
+            voltBody.PartialReset();
+
+            voltBody.BiasRotation = body.BiasRotation;
+            voltBody.BiasVelocity = body.BiasVelocity;
+            voltBody.LinearVelocity = body.Velocity;
+            voltBody.AngularVelocity = body.AngularVelocity;
+            voltBody.Set(body.Position, body.Angle);
+
             body.BodyComponent.CustomState = body.CustomState?.Clone();
-            body.BodyComponent.Body.Set(body.Position, body.Angle);
         }
+
+        // MAY NOT BE NEEDED, Test removing it after dsync issue is identified
+        _simulationSpace.SortBodies();
+
+        _simulationSpace.FreeManifolds();
     }
 
 }

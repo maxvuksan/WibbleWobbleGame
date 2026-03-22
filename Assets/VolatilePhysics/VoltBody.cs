@@ -497,11 +497,7 @@ namespace Volatile
       this.LinearVelocity = VoltVector2.zero;
       this.AngularVelocity = Fix64.Zero;
 
-      this.Force = VoltVector2.zero;
-      this.Torque = Fix64.Zero;
-
-      this.BiasVelocity = VoltVector2.zero;
-      this.BiasRotation = Fix64.Zero;
+      ClearForces();
     }
 
     /// <summary>
@@ -611,8 +607,9 @@ namespace Volatile
     /// </summary>
     private void OnPositionUpdated()
     {
-      for (int i = 0; i < this.shapeCount; i++)
+      for (int i = 0; i < this.shapeCount; i++){
         this.shapes[i].OnBodyPositionUpdated();
+      }
       this.UpdateAABB();
     }
 
@@ -622,9 +619,9 @@ namespace Volatile
     private void UpdateAABB()
     {
       Fix64 top = Fix64.MinValue;
-      Fix64 right = Fix64.MinValue; // TODO: Was .MaxValue, changed because i suspect a bug.
+      Fix64 right = Fix64.MaxValue; // TODO: Was .MaxValue, changed because i suspect a bug.
       Fix64 bottom = Fix64.MaxValue;
-      Fix64 left = Fix64.MaxValue;// TODO: Was .MaxValue, changed because i suspect a bug.
+      Fix64 left = Fix64.MinValue;// TODO: Was .MaxValue, changed because i suspect a bug.
 
       for (int i = 0; i < this.shapeCount; i++)
       {
@@ -716,7 +713,7 @@ namespace Volatile
       this.Facing = VoltMath.Polar(this.Angle);
     }
 
-    private void ClearForces()
+    public void ClearForces()
     {
       this.Force = VoltVector2.zero;
       this.Torque = Fix64.Zero;

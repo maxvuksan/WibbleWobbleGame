@@ -272,7 +272,7 @@ public class GameStateManager : NetworkBehaviour
 
                 for(int i = 0; i < PlayerDataManager.Singleton.PlayerCount; i++){
                     
-                    PlayerDataManager.Singleton.PlayerData[i].player.SetPosition(VoltVector2.zero);
+                    PlayerDataManager.Singleton.PlayerData[i].player.SetPosition(new IntHundredthVector2(0,0));
                 }
 
                 TrapPlacementArea.Singleton.DestroyAllScopedObjects();
@@ -285,9 +285,6 @@ public class GameStateManager : NetworkBehaviour
 
                 if (IsServer)
                 {
-                    LevelManager.Singleton.LoadLobbyRpc();
-
-                    SchedulePhysicsForEnable();
                     PlayerDataManager.Singleton.ServerResetAllPlayerStates();
                     
                     if (PlayerDataManager.Singleton.IsSpawned) // TO DO: The additional is spawned check is to ensure PlayerDataManager has been spawned
@@ -295,6 +292,10 @@ public class GameStateManager : NetworkBehaviour
                     {
                         PlayerDataManager.Singleton.ServerSetActiveAllTrapToPlaceRpc(false);
                     }
+
+                    LevelManager.Singleton.LoadLobbyRpc();
+
+                    SchedulePhysicsForEnable();
                 }
 
 
@@ -409,7 +410,6 @@ public class GameStateManager : NetworkBehaviour
                     // TODO: Im not sure if the PlayerData list will be the same order for each player. we should check back on this
                     PlayerDataManager.Singleton.PlayerData[i].player.SetPosition(LevelManager.Singleton.LoadedLevel.GetSpawnpoint(i));
                     PlayerDataManager.Singleton.PlayerData[i].player.ResetState();
-
                 }
 
                 if(IsServer){

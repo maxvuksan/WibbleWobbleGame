@@ -92,7 +92,7 @@ public class TrapPlacementArea : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         _networkedPlacedTrapDataList.OnListChanged += OnPlacedTrapsChanged;
-        SpawnAllTrapInstances();
+        //SpawnAllTrapInstances();
     }
 
     public override void OnNetworkDespawn()
@@ -125,8 +125,10 @@ public class TrapPlacementArea : NetworkBehaviour
         PlayerDataManager.Singleton.OnRoundEnd += DestroyAllScopedObjects;
     }
 
-    private void OnDestroy()
+    override public void OnDestroy()
     {
+        base.OnDestroy();
+
         CustomPhysics.OnRecomputeEntityIds -= OnRecomputeEntityIds;
         PlayerDataManager.Singleton.OnRoundEnd -= DestroyAllScopedObjects;
     }
@@ -170,10 +172,6 @@ public class TrapPlacementArea : NetworkBehaviour
         _networkedPlacedTrapDataList.Clear();
     }
 
-
-
-
-
     public void ServerAddTrap(Vector2 position, float zRotationEuler, string trapName, bool playSound = true)
     {
         ServerAddTrap(position, zRotationEuler, _trapNameToIndexMap[trapName], playSound);
@@ -209,8 +207,8 @@ public class TrapPlacementArea : NetworkBehaviour
             rotationHundredths = Mathf.RoundToInt(zRotationEuler * 100f)
         };
 
+        print("adding trap...");
         _networkedPlacedTrapDataList.Add(data);
-
     }
     
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
@@ -233,7 +231,7 @@ public class TrapPlacementArea : NetworkBehaviour
         for(int i = 0; i < _trapInstances.Count; i++)
         {
             // add +100 offset to ensure players ids are before traps
-            _trapInstances[i].GetComponent<CustomPhysicsBody>().Body.EntityId = (ulong)i + 100ul;
+            _trapInstances[i].GetComponent<CustomPhysicsBody>().SetDesiredEntityId((ulong)i + 100ul);
 
             if (Configuration.Singleton.DebugMode)
             {
@@ -304,6 +302,11 @@ public class TrapPlacementArea : NetworkBehaviour
                 Debug.LogError("A trap is trying to be placed without a TrapHeader component, please ensure all traps have this for other behaviour to work");
             }
         }
+
+        // TODO: This is the problem, we are recomputing 0 traps...
+        Debug.Log("there is X sorted traps = " + sortedTrapsToPlace.Count);
+        Debug.Log("there is X traps = " + _trapInstances.Count);
+        CustomPhysics.RecomputeEntityIds();
     }
 
     

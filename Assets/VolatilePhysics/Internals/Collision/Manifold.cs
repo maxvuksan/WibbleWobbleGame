@@ -66,6 +66,35 @@ namespace Volatile
       return this;
     }
 
+
+    // TODO: This was added, aiming to fix determinism bugs, this may not be needed. Should test without it
+    internal void SortContacts()
+    {
+        if (this.used <= 1)
+            return; // Nothing to sort
+
+        // Insertion sort by position
+        for (int i = 1; i < this.used; i++)
+        {
+            Contact key = this.contacts[i];
+            int j = i - 1;
+
+            while (j >= 0)
+            {
+                int cmp = this.contacts[j].Position.x.CompareTo(key.Position.x);
+                if (cmp == 0)
+                    cmp = this.contacts[j].Position.y.CompareTo(key.Position.y);
+                
+                if (cmp <= 0)
+                    break;
+                    
+                this.contacts[j + 1] = this.contacts[j];
+                j--;
+            }
+            this.contacts[j + 1] = key;
+        }
+    }
+
     internal bool AddContact(
       VoltVector2 position,
       VoltVector2 normal,
@@ -91,7 +120,10 @@ namespace Volatile
     }
 
     internal void PreStep()
-    {
+    {      
+      // Sort contacts to ensure all clients have the same contact ordering
+      SortContacts();
+
       for (int i = 0; i < this.used; i++)
         this.contacts[i].PreStep(this);
     }

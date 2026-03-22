@@ -12,6 +12,12 @@ public class IntHundredthVector2
     public IntHundredth X = 0;
     public IntHundredth Y = 0;
 
+    public IntHundredthVector2(IntHundredth _x, IntHundredth _y)
+    {
+        X = _x;
+        Y = _y;
+    }
+
     /// <summary>
     /// Converts and casts the internal value to a VoltVector2 type, this removes the hundredth scaler
     /// </summary>

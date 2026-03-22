@@ -58,6 +58,7 @@ GameObject:
   - component: {fileID: 4776770872372402512}
   - component: {fileID: 248461089073878316}
   - component: {fileID: 2891200814827332429}
+  - component: {fileID: 1164768822728927056}
   m_Layer: 0
   m_Name: hurtbox
   m_TagString: Untagged
@@ -110,6 +111,24 @@ MonoBehaviour:
     ValueHundredths: 425
   _radius:
     ValueHundredths: 70
+--- !u!114 &1164768822728927056
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1551359529758071312}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 800eea881453e7442b3d558ac39483ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CustomTransform
+  _positionX:
+    ValueHundredths: 0
+  _positionY:
+    ValueHundredths: 0
+  _rotationDegrees:
+    ValueHundredths: 0
 --- !u!1 &2434558581931510970
 GameObject:
   m_ObjectHideFlags: 0

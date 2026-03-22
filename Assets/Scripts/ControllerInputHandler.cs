@@ -30,6 +30,15 @@ public class ControllerInputHandler : MonoBehaviour
     void Awake()
     {
         CustomPhysics.OnPostPhysicsTick += OnPostPhysicsTick;
+        CustomPhysics.OnStartPhysicsSimulation += OnStartPhysicsSimulation;
+    }
+
+    public void OnStartPhysicsSimulation()
+    {
+        _input.jumpButtonIsPressed = false;
+        _input.mainButtonIsPressed = false;
+        _input.mouseCursorVelocity.x = 0;
+        _input.mouseCursorVelocity.y = 0;
     }
 
     public void OnPostPhysicsTick()

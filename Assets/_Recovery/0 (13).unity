@@ -2962,7 +2962,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c804ff09da4dd1c4a8bcff26dbb88655, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  SimulateRollbacks: 1
 --- !u!1001 &554724334
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9344,7 +9343,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Configuration
   DebugMode: 1
   GenerateLogFilesInDebugMode: 1
-  LogsShouldIncludeClientInputs: 1
+  LogsShouldIncludeClientInputs: 0
   LogsShouldIncludePhysicsBodyState: 0
   LogsShouldIgnoreStaticBodies: 1
   LogsShouldIncludeCustomDataFromBodies: 1

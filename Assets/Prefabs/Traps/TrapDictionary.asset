@@ -28,6 +28,12 @@ MonoBehaviour:
   - name: Block_3x1
     soundOnPlace: 
     behaviorPrefab: {fileID: 4665495375785675357, guid: cddb505372a7a1f4fb2cf937eb464b86, type: 3}
+  - name: Block_LSmall
+    soundOnPlace: 
+    behaviorPrefab: {fileID: 2244898614544078694, guid: 7341dbff7ebbb5948a4ffc39ced43da1, type: 3}
+  - name: Block_Platform
+    soundOnPlace: 
+    behaviorPrefab: {fileID: 4665495375785675357, guid: dd7c10faafc440e44a54420eea7e231f, type: 3}
   - name: Block_Circle
     soundOnPlace: 
     behaviorPrefab: {fileID: 4665495375785675357, guid: b4493475684505245af3315c70f4c9d8, type: 3}
@@ -40,3 +46,6 @@ MonoBehaviour:
   - name: Saw
     soundOnPlace: 
     behaviorPrefab: {fileID: 4967037026206012188, guid: 237bd78f05bc09c4b91ebe2c3c610eb7, type: 3}
+  - name: Spike
+    soundOnPlace: 
+    behaviorPrefab: {fileID: 2899622994378174877, guid: be5c77b58113f39468e2347fde6f1e45, type: 3}

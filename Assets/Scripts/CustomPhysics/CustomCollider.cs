@@ -42,7 +42,7 @@ public abstract class CustomCollider : MonoBehaviour
         body.AddCollider(this);
     }
 
-    protected CustomTransform GetCustomTransform()
+    public CustomTransform GetCustomTransform()
     {
         CustomTransform customTransform = GetComponent<CustomTransform>();
         if(customTransform == null)

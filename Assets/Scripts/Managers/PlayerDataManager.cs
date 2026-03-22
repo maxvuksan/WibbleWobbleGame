@@ -89,16 +89,11 @@ public class PlayerDataManager : NetworkBehaviour
 
     public static PlayerDataManager Singleton;
 
-
     // callbacks ________________________________________________
     
     public Action<ulong> OnPlayerDeath;   
     public Action<ulong> OnPlayerCompleteRound;
     public Action OnRoundEnd;   
-
-
-
-
 
     public void Awake()
     {
@@ -128,7 +123,7 @@ public class PlayerDataManager : NetworkBehaviour
             var body = PlayerData[i].player.GetComponent<CustomPhysicsBody>();
             var networkObject = PlayerData[i].networkedPlayerHeader.GetComponent<NetworkObject>();
             
-            body.SetEntityId(networkObject.NetworkObjectId);
+            body.SetDesiredEntityId(networkObject.NetworkObjectId);
 
             if (Configuration.Singleton.DebugMode)
             {

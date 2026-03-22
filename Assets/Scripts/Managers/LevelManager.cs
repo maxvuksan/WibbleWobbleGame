@@ -1,3 +1,4 @@
+using System;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -10,6 +11,8 @@ public class LevelManager : NetworkBehaviour
     private Level _loadedLevel;
     public Level LoadedLevel { get => _loadedLevel; }
 
+
+    public Action OnLevelLoad;
 
     public static LevelManager Singleton;
 
@@ -45,6 +48,7 @@ public class LevelManager : NetworkBehaviour
 
         if (IsServer)
         {
+            //TrapPlacementArea.Singleton.ServerSignalTrapsLoaded();
             GameStateManager.Singleton.ServerSetGameState(GameStateManager.GameStateEnum.GameState_PreviewLevel);
         }    
     }
@@ -54,6 +58,7 @@ public class LevelManager : NetworkBehaviour
     {
         UnloadLevel();
         LoadLevel(_lobbyLevelPrefab);
+        print("loaded lobby");
     }
 
     public void LoadLevel(GameObject prefabToLoad)
@@ -61,7 +66,7 @@ public class LevelManager : NetworkBehaviour
         Level spawnedLevel = Instantiate(prefabToLoad, _levelParent).GetComponent<Level>();
         this._loadedLevel = spawnedLevel;
 
-        StaticTrap[] children = spawnedLevel.transform.GetComponentsInChildren<StaticTrap>();
+        TrapHeader[] children = spawnedLevel.transform.GetComponentsInChildren<TrapHeader>();
 
         for(int i = 0; i < children.Length; i++)
         {
@@ -72,6 +77,7 @@ public class LevelManager : NetworkBehaviour
 
             Destroy(children[i].gameObject);
         }
+        TrapPlacementArea.Singleton.SpawnAllTrapInstances();
     }
 
 

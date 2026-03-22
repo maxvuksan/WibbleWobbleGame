@@ -9,15 +9,17 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 997786167966159236}
-  - component: {fileID: 2159710864587371207}
   - component: {fileID: 1024447458764328496}
   - component: {fileID: 3742951165435896355}
   - component: {fileID: 5296371690366329563}
   - component: {fileID: 1711063052087966144}
   - component: {fileID: 1280543363196802488}
   - component: {fileID: 7049216772924576741}
+  - component: {fileID: 6355503562383506138}
+  - component: {fileID: 4778009371413411897}
+  - component: {fileID: 1528408619234124429}
   m_Layer: 6
-  m_Name: Trap_Block_1x1
+  m_Name: Trap_Block_Platform
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -38,24 +40,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2159710864587371207
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4665495375785675357}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 800eea881453e7442b3d558ac39483ab, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CustomTransform
-  _positionX:
-    ValueHundredths: 0
-  _positionY:
-    ValueHundredths: 0
-  _rotationDegrees:
-    ValueHundredths: 0
 --- !u!212 &1024447458764328496
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -103,7 +87,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -731162151908756296, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
+  m_Sprite: {fileID: -75911164829219746, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -128,8 +112,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SpriteJiggle
   target: {fileID: 1024447458764328496}
   state:
-    onSprite: {fileID: -7361935669122291364, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
-    offSprite: {fileID: -2078535033211160682, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
+    onSprite: {fileID: -75911164829219746, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
+    offSprite: {fileID: -75911164829219746, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
 --- !u!114 &5296371690366329563
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -142,7 +126,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 977d28dfaa5a7ec4ea3697316df7c061, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrapHeader
-  trapName: Block_1x1
+  trapName: Block_Platform
 --- !u!114 &1711063052087966144
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -158,9 +142,9 @@ MonoBehaviour:
   OffsetX:
     ValueHundredths: 0
   OffsetY:
-    ValueHundredths: 0
+    ValueHundredths: 50
   _sizeX:
-    ValueHundredths: 200
+    ValueHundredths: 1200
   _sizeY:
     ValueHundredths: 200
 --- !u!114 &1280543363196802488
@@ -206,4 +190,58 @@ MonoBehaviour:
     - {fileID: 1024447458764328496}
     ColourData:
       ColourTarget: 1
-      ColourTargetIndexOffset: 1
+      ColourTargetIndexOffset: 0
+--- !u!114 &6355503562383506138
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4665495375785675357}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 800eea881453e7442b3d558ac39483ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CustomTransform
+  _positionX:
+    ValueHundredths: 0
+  _positionY:
+    ValueHundredths: 0
+  _rotationDegrees:
+    ValueHundredths: 0
+--- !u!114 &4778009371413411897
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4665495375785675357}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e093d5263ee1a704fb116eedc6d81070, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CustomColliderCircle
+  OffsetX:
+    ValueHundredths: 525
+  OffsetY:
+    ValueHundredths: -80
+  _radius:
+    ValueHundredths: 75
+--- !u!114 &1528408619234124429
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4665495375785675357}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e093d5263ee1a704fb116eedc6d81070, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CustomColliderCircle
+  OffsetX:
+    ValueHundredths: -525
+  OffsetY:
+    ValueHundredths: -80
+  _radius:
+    ValueHundredths: 75

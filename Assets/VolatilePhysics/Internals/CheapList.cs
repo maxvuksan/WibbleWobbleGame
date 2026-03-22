@@ -71,18 +71,39 @@ namespace Volatile
     /// </summary>
     public void Remove(T value)
     {
-      // TODO: This was changed to maintain ordering
+      // // TODO: This was changed to maintain ordering
+      // int index = value.Index;
+      // VoltDebug.Assert(index >= 0);
+      // VoltDebug.Assert(index < this.count);
+
+      // // shift everything down instead of swap
+      // for (int i = index; i < this.count - 1; i++)
+      // {
+      //     this.values[i] = this.values[i + 1];
+      //     this.values[i].Index = i;
+      // }
+      // this.values[this.count - 1] = null;
+      // this.count--;
+
+      ///................................................
+      
+      // TODO: Does this maintain ordering?
       int index = value.Index;
       VoltDebug.Assert(index >= 0);
       VoltDebug.Assert(index < this.count);
 
-      // shift everything down instead of swap
-      for (int i = index; i < this.count - 1; i++)
+      int lastIndex = this.count - 1;
+      if (index < lastIndex)
       {
-          this.values[i] = this.values[i + 1];
-          this.values[i].Index = i;
+        T lastValue = this.values[lastIndex];
+
+        this.values[lastIndex].Index = -1;
+        this.values[lastIndex] = null;
+
+        this.values[index] = lastValue;
+        lastValue.Index = index;
       }
-      this.values[this.count - 1] = null;
+
       this.count--;
     }
 

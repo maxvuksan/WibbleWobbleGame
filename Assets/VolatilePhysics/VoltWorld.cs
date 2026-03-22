@@ -305,13 +305,13 @@ namespace Volatile
             // TODO: This was modified, an additional sort to ensure bodies are in the same order between machines.
             // A potential problem with this though is ensuring unity calls functions which add said bodies and assign ids in the same order between machine
             // This sort could potentially be moved to only when bodies are added or removed
-            this.bodies.Sort((a, b) =>
-                    a.EntityId.CompareTo(b.EntityId));
+            this.SortBodies();
 
             for (int i = 0; i < this.bodies.Count; i++)
             {
                 VoltBody body = this.bodies[i];
-                if (body.IsStatic == false)
+                
+                if (!body.IsStatic)
                 {
                     body.Update();
                     this.dynamicBroadphase.UpdateBody(body);
@@ -322,6 +322,61 @@ namespace Volatile
 
             this.UpdateCollision();
             this.FreeManifolds();
+        }
+
+
+
+        /// <summary>
+        /// TODO: Added to update a specific bodies broadphase
+        /// </summary>
+        public void UpdateBodyInBroadphase(VoltBody body)
+        {
+            
+        }
+
+        /// <summary>
+        /// TODO: This is custom method added to ensure no cached data exists 
+        /// </summary>
+        public void ClearPersistantState()
+        {   
+
+            // Clear Broadphase Data ------------------------------------------------------------
+
+            this.dynamicBroadphase = new NaiveBroadphase();
+            this.staticBroadphase = new NaiveBroadphase();
+            
+            // Re-add all bodies to the new broadphases
+            foreach (var body in this.bodies)
+            {
+                if (body.IsStatic)
+                {
+                    this.staticBroadphase.AddBody(body);
+                }
+                else
+                {
+                    this.dynamicBroadphase.AddBody(body);
+                }
+            }
+
+            // Clear existing manifolds
+            this.FreeManifolds();
+
+            // Clear object pools --------------------------------------------------------------
+
+            // we are not clearing bodies because we need the data
+            this.contactPool = new VoltPool<Contact>();
+            this.manifoldPool = new VoltPool<Manifold>();
+             
+            // Clear any cached contact data in bodies
+            foreach (var body in this.bodies)
+            {
+                // Reset any collision state stored in bodies
+                if (body != null)
+                {
+                    body.ClearForces();
+                    // Clear any collision flags or cached contacts if they exist
+                }
+            }
         }
 
         /// <summary>
@@ -477,6 +532,8 @@ namespace Volatile
             body.AssignWorld(null);
         }
 
+
+
         /// <summary>
         /// Identifies collisions for all bodies, ignoring symmetrical duplicates.
         /// </summary>
@@ -566,8 +623,47 @@ namespace Volatile
                 this.manifolds.Add(manifold);
         }
 
+        /// <summary>
+        /// Helper method to get the index of a shape of a body, TODO: This could be cached for performance
+        /// </summary>
+        private int GetShapeIndex(VoltShape shape)
+        {
+            VoltBody body = shape.Body;
+            for (int i = 0; i < body.shapeCount; i++)
+            {
+                if (body.shapes[i] == shape)
+                    return i;
+            }
+            return -1;
+        }
+
         private void UpdateCollision()
         {
+
+            // Sort manifolds to ensure all client simulations have manifolds in the same order
+            this.manifolds.Sort((a, b) =>
+            {
+                // First: Compare body A EntityId
+                int cmp = a.ShapeA.Body.EntityId.CompareTo(b.ShapeA.Body.EntityId);
+                if (cmp != 0) return cmp;
+                
+                // Second: Compare body B EntityId
+                cmp = a.ShapeB.Body.EntityId.CompareTo(b.ShapeB.Body.EntityId);
+                if (cmp != 0) return cmp;
+
+                // Third: Compare shape index in body A
+                int shapeIndexA_a = GetShapeIndex(a.ShapeA);
+                int shapeIndexA_b = GetShapeIndex(b.ShapeA);
+                cmp = shapeIndexA_a.CompareTo(shapeIndexA_b);
+                if (cmp != 0) return cmp;
+                
+                // Fourth: Compare shape index in body B
+                int shapeIndexB_a = GetShapeIndex(a.ShapeB);
+                int shapeIndexB_b = GetShapeIndex(b.ShapeB);
+                return shapeIndexB_a.CompareTo(shapeIndexB_b);
+            });
+
+
             for (int i = 0; i < this.manifolds.Count; i++)
                 this.manifolds[i].PreStep();
 
@@ -601,7 +697,7 @@ namespace Volatile
             this.bodyPool.Deallocate(body);
         }
 
-        private void FreeManifolds()
+        public void FreeManifolds()
         {
             for (int i = 0; i < this.manifolds.Count; i++)
                 this.manifoldPool.Deallocate(this.manifolds[i]);

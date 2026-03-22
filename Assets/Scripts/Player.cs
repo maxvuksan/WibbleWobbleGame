@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using FixMath.NET;
+using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using Volatile;
@@ -29,6 +30,13 @@ public class CustomPlayerTickState : ICustomTickState<CustomPlayerTickState>
             _grounded = this._grounded,
             _directionFacing = this._directionFacing,
         };
+    }
+
+    public override string ToString()
+    {
+        return $"jump:{_lastJumpPhysicsTick}\n jumpInput:{_lastJumpInputPhysicsTick} \n" +
+               $"lastGrounded:{_lastGroundedPhysicsTick}\n trueGrounded:{_trueGrounded} \n" +
+               $"grounded:{_grounded} facing:{_directionFacing}\n\n";
     }
 }
 
@@ -60,7 +68,6 @@ public class Player : NetworkBehaviour
 
 
     [Header("Visuals")]
-
     [SerializeField] private float inAirRotationSpeed = 1.0f;
     [SerializeField] private float verticalStretch = 1.0f;
     [SerializeField] private float horizontalCounterStretch = 0.5f;
@@ -233,14 +240,9 @@ public class Player : NetworkBehaviour
     }
 
 
-    public void SetPosition(VoltVector2 position)
+    public void SetPosition(IntHundredthVector2 position)
     {
-        if(_physicsBody?.Body != null)
-        {
-            _physicsBody.Position = new VoltVector2((Fix64)position.x, (Fix64)position.y);
-        }
-
-        transform.position = new Vector2((float)position.x, (float)position.y);
+        _physicsBody.SetPosition(position);
     }
 
     public void HitTrap(Vector2 directionToApplyForce)
@@ -285,7 +287,6 @@ public class Player : NetworkBehaviour
         // Sync local tickstate with snapshot state...
         _tickState = _physicsBody.CustomState as CustomPlayerTickState;
 
-
         if (_driver.PlayerInputs.InputJump == PlayerJumpInput.JumpPressed)
         {
              _tickState._lastJumpInputPhysicsTick = CustomPhysics.Tick;
@@ -307,13 +308,7 @@ public class Player : NetworkBehaviour
         {
             canJump = true;
         }
-
-        // ADD THIS
-        if (_driver.PlayerInputs.InputJump == PlayerJumpInput.JumpPressed)
-        {
-            Debug.Log($"OnPhysicsTick | tick={CustomPhysics.Tick} inputJump={_driver.PlayerInputs.InputJump} canJump={canJump} grounded={_tickState._grounded} trueGrounded={_tickState._trueGrounded} lastJumpInput={_tickState._lastJumpInputPhysicsTick} lastJump={_tickState._lastJumpPhysicsTick} lastGrounded={_tickState._lastGroundedPhysicsTick}");
-        }
-
+        
         if(canJump && _tickState._grounded) // & _jumpInputTracked > 0
         {
             Jump(true);
@@ -324,14 +319,16 @@ public class Player : NetworkBehaviour
         }
 
         ApplyMovementPhysics();
+        ApplyPositionWrapAroundInLobby();    
+
+    
+        // reapply custom data
+        _physicsBody.CustomState = _tickState;
     }
 
     public void OnPostPhysicsTick()
     {
-        ApplyPositionWrapAroundInLobby();
-
-        // reapply custom data
-            _physicsBody.CustomState = _tickState;
+        
     }
 
 
@@ -347,7 +344,7 @@ public class Player : NetworkBehaviour
     {
         if(GameStateManager.Singleton.NetworkedState.Value != GameStateManager.GameStateEnum.GameState_SelectingLevel)
         {
-             return;
+             //return;
         }
 
         Fix64 minY = (Fix64)(-25);

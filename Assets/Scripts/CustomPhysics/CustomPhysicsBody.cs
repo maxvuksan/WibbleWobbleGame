@@ -14,19 +14,6 @@ public enum CustomBodyType : byte
 
 public class CustomPhysicsBody : MonoBehaviour
 {
-    
-    /// <summary>
-    /// Determines whether the physics body can move and rotate in response to forces
-    /// </summary>
-    public CustomBodyType BodyType = CustomBodyType.Static;
-    public ICustomTickState CustomState;
-
-    public bool IsTrigger { get => _isTrigger; }
-    [SerializeField] private bool _isTrigger = false;
-    public CustomPhysicsBody ParentBody { get=> _parentBody; }
-    [SerializeField] private CustomPhysicsBody _parentBody; // if is Trigger, we perform a search for a parent body to move said trigger, we may not always find a parent
-    private VoltVector2 _parentBodyPositionOffset;
-
     public Fix64 Angle
     {
         get => Body.Angle;
@@ -36,11 +23,9 @@ public class CustomPhysicsBody : MonoBehaviour
     {
         get => Body.AngularVelocity;
     }
-
     public VoltVector2 Position
     {
         get => Body.Position;
-        set => Body.Set(value, Body.Angle);
     }
     public Fix64 PositionX
     {
@@ -52,7 +37,6 @@ public class CustomPhysicsBody : MonoBehaviour
         get => Body.Position.y;
         set => Body.Set(new VoltVector2(Body.Position.x, value), Body.Angle);
     }
-
     public VoltVector2 LinearVelocity
     {
         get => Body.LinearVelocity;
@@ -63,12 +47,25 @@ public class CustomPhysicsBody : MonoBehaviour
         get => Body.LinearVelocity.x;
         set => SetVelocityX(value);
     }
-
     public Fix64 LinearVelocityY
     {
         get => Body.LinearVelocity.y;
         set => SetVelocityY(value);
     }
+
+
+    /// <summary>
+    /// Determines whether the physics body can move and rotate in response to forces
+    /// </summary>
+    public CustomBodyType BodyType = CustomBodyType.Static;
+    public ICustomTickState CustomState;
+
+    public bool IsTrigger { get => _isTrigger; }
+    [SerializeField] private bool _isTrigger = false;
+
+    public CustomPhysicsBody ParentBody { get=> _parentBody; }
+    [SerializeField] private CustomPhysicsBody _parentBody; // if is Trigger, we perform a search for a parent body to move said trigger, we may not always find a parent
+    private VoltVector2 _parentBodyPositionOffset;
 
     public VoltBody Body { get; private set; } = new();
     private ulong _desiredEntityId = 0;
@@ -93,6 +90,22 @@ public class CustomPhysicsBody : MonoBehaviour
     private bool _constructed = false;
     public CustomTransform CustomTransform { get; private set; }
 
+    /// <summary>
+    /// A flag used to disable interpolation for a single physics tick update, this should be used when we want to manually set the position of the body 
+    /// </summary>
+    private bool _skipInterpolation = false;
+    private bool _turnOnInterpolatioNextTick = false;
+
+    /// <summary>
+    /// Used to perform visual interpolation of the transform to smooth out the physics simulation. 
+    /// Note: we can use floats here because this is purley driving visuals not the actual simulation
+    /// </summary>
+    private Vector2 _previousPositionForLerp;
+    private Vector2 _currentPositionForLerp;
+    private float _previousAngleForLerp;
+    private float _currentAngleForLerp;
+
+
     void Awake()
     {
         CustomTransform = GetComponent<CustomTransform>();
@@ -104,7 +117,12 @@ public class CustomPhysicsBody : MonoBehaviour
         }
     }
 
-    public void SetEntityId(ulong id)
+    void Update()
+    {
+        InterpolateTransform();
+    }
+
+    public void SetDesiredEntityId(ulong id)
     {
         _desiredEntityId = id;
         
@@ -112,6 +130,29 @@ public class CustomPhysicsBody : MonoBehaviour
         {
             Body.EntityId = id;    
         }
+    }
+
+    private void SortColliderList()
+    {
+        _colliderList.Sort((a, b) => 
+        {
+            // Get world positions: body position + collider offset
+            VoltVector2 posA = _positionFix64 + a.Offset;
+            VoltVector2 posB = _positionFix64 + b.Offset;
+            
+            // Sort by X coordinate first
+            int xCompare = posA.x.CompareTo(posB.x);
+            if (xCompare != 0) 
+                return xCompare;
+            
+            // Then by Y coordinate
+            int yCompare = posA.y.CompareTo(posB.y);
+            if (yCompare != 0)
+                return yCompare;
+            
+            // If positions are identical (shouldn't happen), sort by name as tiebreaker
+            return a.GetInstanceID().CompareTo(b.GetInstanceID());
+        });
     }
 
     public void Construct()
@@ -138,9 +179,10 @@ public class CustomPhysicsBody : MonoBehaviour
         _radiansZFix64 = CustomTransform.GetRotationRadiansFix64();
         _positionFix64 = CustomTransform.GetPositionFix64();
 
-        List<VoltShape> shapes = new();
+        // shapes must be sorted by position, to ensure when a body is created on different devices the shapes are in the same order
+        SortColliderList();
 
-        print("create with mass: " + _mass.AsFloat());
+        List<VoltShape> shapes = new();
 
         foreach(var collider in _colliderList)
         {
@@ -197,6 +239,21 @@ public class CustomPhysicsBody : MonoBehaviour
     }
 
     /// <summary>
+    /// Logs the order of the attached colliders
+    /// </summary>
+    public void LogShapeOrder()
+    {
+        int i = 0;
+        string info = "";
+        foreach(var collider in _colliderList)
+        {
+            info += collider.GetType().ToString() + " with index: " + i + " and OffsetX: " + collider.Offset.x + "and OffsetY: " + collider.Offset.y + "\n";
+            i++;
+        }
+        DeterminismLogger.LogExtraInfo(info);
+    }
+
+    /// <summary>
     /// Is called if this body is a trigger and another body has overlapped said trigger. Should be extended with .OnTrigger Action
     /// </summary>
     private void OnTriggerCallback(CustomPhysicsBody otherBody)
@@ -220,6 +277,12 @@ public class CustomPhysicsBody : MonoBehaviour
     /// </summary>
     public void ApplySimulationToGameObject()
     {   
+        ApplySimulationToBody();
+        ApplySimulationInterpolation();
+    }
+
+    public void ApplySimulationToBody()
+    {
         // make body follow parent if parent is assigned
         if(_parentBody != null)
         {
@@ -233,17 +296,95 @@ public class CustomPhysicsBody : MonoBehaviour
             Body.Set(rotatedOffset + _parentBody.Position, Fix64.Zero);
         }
 
-        // TODO: Update transform position of gameobject
-        // TODO: Create enum for interpolation (default should be to true), this will allow simulation to run at specific rate, but interpolation to make it smooth
-        
-        transform.position = new Vector2((float)Body.Position.x, (float)Body.Position.y);
-        transform.rotation = Quaternion.Euler(0, 0, Mathf.Rad2Deg * (float)Body.Angle);
-
         for(int i = 0; i < Body.shapes.Length; i++)
         {
             VoltVector2 shapePos = Body.shapes[i].bodySpaceAABB.Center;
             _colliderList[i].Offset = shapePos;
         }
+    }
+
+    /// <summary>
+    /// Applies the current simulation state to our internal interpolation variables
+    /// </summary>
+    public void ApplySimulationInterpolation()
+    {
+        if (_turnOnInterpolatioNextTick)
+        {
+            _skipInterpolation = false;
+        }
+
+
+        if (!_skipInterpolation && CustomPhysicsSpace.Singleton.VisualInterpolation)
+        {
+            // Store previous frame's current as new previous
+            _previousPositionForLerp = _currentPositionForLerp;
+            _previousAngleForLerp = _currentAngleForLerp;
+            
+            // Store new current position from physics
+            _currentPositionForLerp = new Vector2((float)Body.Position.x, (float)Body.Position.y);
+            _currentAngleForLerp = Mathf.Rad2Deg * (float)Body.Angle;
+        }
+        else
+        {
+            // No interpolation; direct update
+            transform.position = new Vector2((float)Body.Position.x, (float)Body.Position.y);
+            transform.rotation = Quaternion.Euler(0, 0, Mathf.Rad2Deg * (float)Body.Angle);
+
+            _turnOnInterpolatioNextTick = true;
+        }
+    }
+
+    /// <summary>
+    /// Interpolates the transform position and rotation between the last physics tick and the current physics tick 
+    /// </summary>
+    public void InterpolateTransform()
+    {
+        if (!_constructed || Body.IsStatic)
+        {
+            return;
+        }
+
+
+        if (!_skipInterpolation && CustomPhysicsSpace.Singleton.VisualInterpolation)
+        {
+            float t = CalculateInterpolationTValue();
+            
+            transform.position = Vector2.Lerp(_previousPositionForLerp, _currentPositionForLerp, t);
+            
+            float interpolatedAngle = Mathf.LerpAngle(_previousAngleForLerp, _currentAngleForLerp, t);
+            transform.rotation = Quaternion.Euler(0, 0, interpolatedAngle);
+        }
+    }
+
+    /// <summary>
+    /// Calculates the value t fraction for lerping between the previous physics tick and current physics tick
+    /// </summary>
+    private float CalculateInterpolationTValue()
+    {
+        double timeSinceLastTick = Time.realtimeSinceStartupAsDouble - CustomPhysics.LastPhysicsTickTime;
+        float t = (float)(timeSinceLastTick / (double)CustomPhysics.TimeBetweenTicks);
+        
+        // Clamp to [0, 1] to prevent extrapolation
+        return Mathf.Clamp01(t);
+    }
+
+    /// <summary>
+    /// Sets the position of the body aswell as the internal CustomTransform. This call will also disable visaul interpolation for the next tick
+    /// </summary>
+    /// <param name="position">The position to set</param>
+    public void SetPosition(IntHundredthVector2 position)
+    {
+        CustomTransform.SetValues(position.X, position.Y, CustomTransform.RotationDegreesHundredth);
+
+        if(Body != null)
+        {
+            Body.Set(new VoltVector2((Fix64)position.X, (Fix64)position.Y), Body.Angle);
+        }
+
+        transform.position = new Vector2(position.X.AsFloat(), position.Y.AsFloat());
+
+        _skipInterpolation = true;
+        _turnOnInterpolatioNextTick = false;
     }
 
     public void AddForce(VoltVector2 force)
@@ -291,14 +432,12 @@ public class CustomPhysicsBody : MonoBehaviour
     {
         Remove();
     }
-
     private void Remove()
     {
         if (!_constructed)
         {
             return;
         }
-        
         
         CustomPhysicsSpace.Singleton.SimulationSpace.RemoveBody(Body);
         CustomPhysicsSpace.Singleton.RemoveBody(this);

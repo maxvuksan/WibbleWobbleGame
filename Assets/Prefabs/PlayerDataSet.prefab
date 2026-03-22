@@ -48,7 +48,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 4289917413
+  GlobalObjectIdHash: 351663768
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -1082,7 +1082,7 @@ GameObject:
   - component: {fileID: 3699598689166684509}
   - component: {fileID: 1159031728909612989}
   - component: {fileID: 8800905218639188906}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Outline
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,6 +12,15 @@ public class Configuration : MonoBehaviour
     public bool DebugMode = false;
 
     /// <summary>
+    /// Do logs get generated during runtime, this is only supported in debug mode
+    /// </summary>
+    public bool GenerateLogFilesInDebugMode = true;
+    public bool LogsShouldIncludeClientInputs = true;
+    public bool LogsShouldIncludePhysicsBodyState = true;
+    public bool LogsShouldIgnoreStaticBodies = true;
+    public bool LogsShouldIncludeCustomDataFromBodies = true;
+
+    /// <summary>
     /// Determines if the Network Manager uses Facepunch steam transport, or the default Unity transport
     /// </summary>
     public bool UseSteamTransport = true;
@@ -33,6 +42,12 @@ public class Configuration : MonoBehaviour
 
         Singleton = this;
         DontDestroyOnLoad(this.gameObject);
+
+        if(_networkManager == null)
+        {
+            Debug.LogWarning("Network manager is null, ignoring transport setup");
+            return;
+        }
 
         if (UseSteamTransport)
         {

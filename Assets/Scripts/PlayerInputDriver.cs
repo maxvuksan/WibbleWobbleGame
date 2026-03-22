@@ -39,7 +39,7 @@ public class PlayerInputDriver : NetworkBehaviour
     /// <summary>
     /// Determines the number of ticks an input is buffered for
     /// </summary>
-    public const int InputBufferTickDelay = 3; //2; TODO: This should not be set to zero for multiplayer, we need some delay because infomation over the network is not instant
+    public const int InputBufferTickDelay = 3;//3; //2; TODO: This should not be set to zero for multiplayer, we need some delay because infomation over the network is not instant
 
     /// <summary>
     /// Encapsulates the players input (is the player pressing move or jump?)
@@ -62,14 +62,14 @@ public class PlayerInputDriver : NetworkBehaviour
 
     void Awake()
     {   
-        ClearHistoryRingBuffer();
-
         _input = FindFirstObjectByType<ControllerInputHandler>();
 
         CustomPhysics.OnPrePhysicsTick += OnPrePhysicsTick;
         CustomPhysics.OnTurnOffPhysicsSimulation += OnTurnOffPhysicsSimulation;
 
         _playerInputs = new();
+
+        OnTurnOffPhysicsSimulation();
     }
 
 
@@ -89,7 +89,8 @@ public class PlayerInputDriver : NetworkBehaviour
     {
         if (Input.GetKeyDown(KeyCode.U))
         {
-            SyncClockThenStartPhysics();
+            CustomPhysics.BeginRollbackDebug();
+            RequestRollbackAndResimulate(1);
         }
     }
 
@@ -101,7 +102,6 @@ public class PlayerInputDriver : NetworkBehaviour
             // Host has no offset
             _clockOffset = 0;
             // wait for ping pong to start simulation... MAY NEED REFACTOR FOR MULTIPLE CLIENTS
-            // TODO: WILL NEVER START IF ONLY ONLY 1 PLAYER (NO CLIENTS TO PING PONG WITH)
 
             if(NetworkManager.ConnectedClients.Count == 1)
             {
@@ -112,11 +112,6 @@ public class PlayerInputDriver : NetworkBehaviour
                 RequestClientsToSyncRpc();
             }
         }
-    }
-
-    public PlayerInputAtTick GetLatestInputAtTick()
-    {
-        return _inputHistoryRingBuffer[GetCurrentBufferIndex()];
     }
 
     void ServerBeginPhysicsSimulation(double startDelay = 2.0d)
@@ -243,11 +238,13 @@ public class PlayerInputDriver : NetworkBehaviour
     {
         // clear input ring buffer
         ClearHistoryRingBuffer();
+        _playerInputs.InputJump = PlayerJumpInput.None;
+        _playerInputs.InputMoveDirection = PlayerMoveInput.None;
     }
 
     void OnPrePhysicsTick()
     {   
-        if (!CustomPhysics.Resimulating && IsOwner)
+        if (!CustomPhysics.SimulateFutureAtRegularTickRate && !CustomPhysics.Resimulating && IsOwner)
         {
             // store current input in buffer, offset by out input delay
 
@@ -259,11 +256,6 @@ public class PlayerInputDriver : NetworkBehaviour
             inputAtTick.WasPredicted = false;
             inputAtTick.Inputs = CalculatePlayerInput();
 
-            if (inputAtTick.Inputs.InputJump == PlayerJumpInput.JumpPressed)
-            {
-                Debug.Log("Jump pressed at:  " + CustomPhysics.Tick);
-            }
-
             RecordInputToHistory(inputAtTick);
 
             BroadcastInputsForTickRpc(_inputHistoryRingBuffer[GetCurrentBufferIndex(tickOffset)].Inputs, tick);
@@ -274,17 +266,13 @@ public class PlayerInputDriver : NetworkBehaviour
 
     private void AssignPlayerInputs()
     {
-
         PlayerClientInputs inputs = new();
-        
-        if(_inputHistoryRingBuffer[GetCurrentBufferIndex()]?.Tick == CustomPhysics.Tick)
+
+        // We will use a stored input, which is NOT predicted        
+        if(_inputHistoryRingBuffer[GetCurrentBufferIndex()]?.Tick == CustomPhysics.Tick
+        && !_inputHistoryRingBuffer[GetCurrentBufferIndex()].WasPredicted)
         {
             inputs = new PlayerClientInputs(_inputHistoryRingBuffer[GetCurrentBufferIndex()].Inputs);
-
-            if (inputs.InputJump == PlayerJumpInput.JumpPressed)
-            {
-                Debug.Log("Jump simulated at:  " + CustomPhysics.Tick);
-            } 
         }
         else
         {
@@ -357,7 +345,7 @@ public class PlayerInputDriver : NetworkBehaviour
     /// </summary>
     /// TODO: Rpc should be set to NotOwner, set to everyone for everyone
     /// 
-    [Rpc(SendTo.Everyone, InvokePermission = RpcInvokePermission.Owner)]
+    [Rpc(SendTo.NotOwner, InvokePermission = RpcInvokePermission.Owner)]
     void BroadcastInputsForTickRpc(PlayerClientInputs inputs, long tick)
     {
         RecieveBroadcastInputsForTick(inputs, tick);
@@ -396,7 +384,7 @@ public class PlayerInputDriver : NetworkBehaviour
 
             if (predictionWrong)
             {
-                RequestRollbackAndResimulate(tick);
+                RequestRollbackAndResimulate(tick - 1);
             }
         }
         else

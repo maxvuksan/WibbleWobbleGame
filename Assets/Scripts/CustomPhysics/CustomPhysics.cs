@@ -6,18 +6,20 @@ using Unity.VisualScripting;
 using UnityEngine;
 using Volatile;
 
-
 /// <summary>
 /// An interface for interacting with the custom physics scripts. 
 /// </summary>
 public class CustomPhysics : MonoBehaviour
 {
-
-
     /// <summary>
     /// How many times PhysicsTick() is called per second 
     /// </summary>
     private static readonly int s_ticksPerSecond = 120;
+    
+    /// <summary>
+    /// The real time the last physics tick occured
+    /// </summary>
+    public static double LastPhysicsTickTime { get; private set; }
 
     /// <summary>
     /// Fixed delta time value, is the difference in time between each tick
@@ -27,12 +29,18 @@ public class CustomPhysics : MonoBehaviour
     /// <summary>
     /// How many ticks in the past are snapshots recorded for. This history would be useful for performing rollbacks
     /// </summary>
-    public static readonly int HistoryLength = s_ticksPerSecond * 30;
+    public static readonly int HistoryLength = s_ticksPerSecond * 150;
 
     /// <summary>
     /// Is true if the physics simulation is resimulating (catching up ticks)
     /// </summary>
     public static bool Resimulating => _resimulatingDepth > 0;
+
+    /// <summary>
+    /// After a rollback simulates the future at the same rate the game ticks at normally, this parameter is used for testing the correctness of rollbacks and resimulation
+    /// </summary>
+    public static bool SimulateFutureAtRegularTickRate = false;
+    public static long SimuluateFutureAtRegularTickRateStartTick = long.MaxValue; 
     private static int _resimulatingDepth = 0;
 
 
@@ -56,16 +64,25 @@ public class CustomPhysics : MonoBehaviour
     public static Action OnPhysicsTick;
     public static Action OnPostPhysicsTick;
     public static Action OnTurnOffPhysicsSimulation;
+    public static Action OnStartPhysicsSimulation;
     public static Action OnRecomputeEntityIds;
 
     private static long? _pendingRollbackTick = null;
     private static double _simulationStartTime = -1;
+    private static bool _recomputeEntityIdsRequired = false;
         
     void Awake()
     {
         ClearSnapshotHistoryRingBuffer();
     }
 
+    public static void BeginRollbackDebug()
+    {
+        SimuluateFutureAtRegularTickRateStartTick = Tick;
+        SimulateFutureAtRegularTickRate = true;       
+        DeterminismLogger.ClearLog();
+    }
+    
     public static void ScheduleStart(double startTime)
     {   
         if(_simulationStartTime != -1)
@@ -73,8 +90,13 @@ public class CustomPhysics : MonoBehaviour
             Debug.LogWarning("Ignoring simulation ScheduleStart, the simulation has already started");
             return;
         }
-        
+
         _simulationStartTime = startTime;
+    }
+
+    public static void RecomputeEntityIds()
+    {
+        _recomputeEntityIdsRequired = true;
     }
 
     /// <summary>
@@ -82,18 +104,36 @@ public class CustomPhysics : MonoBehaviour
     /// </summary>
     public static void PhysicsTick()
     {
+        LastPhysicsTickTime = Time.realtimeSinceStartupAsDouble;
+
+        RecordSnapshotToHistory();
+
         OnPrePhysicsTick?.Invoke();
         OnPhysicsTick?.Invoke();
-        //Helpers.SafeInvoke(OnPrePhysicsTick, "OnPrePhysicsTick()");
-        //Helpers.SafeInvoke(OnPhysicsTick, "OnPhysicsTick()");
-
         CustomPhysicsSpace.Singleton.UpdateSimulation(TimeBetweenTicks);
+        OnPostPhysicsTick?.Invoke();
 
-        Helpers.SafeInvoke(OnPostPhysicsTick, "OnPostPhysicsTick()");
-        
-        RecordSnapshotToHistory();
-        
+        LogTick();
         Tick++;
+
+    }
+
+    private static void LogTick(string title="")
+    {
+        if (Configuration.Singleton.DebugMode)
+        {
+            List<PlayerInputDriver> playerDrivers = new();
+
+            if(PlayerDataManager.Singleton != null){
+                for(int i = 0; i < PlayerDataManager.Singleton.PlayerCount; i++)
+                {
+                    playerDrivers.Add(PlayerDataManager.Singleton.PlayerData[i].playerInputDriver);
+                }
+            }
+
+            int index = (int)(Tick % HistoryLength);
+            DeterminismLogger.LogTick(Tick, _historyRingBuffer[index], playerDrivers, title);
+        }
     }
 
     public static void ResetTickToZero()
@@ -117,7 +157,8 @@ public class CustomPhysics : MonoBehaviour
         _simulationStartTime = -1;
         ClearSnapshotHistoryRingBuffer();
         OnTurnOffPhysicsSimulation?.Invoke();
-
+        SimulateFutureAtRegularTickRate = false;
+        SimuluateFutureAtRegularTickRateStartTick = long.MaxValue;
     }
 
     void Update()
@@ -134,16 +175,21 @@ public class CustomPhysics : MonoBehaviour
 
         if(Tick == 0)
         {
+            OnStartPhysicsSimulation?.Invoke();
+        }
+
+        if (_recomputeEntityIdsRequired)
+        {
             DeterminismLogger.ClearLog();
-            
             OnRecomputeEntityIds?.Invoke(); 
             CustomPhysicsSpace.Singleton.RebuildBodyDictionary();
             CustomPhysicsSpace.Singleton.SortWorld();
+
+            _recomputeEntityIdsRequired = false;
         }
 
         long targetTick = (long)((Time.realtimeSinceStartupAsDouble - _simulationStartTime) * s_ticksPerSecond);
 
-        ActOnPendingRollback(targetTick);
         PerformNecassaryPhysicsTicks(targetTick);
     }
 
@@ -152,7 +198,16 @@ public class CustomPhysics : MonoBehaviour
         while(Tick < targetTick)
         {
             PhysicsTick();
-            targetTick = ActOnPendingRollback(targetTick);
+            var currTick = ActOnPendingRollback(targetTick);
+
+            if (SimulateFutureAtRegularTickRate)
+            {
+                return;
+            }
+            else
+            {
+                targetTick = currTick;
+            }
         }
     }
 
@@ -164,12 +219,18 @@ public class CustomPhysics : MonoBehaviour
             long rollbackTo = _pendingRollbackTick.Value;
             _pendingRollbackTick = null;
 
-            _resimulatingDepth++;
             Rollback(rollbackTo);
-            _resimulatingDepth--;
 
-            // expand futureTick if needed to ensure we still reach original target
-            return Math.Max(targetTick, Tick);
+            if (SimulateFutureAtRegularTickRate)
+            {
+                return rollbackTo;     
+            }
+            else
+            {
+                // expand futureTick if needed to ensure we still reach original target
+                SimulateFuture(targetTick);           
+            }
+            return targetTick;
         }
         return targetTick;
     }
@@ -197,19 +258,6 @@ public class CustomPhysics : MonoBehaviour
         
         int index = (int)(Tick % HistoryLength);
         _historyRingBuffer[index] = snapshot;
-
-        // If we are in DebugMode, record current frame to log
-        if (Configuration.Singleton.DebugMode)
-        {
-            List<PlayerInputDriver> playerDrivers = new();
-
-            for(int i = 0; i < PlayerDataManager.Singleton.PlayerCount; i++)
-            {
-                playerDrivers.Add(PlayerDataManager.Singleton.PlayerData[i].playerInputDriver);
-            }
-
-            DeterminismLogger.LogTick(Tick, snapshot, playerDrivers);
-        }
     }
 
     /// <summary>
@@ -220,7 +268,7 @@ public class CustomPhysics : MonoBehaviour
     {
         if (previousTick <= 0)
         {
-            Debug.LogWarning("Cannot rollback to tick 0 or below, ignoring");
+            Debug.LogWarning("Cannot rollback to tick less than 0, ignoring");
             return;
         }
 
@@ -232,7 +280,7 @@ public class CustomPhysics : MonoBehaviour
             return;
         }
         
-        long snapshotTick = previousTick - 1; // restore state BEFORE previousTick ran;
+        long snapshotTick = previousTick; // was previousTick - 1; // restore state BEFORE previousTick ran;
         int shiftedIndex = (int)(snapshotTick % HistoryLength); 
 
         if(_historyRingBuffer[shiftedIndex].Tick != snapshotTick)
@@ -241,17 +289,27 @@ public class CustomPhysics : MonoBehaviour
             return;
         }
 
-        CustomPhysicsSpace.Singleton.RestoreSimulationSnapshot(_historyRingBuffer[shiftedIndex]);
+        if (Configuration.Singleton.DebugMode)
+        {
+            DeterminismLogger.LogExtraInfo("Performing Rollback, CurrentTick: " + Tick + " RollbackSnapshotTick: " + snapshotTick);
+        }
 
-        Tick = previousTick;
+        CustomPhysicsSpace.Singleton.RestoreSimulationSnapshot(_historyRingBuffer[shiftedIndex]);
+        
+        Tick = previousTick; // restore simulate -1 so the next tick we process previousTick
     }
     
     /// <summary>
-    /// Simulates the 
+    /// Simulates the future to return to where we were up to
     /// </summary>
     /// <param name="futureTick">The tick we wish to simulate up to</param>
     public static void SimulateFuture(long futureTick)
     {
+        if (Configuration.Singleton.DebugMode)
+        {
+            DeterminismLogger.LogExtraInfo("Simulating to future tick: " + futureTick);
+        }
+
         // TODO: Prevent death spiral, enforce a max resimulatingDepth
         _resimulatingDepth++;
         

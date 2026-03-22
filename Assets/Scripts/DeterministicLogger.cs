@@ -1,13 +1,13 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
+using Unity.Netcode;
 using UnityEngine;
 
 public static class DeterminismLogger
 {
-    private const int LOG_TICKS = 2000;
+    private const int LOG_TICKS = 5000;
     private static System.Text.StringBuilder _log = new();
     private static bool _done = false;
+    private static int _logIndex = 0;
 
     public static void LogExtraInfo(string extraInfo)
     {
@@ -20,17 +20,38 @@ public static class DeterminismLogger
         _done = false;
     }
 
-    public static void LogTick(long tick, CustomSimulationSnapshot snapshot, List<PlayerInputDriver> drivers)
-    {   
-
-        if (_done || tick > LOG_TICKS)
+    public static void LogTick(long tick, CustomSimulationSnapshot snapshot, List<PlayerInputDriver> drivers, string title="")
+    {
+        if (!Configuration.Singleton.DebugMode || !Configuration.Singleton.GenerateLogFilesInDebugMode)
         {
-            if (!_done)
-            {
-                _done = true;
-                WriteLog();
-            }
             return;
+        }
+
+        if(tick <= 1)
+        {
+            _done = false;
+        }
+
+        if (_done)
+        {
+            return;
+        }
+
+        if(CustomPhysics.SimulateFutureAtRegularTickRate){
+            if(tick > CustomPhysics.SimuluateFutureAtRegularTickRateStartTick){
+
+                Debug.Log("Write log: " + tick);
+                WriteLog();
+                return;
+            }
+        }
+        else{
+
+            if (tick > LOG_TICKS)
+            {
+                WriteLog();
+                return;
+            }
         }
 
         // Build checksum from all body states
@@ -38,49 +59,90 @@ public static class DeterminismLogger
         int bodyIndex = 0;
 
         System.Text.StringBuilder bodyDetails = new();
-        foreach (var bodyState in snapshot.Bodies)
+        
+        _log.AppendLine($"{title} tick={tick} -------------------");
+
+        if(Configuration.Singleton.LogsShouldIncludeClientInputs){
+            // Log input state per driver
+            System.Text.StringBuilder inputDetails = new();
+            foreach (var driver in drivers)
+            {
+                PlayerClientInputs inputs = driver?.PlayerInputs;
+                if(inputs != null)
+                {
+                    inputDetails.Append($"  clientId={driver.OwnerClientId} move={inputs.InputMoveDirection} jump={inputs.InputJump}\n");
+                }
+            }
+            _log.Append(inputDetails);
+            
+        }
+        
+
+        
+        // CHANGED: Get bodies from the actual Volatile world in simulation order
+        foreach (var voltBody in CustomPhysicsSpace.Singleton.SimulationSpace.Bodies)
         {
-            long px = bodyState.Position.x.RawValue;
-            long py = bodyState.Position.y.RawValue;
-            long vx = bodyState.Velocity.x.RawValue;
-            long vy = bodyState.Velocity.y.RawValue;
-            long angle = bodyState.Angle.RawValue;
-            long angularVel = bodyState.AngularVelocity.RawValue;
+            // Find the corresponding CustomPhysicsBody
+            CustomPhysicsBody bodyComponent = CustomPhysicsSpace.Singleton.GetBody(voltBody.EntityId);
+            
+            long px = voltBody.Position.x.RawValue;
+            long py = voltBody.Position.y.RawValue;
+            long vx = voltBody.LinearVelocity.x.RawValue;
+            long vy = voltBody.LinearVelocity.y.RawValue;
+            long angle = voltBody.Angle.RawValue;
+            long angularVel = voltBody.AngularVelocity.RawValue;
 
             checksum ^= (px * 31 + py * 17 + vx * 13 + vy * 7 + angle * 11 + angularVel * 5) * (bodyIndex + 1);
 
-            string bodyName = (bodyState.BodyComponent != null && bodyState.BodyComponent) 
-                ? bodyState.BodyComponent.name 
-                : "destroyed";
+            if(Configuration.Singleton.LogsShouldIncludePhysicsBodyState){
 
-            bodyDetails.Append($"  body[{bodyIndex}] ({bodyName}) pos=({px},{py}) vel=({vx},{vy}) angle={angle} angularVel={angularVel}\n");
-            
+                if (!voltBody.IsStatic)
+                {
+                    string bodyName = (bodyComponent != null) 
+                    ? bodyComponent.name 
+                    : "destroyed";
+
+                    bodyDetails.Append($"  entityId[{voltBody.EntityId}] body[{bodyIndex}] ({bodyName}) pos=({px},{py}) vel=({vx},{vy}) angle={angle} angularVel={angularVel}\n");   
+                }
+        
+            }
+
             bodyIndex++;
         }
 
-        // Log input state per driver
-        System.Text.StringBuilder inputDetails = new();
-        foreach (var driver in drivers)
+        if (Configuration.Singleton.LogsShouldIncludeCustomDataFromBodies)
         {
-            PlayerInputAtTick inputs = driver.GetLatestInputAtTick();
-            inputDetails.Append($"  clientId={driver.OwnerClientId} move={inputs.Inputs.InputMoveDirection} jump={inputs.Inputs.InputJump} wasPredicted={inputs.WasPredicted}\n");
+            foreach(var body in CustomPhysicsSpace.Singleton.Bodies){
+                
+                if(body.Value.CustomState != null)
+                {
+                    bodyDetails.Append("Custom Body State: \n");
+                    bodyDetails.Append(body.Value.CustomState.ToString() + "\n");
+                    
+                }
+            }
         }
 
-        _log.AppendLine($"--- tick={tick} checksum={checksum}");
+        if (Configuration.Singleton.LogsShouldIncludeClientInputs || Configuration.Singleton.LogsShouldIncludePhysicsBodyState)
+        {
+            _log.AppendLine($"physics checksum={checksum}");
+        }
+
         _log.Append(bodyDetails);
-        _log.Append(inputDetails);
     }
 
-    public static void Reset()
+    public static void WriteLog()
     {
-        _log.Clear();
-        _done = false;
-    }
-
-    private static void WriteLog()
-    {
-        string path = System.IO.Path.Combine(Application.persistentDataPath, "determinism_log.txt");
+        _done = true;
+        string clientNumber = "";
+        if(NetworkManager.Singleton != null)
+        {
+            clientNumber += ", ClientId," + NetworkManager.Singleton.LocalClientId;
+        }
+        string name = "determinism_log_" + _logIndex + clientNumber + ".txt";
+        string path = System.IO.Path.Combine(Application.persistentDataPath, name);
         System.IO.File.WriteAllText(path, _log.ToString());
         UnityEngine.Debug.Log($"Determinism log written to: {path}");
+        _logIndex++;
     }
 }

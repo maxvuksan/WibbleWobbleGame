@@ -41,6 +41,9 @@ namespace Volatile
     }
     #endregion
 
+
+    public VoltVector2 Position { get => position; }
+
     private VoltVector2 position;
     private VoltVector2 normal;
     private Fix64 penetration;

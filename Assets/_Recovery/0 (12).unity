@@ -330,9 +330,8 @@ MonoBehaviour:
   GenerateLogFilesInDebugMode: 1
   LogsShouldIncludeClientInputs: 1
   LogsShouldIncludePhysicsBodyState: 0
-  LogsShouldIgnoreStaticBodies: 1
-  LogsShouldIncludeCustomDataFromBodies: 0
-  UseSteamTransport: 1
+  LogsShouldIncludeCustomDataFromBodies: 1
+  UseSteamTransport: 0
   _networkManager: {fileID: 608186520}
   _transportFacepunch: {fileID: 608186518}
   _transportUnity: {fileID: 608186521}
