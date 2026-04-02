@@ -90,6 +90,41 @@ namespace Volatile
             return new VoltVector2(-a.x, -a.y);
         }
 
+
+        public static Fix64 Distance(VoltVector2 a, VoltVector2 b)
+        {
+            Fix64 dx = b.x - a.x;
+            Fix64 dy = b.y - a.y;
+            return Fix64.Sqrt(dx * dx + dy * dy);
+        }
+
+        public static Fix64 DistanceSqr(VoltVector2 a, VoltVector2 b)
+        {
+            Fix64 dx = b.x - a.x;
+            Fix64 dy = b.y - a.y;
+            return dx * dx + dy * dy;
+        }
+
+        public static VoltVector2 Lerp(VoltVector2 a, VoltVector2 b, Fix64 t)
+        {
+            // Clamp t between 0 and 1
+            if (t < Fix64.Zero) t = Fix64.Zero;
+            if (t > Fix64.One) t = Fix64.One;
+            
+            return new VoltVector2(
+                a.x + (b.x - a.x) * t,
+                a.y + (b.y - a.y) * t
+            );
+        }
+
+        public static VoltVector2 LerpUnclamped(VoltVector2 a, VoltVector2 b, Fix64 t)
+        {
+            return new VoltVector2(
+                a.x + (b.x - a.x) * t,
+                a.y + (b.y - a.y) * t
+            );
+        }
+
         public override string ToString()
         {
             return "{X:" + x + " Y:" + y + "}";

@@ -11,7 +11,7 @@ public class UnityTransportMenuHandler : MonoBehaviour
                 print("Unity Transport: Starting Host");
 
                 NetworkManager.Singleton.StartHost();
-                Invoke("LoadNextScene", 4.0f);
+                Invoke("LoadNextScene", 1.0f);
             }
             else
             {

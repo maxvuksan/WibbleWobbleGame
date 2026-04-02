@@ -2,22 +2,21 @@ using UnityEngine;
 
 public class HurtBox : MonoBehaviour
 {
+    [SerializeField] private CustomPhysicsBody _body;
 
-    private void OnTriggerEnter2D(Collider2D other) {
-
-        Player player = other.GetComponent<Player>();
-
-        if(player == null)
-        {
-            return;
-        }    
-
-        player.HitTrap(other.transform.position - transform.position);
+    void OnEnable()
+    {
+        _body.OnTrigger += OnTrigger;
+    }
+    void OnDisable()
+    {
+        _body.OnTrigger -= OnTrigger;
     }
 
-    private void OnCollisionEnter2D(Collision2D other) 
-    {
-        Player player = other.collider.GetComponent<Player>();
+
+    private void OnTrigger(CustomPhysicsBody other) {
+
+        Player player = other.GetComponent<Player>();
 
         if(player == null)
         {

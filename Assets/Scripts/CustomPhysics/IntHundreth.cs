@@ -7,10 +7,10 @@ using Volatile;
 /// 2D IntHundredth, containg an X and Y parameter
 /// </summary>
 [System.Serializable]
-public class IntHundredthVector2
+public struct IntHundredthVector2
 {
-    public IntHundredth X = 0;
-    public IntHundredth Y = 0;
+    public IntHundredth X;
+    public IntHundredth Y;
 
     public IntHundredthVector2(IntHundredth _x, IntHundredth _y)
     {
@@ -58,6 +58,11 @@ public struct IntHundredth
         ValueHundredths = wholeValue * 100;
     }
 
+    public IntHundredth(Fix64 trueValue)
+    {
+        ValueHundredths = (int)(trueValue * (Fix64)100);
+    }
+
     /// <summary>
     /// Converts and casts the internal value to a Fix64 type, this removes the hundredth scaler
     /// </summary>
@@ -75,6 +80,20 @@ public struct IntHundredth
         return ValueHundredths / 100.0f;
     }
     
+    public static IntHundredth operator +(IntHundredth a, IntHundredth b)
+    {
+        IntHundredth result;
+        result.ValueHundredths = a.ValueHundredths + b.ValueHundredths;
+        return result;
+    }
+
+    public static IntHundredth operator -(IntHundredth a, IntHundredth b)
+    {
+        IntHundredth result;
+        result.ValueHundredths = a.ValueHundredths - b.ValueHundredths;
+        return result;
+    }
+
     /// <summary>
     /// Equivilant to calling .AsFix64()
     /// </summary>

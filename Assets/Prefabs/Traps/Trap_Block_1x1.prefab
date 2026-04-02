@@ -56,6 +56,7 @@ MonoBehaviour:
     ValueHundredths: 0
   _rotationDegrees:
     ValueHundredths: 0
+  _isWorldSpace: 0
 --- !u!212 &1024447458764328496
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -178,6 +179,7 @@ MonoBehaviour:
   BodyType: 0
   _isTrigger: 0
   _parentBody: {fileID: 0}
+  _ignoreParentBodyRotation: 0
   _gravity:
     ValueHundredths: 0
   _restitution:
@@ -204,6 +206,7 @@ MonoBehaviour:
   _targets:
   - SpriteRenderers:
     - {fileID: 1024447458764328496}
+    Graphics: []
     ColourData:
       ColourTarget: 1
       ColourTargetIndexOffset: 1

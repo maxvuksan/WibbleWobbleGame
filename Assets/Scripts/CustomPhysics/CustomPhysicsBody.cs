@@ -27,6 +27,14 @@ public class CustomPhysicsBody : MonoBehaviour
     {
         get => Body.Position;
     }
+    public Fix64 InverseInertia
+    {
+        get => Body.InvInertia;
+    }
+    public Fix64 InverseMass
+    {
+        get => Body.InvMass;
+    }
     public Fix64 PositionX
     {
         get => Body.Position.x;
@@ -65,7 +73,8 @@ public class CustomPhysicsBody : MonoBehaviour
 
     public CustomPhysicsBody ParentBody { get=> _parentBody; }
     [SerializeField] private CustomPhysicsBody _parentBody; // if is Trigger, we perform a search for a parent body to move said trigger, we may not always find a parent
-    private VoltVector2 _parentBodyPositionOffset;
+    [SerializeField] private bool _ignoreParentBodyRotation = false;
+    [SerializeField] private VoltVector2 _parentBodyPositionOffset;
 
     public VoltBody Body { get; private set; } = new();
     private ulong _desiredEntityId = 0;
@@ -108,12 +117,46 @@ public class CustomPhysicsBody : MonoBehaviour
 
     void Awake()
     {
+        AssignCustomTransform();
+    }
+
+    private void AssignCustomTransform()
+    {
         CustomTransform = GetComponent<CustomTransform>();
 
         if(CustomTransform == null)
         {
             Debug.LogError("No CustomTransform attached to physics body, this is a requirement, Object: " + gameObject.name);
             return;
+        }
+    }
+
+    /// <summary>
+    /// Updates the parent body offset if this body has a parent, this is calculated at editor time, not runtime
+    /// </summary>
+    private void OnValidate()
+    {
+        // Only run in editor mode
+        if (Application.isPlaying)
+            return;
+            
+        AssignCustomTransform();
+
+        // Calculate offset from parent if parent is assigned
+        if (_parentBody != null && CustomTransform != null)
+        {
+            // Get parent's CustomTransform
+            var parentTransform = _parentBody.GetComponent<CustomTransform>();
+            
+            if (parentTransform != null)
+            {
+                // Calculate offset in editor
+                VoltVector2 myPosition = CustomTransform.GetPositionFix64();
+                VoltVector2 parentPosition = parentTransform.GetPositionFix64();
+                _parentBodyPositionOffset = myPosition - parentPosition;
+                Debug.Log("Setting parent body position: " + _parentBodyPositionOffset.y + " on object of name " + gameObject.name);
+
+            }
         }
     }
 
@@ -130,6 +173,11 @@ public class CustomPhysicsBody : MonoBehaviour
         {
             Body.EntityId = id;    
         }
+    }
+
+    public ulong GetDesiredEntityId()
+    {
+        return _desiredEntityId;
     }
 
     private void SortColliderList()
@@ -166,14 +214,6 @@ public class CustomPhysicsBody : MonoBehaviour
         if (_constructed)
         {   
             Remove();
-        }
-
-        // if this is a trigger, look for a parent body
-        if (_parentBody != null)
-        {
-            _parentBodyPositionOffset =
-                new VoltVector2(CustomTransform.GetPositionFix64().x, CustomTransform.GetPositionFix64().y) - 
-                new VoltVector2((Fix64)_parentBody.CustomTransform.GetPositionFix64().x, (Fix64)_parentBody.CustomTransform.GetPositionFix64().y);
         }
         
         _radiansZFix64 = CustomTransform.GetRotationRadiansFix64();
@@ -236,6 +276,8 @@ public class CustomPhysicsBody : MonoBehaviour
 
         _constructed = true;
 
+        ApplySimulationToGameObject();
+
     }
 
     /// <summary>
@@ -281,21 +323,46 @@ public class CustomPhysicsBody : MonoBehaviour
         ApplySimulationInterpolation();
     }
 
+
+    public VoltVector2 GetInitalPositionAccountingForParent()
+    {
+        Fix64 cos = Fix64.Cos(_parentBody.GetComponent<CustomTransform>().GetRotationRadiansFix64());
+        Fix64 sin = Fix64.Sin(_parentBody.GetComponent<CustomTransform>().GetRotationRadiansFix64());
+
+        VoltVector2 rotatedOffset = new VoltVector2(
+                cos * CustomTransform.GetPositionFix64().x - sin * CustomTransform.GetPositionFix64().y,
+                sin * CustomTransform.GetPositionFix64().x + cos * CustomTransform.GetPositionFix64().y
+        );
+
+        return _parentBody.GetComponent<CustomTransform>().GetPositionFix64() + rotatedOffset;
+    }
+
     public void ApplySimulationToBody()
     {
         // make body follow parent if parent is assigned
         if(_parentBody != null)
         {
-            Fix64 cos = Fix64.Cos(Fix64.Zero);
-            Fix64 sin = Fix64.Sin(Fix64.Zero);
+            Fix64 cos = Fix64.Cos(_parentBody.Angle);
+            Fix64 sin = Fix64.Sin(_parentBody.Angle);
 
             VoltVector2 rotatedOffset = new VoltVector2(
-                cos * _parentBodyPositionOffset.x - sin * _parentBodyPositionOffset.y,
-                sin * _parentBodyPositionOffset.x + cos * _parentBodyPositionOffset.y
+                 cos * CustomTransform.GetPositionFix64().x - sin * CustomTransform.GetPositionFix64().y,
+                 sin * CustomTransform.GetPositionFix64().x + cos * CustomTransform.GetPositionFix64().y
             );
-            Body.Set(rotatedOffset + _parentBody.Position, Fix64.Zero);
-        }
+            
+            Fix64 angle = Body.Angle;
 
+            // on first tick configure angle...
+            if(CustomPhysics.Tick == 0)
+            {
+                if (!_ignoreParentBodyRotation)
+                {
+                    angle += _parentBody.Angle;
+                }
+            }
+
+            Body.Set(_parentBody.Position + rotatedOffset, angle);
+        }
         for(int i = 0; i < Body.shapes.Length; i++)
         {
             VoltVector2 shapePos = Body.shapes[i].bodySpaceAABB.Center;
@@ -311,10 +378,11 @@ public class CustomPhysicsBody : MonoBehaviour
         if (_turnOnInterpolatioNextTick)
         {
             _skipInterpolation = false;
+            _turnOnInterpolatioNextTick = false;
         }
 
 
-        if (!_skipInterpolation && CustomPhysicsSpace.Singleton.VisualInterpolation)
+        if (!ShouldInterpolate())
         {
             // Store previous frame's current as new previous
             _previousPositionForLerp = _currentPositionForLerp;
@@ -345,7 +413,7 @@ public class CustomPhysicsBody : MonoBehaviour
         }
 
 
-        if (!_skipInterpolation && CustomPhysicsSpace.Singleton.VisualInterpolation)
+        if (!ShouldInterpolate())
         {
             float t = CalculateInterpolationTValue();
             
@@ -354,6 +422,11 @@ public class CustomPhysicsBody : MonoBehaviour
             float interpolatedAngle = Mathf.LerpAngle(_previousAngleForLerp, _currentAngleForLerp, t);
             transform.rotation = Quaternion.Euler(0, 0, interpolatedAngle);
         }
+    }
+
+    public bool ShouldInterpolate()
+    {
+        return !_skipInterpolation && CustomPhysicsSpace.Singleton.VisualInterpolation && CustomPhysics.Tick > 0;
     }
 
     /// <summary>
@@ -372,7 +445,7 @@ public class CustomPhysicsBody : MonoBehaviour
     /// Sets the position of the body aswell as the internal CustomTransform. This call will also disable visaul interpolation for the next tick
     /// </summary>
     /// <param name="position">The position to set</param>
-    public void SetPosition(IntHundredthVector2 position)
+    public void TeleportPosition(IntHundredthVector2 position)
     {
         CustomTransform.SetValues(position.X, position.Y, CustomTransform.RotationDegreesHundredth);
 
@@ -381,10 +454,25 @@ public class CustomPhysicsBody : MonoBehaviour
             Body.Set(new VoltVector2((Fix64)position.X, (Fix64)position.Y), Body.Angle);
         }
 
-        transform.position = new Vector2(position.X.AsFloat(), position.Y.AsFloat());
+        SetSkipInterpolationNextFrame(true);
+    }
 
-        _skipInterpolation = true;
-        _turnOnInterpolatioNextTick = false;
+    public void SetSkipInterpolationNextFrame(bool skipInterpolationNextFrame)
+    {
+        if (skipInterpolationNextFrame)
+        {
+            transform.position = new Vector2((float)Body.Position.x, (float)Body.Position.y);
+
+            _previousPositionForLerp = transform.position;
+            _currentPositionForLerp = transform.position;
+
+            _skipInterpolation = true;
+            _turnOnInterpolatioNextTick = false;
+        }
+        else
+        {
+            _skipInterpolation = false;
+        }
     }
 
     public void AddForce(VoltVector2 force)

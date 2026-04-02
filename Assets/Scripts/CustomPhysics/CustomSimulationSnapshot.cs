@@ -19,12 +19,11 @@ public class CustomSimulationSnapshot
 
     public class BodyState
     {
+        public bool IsEnabled;
         public VoltVector2 Position;
         public VoltVector2 Velocity;
         public Fix64 Angle;
         public Fix64 AngularVelocity;
-        //public VoltVector2 Force;
-        //public Fix64 Torque;
         public VoltVector2 BiasVelocity;
         public Fix64 BiasRotation;
         public CustomPhysicsBody BodyComponent; 

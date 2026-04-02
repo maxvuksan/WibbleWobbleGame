@@ -2,11 +2,14 @@ using System;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
+using Volatile;
 
 
-
+/// <summary>
+/// A traps serialized representation
+/// </summary>
 [System.Serializable]
-public struct NetworkedTrapPlacedData : INetworkSerializable, IEquatable<NetworkedTrapPlacedData>
+public struct TrapPlacedData : INetworkSerializable, IEquatable<TrapPlacedData>
 {
     public int trapTypeIndex;
     public int positionXHundredths;
@@ -22,7 +25,7 @@ public struct NetworkedTrapPlacedData : INetworkSerializable, IEquatable<Network
         serializer.SerializeValue(ref rotationHundredths);
     }
 
-    public bool Equals(NetworkedTrapPlacedData other)
+    public bool Equals(TrapPlacedData other)
     {
         return trapTypeIndex == other.trapTypeIndex
             && positionXHundredths == other.positionXHundredths
@@ -44,7 +47,8 @@ public class TrapPlacementArea : NetworkBehaviour
     private Transform _trapStaticInstanceParent;
     private Transform _trapBehaviorInstanceParent;
 
-    private NetworkList<NetworkedTrapPlacedData> _networkedPlacedTrapDataList; 
+    public NetworkList<TrapPlacedData> NetworkedPlacedTrapDataList { get => _networkedPlacedTrapDataList; }
+    private NetworkList<TrapPlacedData> _networkedPlacedTrapDataList; 
     private List<GameObject> _trapInstances; 
     private List<GameObject> _scopedObjectsList;
     private Dictionary<string, int> _trapNameToIndexMap; 
@@ -63,7 +67,7 @@ public class TrapPlacementArea : NetworkBehaviour
 
         Singleton = this; 
 
-        _networkedPlacedTrapDataList = new NetworkList<NetworkedTrapPlacedData>();
+        _networkedPlacedTrapDataList = new NetworkList<TrapPlacedData>();
         _trapInstances = new List<GameObject>();
 
         _scopedObjectsList = new List<GameObject>();
@@ -108,7 +112,7 @@ public class TrapPlacementArea : NetworkBehaviour
     /// <summary>
     /// Reacting to a change in the networked traps list
     /// </summary>
-    private void OnPlacedTrapsChanged(NetworkListEvent<NetworkedTrapPlacedData> changeEvent)
+    private void OnPlacedTrapsChanged(NetworkListEvent<TrapPlacedData> changeEvent)
     {
         if(GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.GameState_SelectingTrap || 
            GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.GameState_PreviewLevel ||
@@ -189,17 +193,11 @@ public class TrapPlacementArea : NetworkBehaviour
             AudioManager.Singleton.Play(trapDictionary.traps[trapTypeIndex].soundOnPlace);
         }
 
-        // if a trap only has a static instance, we can assume it cannot be placed (it is likely a utility: e.g. delete trap)
-        if(trapDictionary.traps[trapTypeIndex].behaviorPrefab == null)
-        {
-            return;
-        }
-
         // Since we know this code will always run on the server (the host will always perform this math)
         // We should not need to worry about deterministic problems when converting between floats
         // Any potential error will be treated as the truth, we trust the servers values
 
-        NetworkedTrapPlacedData data = new NetworkedTrapPlacedData
+        TrapPlacedData data = new TrapPlacedData
         {
             trapTypeIndex = trapTypeIndex,
             positionXHundredths = Mathf.RoundToInt(position.x * 100f),
@@ -207,8 +205,21 @@ public class TrapPlacementArea : NetworkBehaviour
             rotationHundredths = Mathf.RoundToInt(zRotationEuler * 100f)
         };
 
-        print("adding trap...");
-        _networkedPlacedTrapDataList.Add(data);
+        ServerAddTrap(data);
+    }
+
+    /// <summary>
+    /// Adds a trap using the TrapPlacedData structure
+    /// </summary>
+    public void ServerAddTrap(TrapPlacedData trapData)
+    {
+        // if a trap only has a static instance, we can assume it cannot be placed (it is likely a utility: e.g. delete trap)
+        if(trapDictionary.traps[trapData.trapTypeIndex].behaviorPrefab == null)
+        {
+            return;
+        }
+
+        _networkedPlacedTrapDataList.Add(trapData);
     }
     
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
@@ -228,16 +239,39 @@ public class TrapPlacementArea : NetworkBehaviour
             DeterminismLogger.LogExtraInfo(msg);
         }
 
+        ulong currentEntityId = 100ul; // Start at 100
+
         for(int i = 0; i < _trapInstances.Count; i++)
         {
-            // add +100 offset to ensure players ids are before traps
-            _trapInstances[i].GetComponent<CustomPhysicsBody>().SetDesiredEntityId((ulong)i + 100ul);
+            // Assign IDs to this trap and all its child physics bodies
+            currentEntityId = AssignEntityIdsRecursive(_trapInstances[i], currentEntityId);
+        }
+    }
 
+    /// <summary>
+    /// Iterates over a object finding all the CustomPhysicsBody instances, assigning an id for each body
+    /// </summary>
+    /// <returns></returns>
+    private ulong AssignEntityIdsRecursive(GameObject obj, ulong startId)
+    {
+        ulong currentId = startId;
+        
+        // Get all physics bodies in this object and its children
+        CustomPhysicsBody[] bodies = obj.GetComponentsInChildren<CustomPhysicsBody>();
+        
+        foreach(var body in bodies)
+        {
+            body.SetDesiredEntityId(currentId);
+            
             if (Configuration.Singleton.DebugMode)
             {
-                DeterminismLogger.LogExtraInfo("RecomputeEntityIds for trap: " + _trapInstances[i].name + ", new EntityId: " +  _trapInstances[i].GetComponent<CustomPhysicsBody>().Body.EntityId);
+                DeterminismLogger.LogExtraInfo("RecomputeEntityIds for: " + body.gameObject.name + ", new EntityId: " + currentId);
             }
+            
+            currentId++;
         }
+        
+        return currentId; // Return next available ID
     }
 
     /// <summary>
@@ -249,7 +283,7 @@ public class TrapPlacementArea : NetworkBehaviour
 
         // Sort the network trap placed data list, to ensure we introduce traps to the physics simulation in the same order
 
-        var sortedTrapsToPlace = new List<NetworkedTrapPlacedData>();
+        var sortedTrapsToPlace = new List<TrapPlacedData>();
         
         for (int i = 0; i < _networkedPlacedTrapDataList.Count; i++){
             sortedTrapsToPlace.Add(_networkedPlacedTrapDataList[i]);
@@ -281,6 +315,11 @@ public class TrapPlacementArea : NetworkBehaviour
             // Set the CustomTransform values to the IntHundredth values, to ensure deterministic position and rotation on every client...
             
             CustomTransform customTransform = newObj.GetComponent<CustomTransform>();
+
+            if(customTransform == null)
+            {
+                customTransform = newObj.GetComponentInChildren<CustomTransform>();
+            }
             if(customTransform == null)
             {
                 Debug.LogError("No CustomTransform attached to placed trap, SpawnAllTrapInstances()");
@@ -288,6 +327,19 @@ public class TrapPlacementArea : NetworkBehaviour
 
             customTransform.SetValues(positionX, positionY, rotationDegrees);
             // TODO: We may need to update the child CustomTransform, will see
+
+            CustomTransform[] bodies = newObj.GetComponentsInChildren<CustomTransform>();
+            for(int b = 0; b < bodies.Length; b++)
+            {   
+                if(!bodies[b].IsWorldSpace)
+                {
+                    continue;
+                }
+                bodies[b].SetValues(
+                    positionX + bodies[b].PositionXHundredth, 
+                    positionY + bodies[b].PositionYHundredth, 
+                    rotationDegrees + bodies[b].RotationDegreesHundredth);
+            }
 
             // trigger start to run
             newObj.SetActive(true);
@@ -302,6 +354,22 @@ public class TrapPlacementArea : NetworkBehaviour
                 Debug.LogError("A trap is trying to be placed without a TrapHeader component, please ensure all traps have this for other behaviour to work");
             }
         }
+
+
+        // // ensure traps children are positioned prior to next draw operation... (before the physics starts)
+        // for(int i = 0; i < _trapInstances.Count; i++)
+        // {
+        //     CustomPhysicsBody[] bodies = _trapInstances[i].GetComponentsInChildren<CustomPhysicsBody>();
+        //     for(int b = 0; b < bodies.Length; b++)
+        //     {   
+        //         if(bodies[b].ParentBody == null)
+        //         {
+        //             continue;
+        //         }
+        //         VoltVector2 initalPosition = bodies[b].GetInitalPositionAccountingForParent();
+        //         bodies[b].transform.position = new Vector2((float)initalPosition.x, (float)initalPosition.y);
+        //     }
+        // }
 
         // TODO: This is the problem, we are recomputing 0 traps...
         Debug.Log("there is X sorted traps = " + sortedTrapsToPlace.Count);

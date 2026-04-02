@@ -9,7 +9,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2086050080506549558}
-  - component: {fileID: 7027103736177173795}
   m_Layer: 6
   m_Name: FixedRotation
   m_TagString: Untagged
@@ -33,20 +32,6 @@ Transform:
   - {fileID: 2376864383030997602}
   m_Father: {fileID: 2820990266188840496}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7027103736177173795
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 230347497807028694}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a7f876a9c3a2b61418dab7271df81c8b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AlwaysMaintainRotation
-  fixedRotation: 0
-  _bodyToApplyTo: {fileID: 0}
 --- !u!1 &1551359529758071312
 GameObject:
   m_ObjectHideFlags: 0
@@ -93,6 +78,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 907e68ea622e56044adc07e38e787922, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HurtBox
+  _body: {fileID: 1142440177249331008}
 --- !u!114 &2891200814827332429
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -129,6 +115,7 @@ MonoBehaviour:
     ValueHundredths: 0
   _rotationDegrees:
     ValueHundredths: 0
+  _isWorldSpace: 0
 --- !u!1 &2434558581931510970
 GameObject:
   m_ObjectHideFlags: 0
@@ -251,7 +238,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CustomPhysicsBody
   BodyType: 1
   _isTrigger: 1
-  _parentBody: {fileID: 0}
+  _parentBody: {fileID: 5258354893559297383}
+  _ignoreParentBodyRotation: 0
   _gravity:
     ValueHundredths: 0
   _restitution:
@@ -281,6 +269,7 @@ MonoBehaviour:
     ValueHundredths: 0
   _rotationDegrees:
     ValueHundredths: 0
+  _isWorldSpace: 0
 --- !u!1 &4967037026206012188
 GameObject:
   m_ObjectHideFlags: 0
@@ -421,6 +410,7 @@ MonoBehaviour:
   BodyType: 0
   _isTrigger: 0
   _parentBody: {fileID: 0}
+  _ignoreParentBodyRotation: 0
   _gravity:
     ValueHundredths: 0
   _restitution:
@@ -470,3 +460,4 @@ MonoBehaviour:
     ValueHundredths: 0
   _rotationDegrees:
     ValueHundredths: 0
+  _isWorldSpace: 0

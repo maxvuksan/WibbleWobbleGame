@@ -10,10 +10,9 @@ public class LevelManager : NetworkBehaviour
     [SerializeField] private Transform _levelParent;
     private Level _loadedLevel;
     public Level LoadedLevel { get => _loadedLevel; }
-
+    
 
     public Action OnLevelLoad;
-
     public static LevelManager Singleton;
 
     private void Awake()
@@ -25,7 +24,6 @@ public class LevelManager : NetworkBehaviour
 
         Singleton = this;
     }
-
 
     public void UnloadLevel()
     {
@@ -60,7 +58,7 @@ public class LevelManager : NetworkBehaviour
         LoadLevel(_lobbyLevelPrefab);
         print("loaded lobby");
     }
-
+    
     public void LoadLevel(GameObject prefabToLoad)
     {
         Level spawnedLevel = Instantiate(prefabToLoad, _levelParent).GetComponent<Level>();
@@ -80,7 +78,6 @@ public class LevelManager : NetworkBehaviour
         TrapPlacementArea.Singleton.SpawnAllTrapInstances();
     }
 
-
     /// <summary>
     /// Spawns the level, Iterates over the level contents, registering the traps with the TrapPlacementArea
     /// </summary>
@@ -95,4 +92,43 @@ public class LevelManager : NetworkBehaviour
         LoadLevelRpc(levelIndex);
     }
 
+    /// <summary>
+    /// Saves the current scenes level state to a file
+    /// </summary>
+    /// <param name="relativeDataPath">The file location relative to the Application.persistantDataPath, omit the file extension</param>
+    public void SaveLevelToFile(string relativeDataPath)
+    {
+        LevelSaveData saveData = new();
+        
+        foreach(var trap in TrapPlacementArea.Singleton.NetworkedPlacedTrapDataList)
+        {
+            saveData.Traps.Add(trap);
+        }
+
+        DataSerializer.SaveObjectToFile(saveData, relativeDataPath + ".level");
+    }
+
+    /// <summary>
+    /// Loads a level from a file
+    /// </summary>
+    /// <param name="relativeDataPath">The file location relative to the Application.persistantDataPath, omit the file extension</param>
+    /// <returns>True if the load was successful, false otherwise</returns>
+    public bool LoadLevelFromFile(string relativeDataPath)
+    {
+        if (!IsServer)
+        {
+            return false;
+        }
+
+        LevelSaveData saveData = DataSerializer.LoadObjectFromFile<LevelSaveData>(relativeDataPath + ".level");
+    
+        TrapPlacementArea.Singleton.ServerClearTraps();
+
+        foreach(var trap in saveData.Traps)
+        {
+            TrapPlacementArea.Singleton.ServerAddTrap(trap);
+        }
+
+        return true;
+    }
 }

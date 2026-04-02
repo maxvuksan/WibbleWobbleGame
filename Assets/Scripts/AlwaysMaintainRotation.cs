@@ -34,7 +34,7 @@ public class AlwaysMaintainRotation : MonoBehaviour
 
     void LateUpdate()
     {
-        if(_bodyToApplyTo == null)
+        if(_bodyToApplyTo == null || CustomPhysics.Tick == 0)
         {
             transform.rotation = Quaternion.Euler(0, 0, fixedRotation);
         }

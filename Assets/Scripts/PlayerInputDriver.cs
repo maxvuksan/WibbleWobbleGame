@@ -106,6 +106,7 @@ public class PlayerInputDriver : NetworkBehaviour
             if(NetworkManager.ConnectedClients.Count == 1)
             {
                 ServerBeginPhysicsSimulation(0.0d);
+                print("starting physics");
             }
             else
             {

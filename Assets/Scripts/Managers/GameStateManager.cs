@@ -43,20 +43,8 @@ public class GameStateManager : NetworkBehaviour
 
     public static GameStateManager Singleton;
 
-
-
-
     [SerializeField] private float hostPreviewHoldSeconds = 3;
     private float _hostPreviewTimerTracked;
-
-
-
-
-
-
-
-
-
 
     private void Awake()
     {
@@ -133,42 +121,9 @@ public class GameStateManager : NetworkBehaviour
 
     public void Update()
     {
-
         if (!IsServer)
         {
             return;
-        }
-
-        if(Configuration.Singleton.DebugMode){
-
-            if (Input.GetKeyDown(KeyCode.Escape))
-            {
-                ServerSetGameState(GameStateEnum.GameState_SelectingLevel);
-            }
-            else if (Input.GetKeyDown(KeyCode.P))
-            {
-                GameStateEnum state = NetworkedState.Value;
-
-                state++;
-                if(state == GameStateEnum.GameState_NUMBER_OF_STATES)
-                {
-                    state = 0;
-                }
-
-                ServerSetGameState(state);
-            }
-            if (Input.GetKeyDown(KeyCode.Keypad1))
-            {
-
-                if(NetworkedState.Value == GameStateEnum.GameState_CreativeMode)
-                {
-                    ServerSetGameState(GameStateEnum.GameState_Play);
-                }
-                else
-                {
-                    ServerSetGameState(GameStateEnum.GameState_CreativeMode);
-                }
-            }
         }
 
         // if the host has set the state to preview, create a timer to switch to the next state...
@@ -181,12 +136,10 @@ public class GameStateManager : NetworkBehaviour
                 ServerSetGameState(GameStateEnum.GameState_SelectingTrap);
             }            
         }
-
-
     }
 
     public void ServerSetGameState(GameStateEnum state)
-    {
+    {   
         // only the network host can change the game state
         if (IsServer)
         {

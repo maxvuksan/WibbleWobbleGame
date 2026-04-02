@@ -888,6 +888,7 @@ MonoBehaviour:
     ValueHundredths: 0
   _rotationDegrees:
     ValueHundredths: 0
+  _isWorldSpace: 0
 --- !u!114 &5886699787865061013
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -919,8 +920,8 @@ MonoBehaviour:
   horizontalCounterStretch: 0.005
   stepRotation: 6
   stepSpriteDuration: 0.15
-  footstepPrefab: {fileID: 1984085572172503019, guid: 6ca0ccd7f29f5f747a356b05ed40689e, type: 3}
-  playerRenderer: {fileID: 3849084462165430682}
+  _footstepPrefab: {fileID: 1984085572172503019, guid: 6ca0ccd7f29f5f747a356b05ed40689e, type: 3}
+  _playerRenderer: {fileID: 3849084462165430682}
   eyeRenderer: {fileID: 6695744250585645009}
   animator: {fileID: 2829270620690801660}
   _physicsBody: {fileID: 8045125109071678660}
@@ -1004,6 +1005,7 @@ MonoBehaviour:
   BodyType: 1
   _isTrigger: 0
   _parentBody: {fileID: 0}
+  _ignoreParentBodyRotation: 0
   _gravity:
     ValueHundredths: 3000
   _restitution:

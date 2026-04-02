@@ -221,7 +221,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 4
-  m_Sprite: {fileID: 1184172711, guid: 10d0da31704faa048b42e39f581fd249, type: 3}
+  m_Sprite: {fileID: -7961285409242522895, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -290,8 +290,9 @@ GameObject:
   m_Component:
   - component: {fileID: 7073156233600709972}
   - component: {fileID: 7618801273982818609}
-  - component: {fileID: 5507986730461023522}
   - component: {fileID: 9208638663966668700}
+  - component: {fileID: 5217128594222847466}
+  - component: {fileID: 8044860637660121863}
   m_Layer: 0
   m_Name: Trap_Clamp
   m_TagString: Untagged
@@ -339,31 +340,6 @@ MonoBehaviour:
   trapLayer:
     serializedVersion: 2
     m_Bits: 64
---- !u!114 &5507986730461023522
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2893538759217496779}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 2107800970
-  InScenePlacedSourceGlobalObjectIdHash: 0
-  DeferredDespawnTick: 0
-  Ownership: 1
-  AlwaysReplicateAsRoot: 0
-  SynchronizeTransform: 1
-  ActiveSceneSynchronization: 0
-  SceneMigrationSynchronization: 1
-  SpawnWithObservers: 1
-  DontDestroyWithOwner: 0
-  AutoObjectParentSync: 1
-  SyncOwnerTransformWhenParented: 1
-  AllowOwnerToParent: 0
 --- !u!114 &9208638663966668700
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -377,6 +353,51 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrapHeader
   trapName: Clamp
+--- !u!114 &5217128594222847466
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2893538759217496779}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d54b084106aee904cabb37e28de18d5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CustomSpring
+  _useImpulseSolver: 1
+  _calculateRestLengthAtStart: 1
+  configuration:
+    restLength:
+      ValueHundredths: 0
+    springConstant:
+      ValueHundredths: 0
+    dampingConstant:
+      ValueHundredths: 0
+  bodyA: {fileID: 0}
+  bodyB: {fileID: 0}
+  bodyAAttachmentOffset:
+    X:
+      ValueHundredths: 0
+    Y:
+      ValueHundredths: 0
+  bodyBAttachmentOffset:
+    X:
+      ValueHundredths: 0
+    Y:
+      ValueHundredths: 0
+--- !u!114 &8044860637660121863
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2893538759217496779}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e5df004d3917264991d5ae1a0adf7b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CustomSpringVisual
 --- !u!1 &7559200935826510168
 GameObject:
   m_ObjectHideFlags: 0

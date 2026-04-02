@@ -17,8 +17,14 @@ public class IntHundredthDrawer : PropertyDrawer
 
         // Show as a float in the inspector, store as int hundredths
         float currentFloat = valueHundredths.intValue / 100f;
+        
+        EditorGUI.BeginChangeCheck();  // Track if user actually changed something
         float newFloat = EditorGUI.FloatField(position, label, currentFloat);
-        valueHundredths.intValue = Mathf.RoundToInt(newFloat * 100f);
+        
+        if (EditorGUI.EndChangeCheck())  // Only write if value changed
+        {
+            valueHundredths.intValue = Mathf.RoundToInt(newFloat * 100f);
+        }
 
         EditorGUI.EndProperty();
     }

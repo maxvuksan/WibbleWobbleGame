@@ -15,7 +15,8 @@ public class ColourPalette{
 
     public Color[] primaryBlockColours;
     public Color backgroundColourSilouttes;
-    public Color backgroundColour;
+    public Color backgroundColourA;
+    public Color backgroundColourB;
 }
 
 /// <summary>
@@ -23,14 +24,9 @@ public class ColourPalette{
 /// </summary>
 public class ColourPaletteManager : MonoBehaviour
 {
-    [SerializeField] private ColourPaletteGroup colourPalettes;
+    [SerializeField] private ColourPaletteGroup _colourPalettes;
 
-
-    // ______________________________
-
-    [SerializeField] SpriteRenderer backgroundRenderer;
-
-    // ______________________________
+    [SerializeField] private Material _checkeredBackgroundMaterial;
 
     /// <summary>
     /// Callback is triggered when the colour palette is set
@@ -39,6 +35,7 @@ public class ColourPaletteManager : MonoBehaviour
 
     public static ColourPaletteManager Singleton;
 
+    public int ActivePaletteIndex = 0;
 
     private int _activePaletteIndex;
 
@@ -53,7 +50,7 @@ public class ColourPaletteManager : MonoBehaviour
         Singleton = this;
         DontDestroyOnLoad(this.gameObject);
 
-        LoadPalette(0);
+        LoadPalette(ActivePaletteIndex);
     }
     
 
@@ -63,29 +60,36 @@ public class ColourPaletteManager : MonoBehaviour
             
             case ColourTarget.COLOUR_PRIMARY: 
 
-                colourIndex %= colourPalettes.palettes[_activePaletteIndex].primaryBlockColours.Length;
-                return colourPalettes.palettes[_activePaletteIndex].primaryBlockColours[colourIndex];
+                colourIndex %= _colourPalettes.palettes[_activePaletteIndex].primaryBlockColours.Length;
+                return _colourPalettes.palettes[_activePaletteIndex].primaryBlockColours[colourIndex];
             
             case ColourTarget.COLOUR_BACKGROUND_SILOUTTES:
-                return colourPalettes.palettes[_activePaletteIndex].backgroundColourSilouttes;
+                return _colourPalettes.palettes[_activePaletteIndex].backgroundColourSilouttes;
         }        
         
         return Color.black;
     }
 
+    void Update()
+    {
+        if (ActivePaletteIndex != _activePaletteIndex)
+        {
+            LoadPalette(ActivePaletteIndex);
+        }
+    }
 
     void LoadPalette(int paletteIndex)
     {
         _activePaletteIndex = paletteIndex;
 
-
         // React to new palette on exisiting elements
 
-        ColourPalette palette = colourPalettes.palettes[_activePaletteIndex];
-
-        backgroundRenderer.color = palette.backgroundColour;
+        ColourPalette palette = _colourPalettes.palettes[_activePaletteIndex];
 
         OnColourPaletteChange?.Invoke();
+
+        _checkeredBackgroundMaterial.SetColor("_ColorA", palette.backgroundColourA);
+        _checkeredBackgroundMaterial.SetColor("_ColorB", palette.backgroundColourB);
     }
 
 

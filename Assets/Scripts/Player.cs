@@ -5,6 +5,7 @@ using FixMath.NET;
 using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using Volatile;
 
 
@@ -15,9 +16,11 @@ public class CustomPlayerTickState : ICustomTickState<CustomPlayerTickState>
     public long _lastJumpPhysicsTick = int.MinValue;
     public long _lastJumpInputPhysicsTick = int.MinValue;
     public long _lastGroundedPhysicsTick = int.MinValue;
+    public ulong _groundedBodyEntityId = 0;
     public bool _trueGrounded = false;
     public bool _grounded;
     public int _directionFacing = 1;
+    public bool _playerAliveLocally = true;
 
     public CustomPlayerTickState Clone()
     {
@@ -73,8 +76,8 @@ public class Player : NetworkBehaviour
     [SerializeField] private float horizontalCounterStretch = 0.5f;
     [SerializeField] private float stepRotation = 15.0f;
     [SerializeField] private float stepSpriteDuration = 0.2f;
-    [SerializeField] private GameObject footstepPrefab;    
-    [SerializeField] private SpriteRenderer playerRenderer;
+    [SerializeField] private GameObject _footstepPrefab;    
+    [SerializeField] private SpriteRenderer _playerRenderer;
     [SerializeField] private SpriteRenderer eyeRenderer;
     [SerializeField] private Animator animator;
 
@@ -144,6 +147,7 @@ public class Player : NetworkBehaviour
         CustomPhysics.OnPhysicsTick += OnPhysicsTick;
         CustomPhysics.OnTurnOffPhysicsSimulation += OnTurnOffPhysicsSimulation;
         CustomPhysics.OnPostPhysicsTick += OnPostPhysicsTick;
+        CustomPhysics.OnPrePhysicsTick += OnPrePhysicsTick;
     }
 
     public override void OnDestroy()
@@ -152,6 +156,7 @@ public class Player : NetworkBehaviour
         CustomPhysics.OnPhysicsTick -= OnPhysicsTick;
         CustomPhysics.OnTurnOffPhysicsSimulation -= OnTurnOffPhysicsSimulation;
         CustomPhysics.OnPostPhysicsTick -= OnPostPhysicsTick;
+        CustomPhysics.OnPrePhysicsTick -= OnPrePhysicsTick;
     }
 
     public override void OnNetworkSpawn()
@@ -164,8 +169,9 @@ public class Player : NetworkBehaviour
 
     public void ResetState()
     {
-        _originalColour = playerRenderer.color;
+        _originalColour = _playerRenderer.color;
         _tickState._trueGrounded = false;
+        _tickState._playerAliveLocally = true;
         _stepSpriteDurationTracked = 0;
 
         animator.SetBool("HasWon", false);
@@ -182,13 +188,13 @@ public class Player : NetworkBehaviour
     {
         if (doesExist)
         {
-            playerRenderer.enabled = true;
+            _playerRenderer.enabled = true;
             eyeRenderer.enabled = true;
         }
         else
         {
             eyeRenderer.enabled = false;
-            playerRenderer.enabled = false;
+            _playerRenderer.enabled = false;
         }
         transform.localScale = new Vector3(1,1,1);
     }
@@ -207,18 +213,18 @@ public class Player : NetworkBehaviour
 
     public void SetColour(Color color)
     {
-        _originalColour = playerRenderer.color;
-        playerRenderer.color = color;   
+        _originalColour = _playerRenderer.color;
+        _playerRenderer.color = color;   
     }
 
     public void SpawnFootstepPrefab()
     {
-        if (!_tickState._grounded || footstepPrefab == null)
+        if (!_tickState._grounded || _footstepPrefab == null)
         {
             return;
         }
 
-        Instantiate(footstepPrefab, groundCheckPosition.position, Quaternion.identity);
+        Instantiate(_footstepPrefab, groundCheckPosition.position, Quaternion.identity);
     }
 
     public void Update()
@@ -235,30 +241,36 @@ public class Player : NetworkBehaviour
 
         // sync with body
         _tickState = _physicsBody.CustomState as CustomPlayerTickState;
-        
+
+        if (!_tickState._playerAliveLocally)
+        {
+            _playerRenderer.gameObject.SetActive(false);
+            return;
+        }
+        else
+        {
+            _playerRenderer.gameObject.SetActive(true);
+        }
+
         ReflectSpriteState();
     }
 
 
     public void SetPosition(IntHundredthVector2 position)
     {
-        _physicsBody.SetPosition(position);
+        _physicsBody.TeleportPosition(position);
     }
 
     public void HitTrap(Vector2 directionToApplyForce)
     {
-        // allow owners to trigger there own death
-        if (!IsOwner)
+        if (!_tickState._playerAliveLocally)
         {
             return;            
         }
 
-        if (!_playerHeader.Alive.Value)
-        {
-            return;
-        }
-
-        _playerHeader.SetPlayerAliveRpc(false);
+        _tickState._playerAliveLocally = false;
+        _physicsBody.Body.IsEnabled = _tickState._playerAliveLocally;
+        //_playerHeader.SetPlayerAliveRpc(false);
 
         //rb.AddForce(directionToApplyForce, ForceMode2D.Impulse);
         //PlayerDataManager.Singleton.Callback_OnPlayerDeath(_playerHeader.PlayerIndex.Value);
@@ -268,7 +280,6 @@ public class Player : NetworkBehaviour
 
     public void OnPlayerDeath()
     {
-        //GetComponent<Collider2D>().enabled = false;
         AudioManager.Singleton.Play("Player_Death");
     }
 
@@ -282,14 +293,24 @@ public class Player : NetworkBehaviour
         }
     }
 
-    public void OnPhysicsTick()
+    public void OnPrePhysicsTick()
     {
         // Sync local tickstate with snapshot state...
         _tickState = _physicsBody.CustomState as CustomPlayerTickState;
+    }
+
+    public void OnPhysicsTick()
+    {
+        _physicsBody.Body.IsEnabled = _tickState._playerAliveLocally;
+
+        if (!_tickState._playerAliveLocally)
+        {
+            return;
+        }
 
         if (_driver.PlayerInputs.InputJump == PlayerJumpInput.JumpPressed)
         {
-             _tickState._lastJumpInputPhysicsTick = CustomPhysics.Tick;
+            _tickState._lastJumpInputPhysicsTick = CustomPhysics.Tick;
         }
 
         PerformGroundedCheck();
@@ -309,6 +330,8 @@ public class Player : NetworkBehaviour
             canJump = true;
         }
         
+        ApplyMovementPhysics();
+
         if(canJump && _tickState._grounded) // & _jumpInputTracked > 0
         {
             Jump(true);
@@ -318,7 +341,6 @@ public class Player : NetworkBehaviour
             _tickState._lastJumpInputPhysicsTick = int.MinValue;
         }
 
-        ApplyMovementPhysics();
         ApplyPositionWrapAroundInLobby();    
 
     
@@ -337,6 +359,15 @@ public class Player : NetworkBehaviour
         Fix64 targetSpeed = (Fix64)_driver.PlayerInputs.GetMoveDirection() * _maxSpeed;
 
         _physicsBody.LinearVelocityX = targetSpeed;
+
+        if (_tickState._trueGrounded)
+        {
+            CustomPhysicsBody otherBody = CustomPhysicsSpace.Singleton.GetBody(_tickState._groundedBodyEntityId);
+
+            _physicsBody.LinearVelocityX = targetSpeed + otherBody.LinearVelocityX;
+        }
+
+
     }
 
 
@@ -352,24 +383,35 @@ public class Player : NetworkBehaviour
         Fix64 maxY = (Fix64)25;
         Fix64 maxX = (Fix64)41;
 
+        bool setPosOccured = false;
+        
         // Vertical wrap
         if (_physicsBody.Position.y < minY)
         {
             _physicsBody.PositionY = maxY;
+            setPosOccured = true;
         }
         else if (_physicsBody.Position.y > maxY)
         {
             _physicsBody.PositionY = minY;
+            setPosOccured = true;
         }
 
         // Horizontal wrap 
         if (_physicsBody.Position.x < minX)
         {
             _physicsBody.PositionX = maxX;
+            setPosOccured = true;
         }
         else if (_physicsBody.Position.x > maxX)
         {
             _physicsBody.PositionX = minX;
+            setPosOccured = true;
+        }
+
+        if (setPosOccured)
+        {
+            _physicsBody.SetSkipInterpolationNextFrame(true);
         }
     }
 
@@ -394,7 +436,7 @@ public class Player : NetworkBehaviour
             }
 
             _inAirRotationFactor = Mathf.Clamp(_inAirRotationFactor, -1, 1);
-            playerRenderer.transform.rotation = Quaternion.Euler(0,0,_inAirRotationFactor * stepRotation * _tickState._directionFacing);
+            _playerRenderer.transform.rotation = Quaternion.Euler(0,0,_inAirRotationFactor * stepRotation * _tickState._directionFacing);
 
         }
         else
@@ -402,7 +444,7 @@ public class Player : NetworkBehaviour
             _inAirRotationFactor = 0;
         
             // I dont mind doing floating point math here because the result is not stored + its for visuals not actual simulation
-            bool isMoving = Mathf.Abs((float)_physicsBody.LinearVelocityX) > 1.0f;
+            bool isMoving = _driver.PlayerInputs.InputMoveDirection != PlayerMoveInput.None; 
             
             if(isMoving) {
                 
@@ -426,25 +468,25 @@ public class Player : NetworkBehaviour
 
                 if (_isLeftFootForward)
                 {
-                    playerRenderer.transform.rotation = Quaternion.Euler(0,0,stepRotation * _tickState._directionFacing);
+                    _playerRenderer.transform.rotation = Quaternion.Euler(0,0,stepRotation * _tickState._directionFacing);
                     localAnimState = PlayerSpriteJiggleAnimations.ANIM_STEP_LEFT;
                 }
                 else
                 {
-                    playerRenderer.transform.rotation = Quaternion.Euler(0,0,-stepRotation * _tickState._directionFacing);
+                    _playerRenderer.transform.rotation = Quaternion.Euler(0,0,-stepRotation * _tickState._directionFacing);
                     localAnimState = PlayerSpriteJiggleAnimations.ANIM_STEP_RIGHT;
                 }
             }
             else
             {
-                playerRenderer.transform.rotation = Quaternion.Euler(0,0,0);
+                _playerRenderer.transform.rotation = Quaternion.Euler(0,0,0);
                 //_stepSpriteDurationTracked = 0;
                 localAnimState = PlayerSpriteJiggleAnimations.ANIM_IDLE;
             }
         }
 
         _animState.SetState(_spriteJiggleAnimationMappings[(int)localAnimState]);
-        playerRenderer.transform.localScale = new Vector3((1 - Mathf.Abs(horizontalCounterStretch * (float)_physicsBody.LinearVelocityY)) * _tickState._directionFacing, 1 + Mathf.Abs(verticalStretch * (float)_physicsBody.LinearVelocityY), 1);
+        _playerRenderer.transform.localScale = new Vector3((1 - Mathf.Abs(horizontalCounterStretch * (float)_physicsBody.LinearVelocityY)) * _tickState._directionFacing, 1 + Mathf.Abs(verticalStretch * (float)_physicsBody.LinearVelocityY), 1);
     }
 
 
@@ -455,10 +497,12 @@ public class Player : NetworkBehaviour
             new VoltVector2(Fix64.Zero, -Fix64.One), 
             (Fix64)_groundRayLength);
 
+
         
         _tickState._trueGrounded = _groundedRaycastResult.Hit;
         if (_tickState._trueGrounded)
         {
+            _tickState._groundedBodyEntityId = _groundedRaycastResult.Body.GetDesiredEntityId();
             _tickState._lastGroundedPhysicsTick = CustomPhysics.Tick;
         }
 

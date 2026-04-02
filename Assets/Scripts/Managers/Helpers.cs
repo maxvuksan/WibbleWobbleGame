@@ -13,9 +13,11 @@ public class Helpers : MonoBehaviour
 
 
     [HideInInspector] public float networkPhysicsTickRate = 1f / 60f;
+
     public LayerMask layerWorldUi;
     public int foregroundRenderingLayer;
     public int uiRenderingLayer;
+    public Material RopeMaterial;
 
 
     public static Helpers Singleton;
@@ -94,7 +96,6 @@ public class Helpers : MonoBehaviour
         }
     }
 
-
     /// <summary>
     /// Given a transform component converts a local point to world space deterministcally using Fix64 maths
     /// </summary>
@@ -118,6 +119,21 @@ public class Helpers : MonoBehaviour
         
         // Translate
         return new VoltVector2(posX + rotatedX, posY + rotatedY);
+    }
+
+    public static VoltVector2 TransformLocalPositionByParentTransform(CustomTransform parentTransform, VoltVector2 position)
+    {
+        Fix64 cos = Fix64.Cos(parentTransform.GetRotationRadiansFix64());
+        Fix64 sin = Fix64.Sin(parentTransform.GetRotationRadiansFix64());
+
+        VoltVector2 transformedPosition = new VoltVector2(
+                cos * position.x - sin * position.y,
+                sin * position.x + cos * position.y
+        );
+        
+        transformedPosition += parentTransform.GetPositionFix64();
+
+        return transformedPosition;
     }
 
 }

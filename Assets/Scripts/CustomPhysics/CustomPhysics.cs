@@ -66,6 +66,7 @@ public class CustomPhysics : MonoBehaviour
     public static Action OnTurnOffPhysicsSimulation;
     public static Action OnStartPhysicsSimulation;
     public static Action OnRecomputeEntityIds;
+    public static Action OnPostRecomputeEntityIds;
 
     private static long? _pendingRollbackTick = null;
     private static double _simulationStartTime = -1;
@@ -73,7 +74,12 @@ public class CustomPhysics : MonoBehaviour
         
     void Awake()
     {
+        CustomConstraintSolver.Initialize();
         ClearSnapshotHistoryRingBuffer();
+    }
+    void OnDestroy()
+    {
+        CustomConstraintSolver.Cleanup();
     }
 
     public static void BeginRollbackDebug()
@@ -110,6 +116,7 @@ public class CustomPhysics : MonoBehaviour
 
         OnPrePhysicsTick?.Invoke();
         OnPhysicsTick?.Invoke();
+        CustomConstraintSolver.SolveAllConstraints();
         CustomPhysicsSpace.Singleton.UpdateSimulation(TimeBetweenTicks);
         OnPostPhysicsTick?.Invoke();
 
@@ -153,6 +160,12 @@ public class CustomPhysics : MonoBehaviour
 
     public static void TurnOffSimulation()
     {
+        // the simulation is already off
+        if(_simulationStartTime == -1)
+        {
+            return;
+        }
+        
         ResetTickToZero();
         _simulationStartTime = -1;
         ClearSnapshotHistoryRingBuffer();
@@ -184,6 +197,9 @@ public class CustomPhysics : MonoBehaviour
             OnRecomputeEntityIds?.Invoke(); 
             CustomPhysicsSpace.Singleton.RebuildBodyDictionary();
             CustomPhysicsSpace.Singleton.SortWorld();
+            OnPostRecomputeEntityIds?.Invoke();
+            
+            
 
             _recomputeEntityIdsRequired = false;
         }

@@ -24,6 +24,8 @@ public class CustomPhysicsSpace : MonoBehaviour
 {
     [Header("Configuration")]
     public bool VisualInterpolation = true;
+    [Range(1, 24)]
+    public int ConstraintIterations = 4;
     private Fix64 _configWorldDampingFix64 = VoltConfig.DEFAULT_DAMPING;
 
     public Dictionary<ulong, CustomPhysicsBody> Bodies => _bodies;
@@ -60,7 +62,7 @@ public class CustomPhysicsSpace : MonoBehaviour
     /// <summary>
     /// Initalize the physics simulation space
     /// </summary>
-    private void InitWorld() 
+    public void InitWorld() 
     {
         _simulationSpace = new VoltWorld(_configWorldDampingFix64);
     }
@@ -130,10 +132,10 @@ public class CustomPhysicsSpace : MonoBehaviour
 
         foreach(var body in _bodies)
         {
-            if(body.Value.BodyType != CustomBodyType.Static)
-            {
-                body.Value.ApplySimulationToGameObject();
-            }
+            //if(body.Value.BodyType != CustomBodyType.Static)
+            //{
+            body.Value.ApplySimulationToGameObject();
+            //}
         }
     }
 
@@ -156,6 +158,7 @@ public class CustomPhysicsSpace : MonoBehaviour
 
             CustomSimulationSnapshot.BodyState bodyState = new()
             {
+                IsEnabled = voltBody.IsEnabled,
                 Velocity = voltBody.LinearVelocity,
                 Angle = voltBody.Angle,
                 AngularVelocity = voltBody.AngularVelocity,
@@ -194,6 +197,7 @@ public class CustomPhysicsSpace : MonoBehaviour
 
             voltBody.PartialReset();
 
+            voltBody.IsEnabled = body.IsEnabled;
             voltBody.BiasRotation = body.BiasRotation;
             voltBody.BiasVelocity = body.BiasVelocity;
             voltBody.LinearVelocity = body.Velocity;

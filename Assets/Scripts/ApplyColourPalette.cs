@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
 /// Applies 
@@ -17,6 +18,7 @@ public class ApplyColourPalette : MonoBehaviour
     public struct SpriteRendererToSetColour
     {
         public SpriteRenderer[] SpriteRenderers;
+        public Graphic[] Graphics;
         public ColourData ColourData;
     }
 
@@ -30,6 +32,10 @@ public class ApplyColourPalette : MonoBehaviour
         ApplyColourData();
     }
 
+    void OnDestroy() {
+        ColourPaletteManager.Singleton.OnColourPaletteChange -= ApplyColourData;
+    }
+
     void ApplyColourData()
     {
         for(int i = 0; i < _targets.Length; i++)
@@ -38,6 +44,10 @@ public class ApplyColourPalette : MonoBehaviour
             for(int s = 0; s < _targets[i].SpriteRenderers.Length; s++)
             {
                 _targets[i].SpriteRenderers[s].color = colour;
+            }
+            for(int s = 0; s < _targets[i].Graphics.Length; s++)
+            {
+                _targets[i].Graphics[s].color = colour;
             }
         }
     }
