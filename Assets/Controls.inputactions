@@ -178,6 +178,17 @@
                 },
                 {
                     "name": "",
+                    "id": "9f488106-9a42-41e2-bdd6-267d443aface",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MainButton",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "a5156a54-18f1-48ed-bbde-4d3791a716d3",
                     "path": "<Gamepad>/rightTrigger",
                     "interactions": "",

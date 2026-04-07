@@ -59,16 +59,6 @@ public class TrapButton : NetworkBehaviour
 
     public void PressTrap()
     {
-        // iterate over each player, set the selected trap to this trap (what we pressed) and check if everyone has selected a trap...
-
-        Debug.Log("PressButton" + NetworkManager.Singleton.LocalClientId);
-
-        //for(int i = 0; i < PlayerDataManager.Singleton.PlayerCount; i++)
-        //{
-        //    if(PlayerDataManager.Singleton.PlayerData[i].index == WorldUIButton.PlayerIndexWhoPressedButton)
-        //    {
-        //    }
-        //}
         ulong clientId = NetworkManager.Singleton.LocalClientId;
         PlayerDataManager.Singleton.PlayerData[(int)clientId].networkedPlayerHeader.SetSelectedTrapRpc(_trapIndex);
     }

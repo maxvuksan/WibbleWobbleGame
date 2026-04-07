@@ -1,0 +1,111 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3dbcf24fad50bc42ba1233e48fc3539, type: 3}
+  m_Name: Loops
+  m_EditorClassIdentifier: Assembly-CSharp::LoopingSoundGroup
+  sounds:
+  - label: Dark1_Pads
+    scheduledForSyncing: 0
+    clip: {fileID: 8300000, guid: 26a3084d0513a0f438174bff68d1386c, type: 3}
+    loopCategory: 0
+    volumeScaler: 1
+    volume: 0.665
+    minVolumeScale: 0.735
+    maxVolumeScale: 1
+    volumeModulationRate: 2.44
+    fadeTimeTracked: 0.1
+    fadeTime: 0.1
+    fadeIn: 1
+  - label: Dark1_Shots
+    scheduledForSyncing: 0
+    clip: {fileID: 8300000, guid: 22ff56e9802eaa844a0b51c256f05b09, type: 3}
+    loopCategory: 0
+    volumeScaler: 1
+    volume: 0.424
+    minVolumeScale: 1
+    maxVolumeScale: 1
+    volumeModulationRate: 0
+    fadeTimeTracked: 0.1
+    fadeTime: 0.1
+    fadeIn: 1
+  - label: General_NoiseShimmer
+    scheduledForSyncing: 0
+    clip: {fileID: 8300000, guid: 425b7333a8caf8e41a4dbefcc151508f, type: 3}
+    loopCategory: 0
+    volumeScaler: 1
+    volume: 0.288
+    minVolumeScale: 1
+    maxVolumeScale: 1
+    volumeModulationRate: 0
+    fadeTimeTracked: 0.1
+    fadeTime: 0.1
+    fadeIn: 1
+  - label: General_NoiseShimmerBursts
+    scheduledForSyncing: 0
+    clip: {fileID: 8300000, guid: 02c4800d16c5a1f4fb8e67633391ee23, type: 3}
+    loopCategory: 0
+    volumeScaler: 1
+    volume: 0
+    minVolumeScale: 1
+    maxVolumeScale: 1
+    volumeModulationRate: 0
+    fadeTimeTracked: 0
+    fadeTime: 0.1
+    fadeIn: 1
+  - label: General_NoiseShimmerBursts
+    scheduledForSyncing: 0
+    clip: {fileID: 8300000, guid: 02c4800d16c5a1f4fb8e67633391ee23, type: 3}
+    loopCategory: 0
+    volumeScaler: 1
+    volume: 0.159
+    minVolumeScale: 1
+    maxVolumeScale: 1
+    volumeModulationRate: 0
+    fadeTimeTracked: 0.1
+    fadeTime: 0.1
+    fadeIn: 1
+  - label: Light1_Pads
+    scheduledForSyncing: 0
+    clip: {fileID: 8300000, guid: 470241573740b634e8a390134634b891, type: 3}
+    loopCategory: 0
+    volumeScaler: 1
+    volume: 0.545
+    minVolumeScale: 1
+    maxVolumeScale: 1
+    volumeModulationRate: 0
+    fadeTimeTracked: 0.1
+    fadeTime: 0.1
+    fadeIn: 0
+  - label: Light1_Swells
+    scheduledForSyncing: 0
+    clip: {fileID: 8300000, guid: 606aa2e6ff2ff60408fd0425a01262ac, type: 3}
+    loopCategory: 0
+    volumeScaler: 1
+    volume: 0.382
+    minVolumeScale: 1
+    maxVolumeScale: 1
+    volumeModulationRate: 0
+    fadeTimeTracked: 0.1
+    fadeTime: 0.1
+    fadeIn: 0
+  - label: Light1_Strings
+    scheduledForSyncing: 0
+    clip: {fileID: 8300000, guid: 18a6b3aa64d9ca947b5ac84c7ebfa1a1, type: 3}
+    loopCategory: 0
+    volumeScaler: 1
+    volume: 0.291
+    minVolumeScale: 1
+    maxVolumeScale: 1
+    volumeModulationRate: 0
+    fadeTimeTracked: 0.1
+    fadeTime: 0.1
+    fadeIn: 0

@@ -43,6 +43,8 @@ public class PlayerRoundOverScreen : NetworkBehaviour
                 PlayerDataManager.Singleton.PlayerData[i].networkedPlayerHeader.HasWon.Value)
             {
                 int newScore = PlayerDataManager.Singleton.PlayerData[i].networkedPlayerHeader.Score.Value + 1;
+
+                print("New Score: " + newScore);
                 
                 PlayerDataManager.Singleton.PlayerData[i].networkedPlayerHeader.SetScoreRpc(newScore);
                 PlayerDataManager.Singleton.PlayerData[i].networkedPlayerHeader.SetHasWonRpc(false);

@@ -33,24 +33,47 @@ public static class CustomConstraintSolver
         SortConstraints();
     }
 
-    public static void SortConstraints()
+public static void SortConstraints()
+{
+    _constraints.Sort((a, b) => 
     {
-        _constraints.Sort((a, b) => 
-        {
-            // Normalize each constraint's body pair (smaller ID first)
-            ulong idA_min = System.Math.Min(GetBodyID(a.bodyA), GetBodyID(a.bodyB));
-            ulong idA_max = System.Math.Max(GetBodyID(a.bodyA), GetBodyID(a.bodyB));
-            
-            ulong idB_min = System.Math.Min(GetBodyID(b.bodyA), GetBodyID(b.bodyB));
-            ulong idB_max = System.Math.Max(GetBodyID(b.bodyA), GetBodyID(b.bodyB));
-            
-            // Compare
-            int minCompare = idA_min.CompareTo(idB_min);
-            if (minCompare != 0) return minCompare;
-            
-            return idA_max.CompareTo(idB_max);
-        });
-    }
+        ulong idA1 = GetBodyID(a.bodyA);
+        ulong idA2 = GetBodyID(a.bodyB);
+        ulong idA_min = idA1 < idA2 ? idA1 : idA2;
+        ulong idA_max = idA1 > idA2 ? idA1 : idA2;
+        
+        ulong idB1 = GetBodyID(b.bodyA);
+        ulong idB2 = GetBodyID(b.bodyB);
+        ulong idB_min = idB1 < idB2 ? idB1 : idB2;
+        ulong idB_max = idB1 > idB2 ? idB1 : idB2;
+        
+        // Primary: Compare min IDs
+        if (idA_min != idB_min)
+            return idA_min < idB_min ? -1 : 1;
+        
+        // Secondary: Compare max IDs
+        if (idA_max != idB_max)
+            return idA_max < idB_max ? -1 : 1;
+        
+        // Tie breaker if both springs have the same connected bodies
+
+        if (a.bodyAAttachmentOffset.X.ValueHundredths != b.bodyAAttachmentOffset.X.ValueHundredths)
+            return a.bodyAAttachmentOffset.X.ValueHundredths.CompareTo(b.bodyAAttachmentOffset.X.ValueHundredths);
+        
+        if (a.bodyAAttachmentOffset.Y.ValueHundredths != b.bodyAAttachmentOffset.Y.ValueHundredths)
+            return a.bodyAAttachmentOffset.Y.ValueHundredths.CompareTo(b.bodyAAttachmentOffset.Y.ValueHundredths);
+        
+        if (a.bodyBAttachmentOffset.X.ValueHundredths != b.bodyBAttachmentOffset.X.ValueHundredths)
+            return a.bodyBAttachmentOffset.X.ValueHundredths.CompareTo(b.bodyBAttachmentOffset.X.ValueHundredths);
+        
+        if (a.bodyBAttachmentOffset.Y.ValueHundredths != b.bodyBAttachmentOffset.Y.ValueHundredths)
+            return a.bodyBAttachmentOffset.Y.ValueHundredths.CompareTo(b.bodyBAttachmentOffset.Y.ValueHundredths);
+        
+        // Otherwise... completely identical constraints
+
+        return 0;
+    });
+}
 
     private static ulong GetBodyID(CustomPhysicsBody body)
     {

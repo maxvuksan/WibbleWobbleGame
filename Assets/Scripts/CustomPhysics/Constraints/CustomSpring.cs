@@ -10,20 +10,17 @@ public class CustomSpring : CustomConstraint
     private bool _restLengthCalculated = false;
 
     public SpringData configuration;    
-    [SerializeField] private IntHundredthVector2 bodyAAttachmentOffset;
-    [SerializeField] private IntHundredthVector2 bodyBAttachmentOffset;
-
 
     override public void Awake()
     {
         base.Awake();       
-        CustomPhysics.OnPhysicsTick += OnPhysicsTick;
+        CustomPhysics.OnPrePhysicsTick += OnPrePhysicsTick;
         CustomPhysics.OnStartPhysicsSimulation += OnStartPhysicsSimulation;
     }
     override public void OnDestroy()
     {
         base.OnDestroy();    
-        CustomPhysics.OnPhysicsTick -= OnPhysicsTick;
+        CustomPhysics.OnPrePhysicsTick -= OnPrePhysicsTick;
         CustomPhysics.OnStartPhysicsSimulation -= OnStartPhysicsSimulation;
     }
 
@@ -32,11 +29,11 @@ public class CustomSpring : CustomConstraint
         _restLengthCalculated = false;
     }
 
-    private void OnPhysicsTick()
+    private void OnPrePhysicsTick()
     {
         if(bodyA != null && bodyB != null)
         {
-            if(_calculateRestLengthAtStart && CustomPhysics.Tick == 1)
+            if(_calculateRestLengthAtStart && CustomPhysics.Tick == 0)
             {
                 Fix64 distance = VoltVector2.Distance(GetStartAnchorPosition(), GetEndAnchorPosition());
                 configuration.restLength = new IntHundredth(distance);
@@ -48,7 +45,7 @@ public class CustomSpring : CustomConstraint
     override public void ApplySubStep(Fix64 deltaTime)
     {
 
-        if(bodyA == null || bodyB == null || !_restLengthCalculated)
+        if(bodyA == null || bodyB == null || (!_restLengthCalculated && _calculateRestLengthAtStart))
         {
             return;
         }
@@ -88,20 +85,38 @@ public class CustomSpring : CustomConstraint
 
     public VoltVector2 GetStartAnchorPosition()
     {
+        if(bodyA == null)
+        {
+            return VoltVector2.zero;
+        }
+
         return RotatePoint(bodyAAttachmentOffset, bodyA.Angle) + bodyA.Position;
     }
 
     public VoltVector2 GetEndAnchorPosition()
     {
+        if(bodyB == null)
+        {
+            return VoltVector2.zero;
+        }
+
         return RotatePoint(bodyBAttachmentOffset, bodyB.Angle) + bodyB.Position;
     }
 
+    public Vector3 GetFloatStartAnchorPosition()
+    {
+        return bodyA.transform.TransformPoint(bodyAAttachmentOffset.AsVector2());
+    }
+    public Vector3 GetFloatEndAnchorPosition()
+    {
+        return bodyB.transform.TransformPoint(bodyBAttachmentOffset.AsVector2());
+    }
     private void OnDrawGizmos()
     {
         if (bodyA == null || bodyB == null) return;
 
-        Vector2 pointA = bodyA.transform.TransformPoint(bodyAAttachmentOffset.AsVector2());
-        Vector2 pointB = bodyB.transform.TransformPoint(bodyBAttachmentOffset.AsVector2());
+        Vector2 pointA = GetFloatStartAnchorPosition();
+        Vector2 pointB = GetFloatEndAnchorPosition();
          
         Gizmos.color = Color.magenta;
         Gizmos.DrawLine(pointA, (Vector2)bodyA.transform.position);

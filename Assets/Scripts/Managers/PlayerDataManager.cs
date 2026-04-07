@@ -40,7 +40,6 @@ public class PlayerDataSet
     public DeviceType deviceType;
 
     //__________________________________________________
-    
 }
 
 
@@ -91,6 +90,7 @@ public class PlayerDataManager : NetworkBehaviour
 
     // callbacks ________________________________________________
     
+    public Action OnRegisterPlayer;
     public Action<ulong> OnPlayerDeath;   
     public Action<ulong> OnPlayerCompleteRound;
     public Action OnRoundEnd;   
@@ -309,6 +309,8 @@ public class PlayerDataManager : NetworkBehaviour
         dataSet.mouseCursor.SetOutlineColour(perIndexStyling.colourMouseOutline);
 
         _playerData.Add(dataSet);
+
+        OnRegisterPlayer?.Invoke();
     }
 
     public NetworkPlayerHeader GetNetworkPlayerHeader(ulong playerIndex)
@@ -354,13 +356,6 @@ public class PlayerDataManager : NetworkBehaviour
         return list;
     }
 
-    public void ServerResetAllPlayerStates()
-    {
-        for(int i = 0; i < PlayerCount; i++)
-        {
-            PlayerData[i].networkedPlayerHeader.ResetStateRpc();
-        }
-    }
 
     [Rpc(SendTo.Everyone, InvokePermission = RpcInvokePermission.Server)]
     public void SetActiveAllPlayersRpc(bool activeState)
@@ -400,19 +395,10 @@ public class PlayerDataManager : NetworkBehaviour
 
 
 
-    public void SetActiveAllMouseCursors(bool activeState, bool moveToUILayer)
+    public void SetActiveAllMouseCursors(bool activeState)
     {
         for(int i = 0; i < PlayerCount; i++)
         {
-            if (moveToUILayer)
-            {
-                _playerData[i].mouseCursor.SetRenderLayer(Helpers.Singleton.uiRenderingLayer);
-            }
-            else
-            {
-                _playerData[i].mouseCursor.SetRenderLayer(Helpers.Singleton.foregroundRenderingLayer);
-            }
-
             _playerData[i].mouseCursor.gameObject.SetActive(activeState);
         }
     }

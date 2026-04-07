@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d35e664d0867034f95b2bcbd2bf6420, type: 3}
+  m_Name: Profiles
+  m_EditorClassIdentifier: Assembly-CSharp::LoopingProfiles
+  Profiles:
+  - Name: Dark1
+    LoopsToEnable:
+    - Dark1_Pads
+    - Dark1_Shots
+    - General_NoiseShimmer
+    - General_NoiseShimmerBursts
+  - Name: Light1
+    LoopsToEnable:
+    - Light1_Pads
+    - Light1_Swells
+    - Light1_Strings
+    - General_NoiseShimmer
+    - General_NoiseShimmerBursts
+  - Name: Silence
+    LoopsToEnable:
+    - General_NoiseShimmerBursts
+    - Light1_Swells

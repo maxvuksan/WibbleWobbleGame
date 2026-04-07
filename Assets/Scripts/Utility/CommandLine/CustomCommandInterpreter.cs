@@ -8,15 +8,48 @@ public class CustomCommandInterpreter : CommandInterpreter
 {
     public override void InterpretCommand(string commandString)
     {
-        string[] args = SplitCommand(commandString);
-        CommandLineSubmission submission = new();
 
+        string[] args = SplitCommand(commandString);
+        
+        if(args.Length == 0)
+        {
+            CommandLine.SetOpen(false);
+            return;
+        }
+
+        CommandLineSubmission submission = new();
 
         if(args[0] == "help")
         {
             submission.MessageType = CommandLineMessageType.Print;
-            submission.Message = "/help, /clear, /level, /game";
+            submission.Message = "/help, /clear, /level, /game, /colour, /debug";
             CommandLine.PushLineToHistory(submission);
+        }
+        else if(args[0] == "debug")
+        {
+            Configuration.Singleton.DebugMode = !Configuration.Singleton.DebugMode;
+            CommandLine.SetOpen(false);
+        }
+        else if(args[0] == "colour")
+        {
+            if(args.Length == 1)
+            {
+                submission.MessageType = CommandLineMessageType.Print;
+                submission.Message = "/colour [colourPaletteIndex]";
+                CommandLine.PushLineToHistory(submission);
+            }
+            else if(int.TryParse(args[1], out int colourPaletteIndex))
+            {
+                // Successfully parsed the color palette index
+                ColourPaletteManager.Singleton.LoadPalette(colourPaletteIndex);
+                CommandLine.SetOpen(false);
+            }
+            else
+            {
+                submission.MessageType = CommandLineMessageType.Error;
+                submission.Message = "Invalid color palette index. Must be a number.";
+                CommandLine.PushLineToHistory(submission);
+            }
         }
         else if(args[0] == "clear")
         {
@@ -50,7 +83,7 @@ public class CustomCommandInterpreter : CommandInterpreter
                 {
                     if(args.Length == 3)
                     {
-                        bool result = LevelManager.Singleton.LoadLevelFromFile(args[2]);
+                        bool result = LevelManager.Singleton.ServerLoadLevelFromFile(args[2]);
 
                         if (result)
                         {

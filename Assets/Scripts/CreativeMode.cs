@@ -14,6 +14,9 @@ public class CreativeMode : NetworkBehaviour
 
     void Start()
     {
+        return;
+        // TODO: Remove this in favour of new ui based creative menu
+        
         for(int i = 0; i < _trapDictionary.traps.Length; i++)
         {
             GameObject trapUi = Instantiate(_trapDictionary.traps[i].behaviorPrefab, _uiParent);
@@ -23,6 +26,9 @@ public class CreativeMode : NetworkBehaviour
 
     void Update()
     {
+        return;
+        // TODO: Remove this in favour of new ui based creative menu
+
         float scrollDelta = Input.GetAxis("Mouse ScrollWheel");
 
         if(scrollDelta > 0)

@@ -40,7 +40,8 @@ public static class Spring
         VoltVector2 delta = p2 - p1;
         Fix64 distance = delta.magnitude;
         
-        if (distance == Fix64.Zero)
+        Fix64 epsilon = (Fix64)1 / (Fix64)10000; // Small threshold
+        if (distance < epsilon)
         {
             return VoltVector2.zero;
         }

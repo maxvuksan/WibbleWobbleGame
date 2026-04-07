@@ -1,4 +1,5 @@
 using UnityEngine;
+using Volatile;
 
 public class CustomSpringVisual : RopeVisual
 {
@@ -8,12 +9,23 @@ public class CustomSpringVisual : RopeVisual
     {
         base.Awake();
         spring = GetComponent<CustomSpring>();
+
     }
 
-    void Update()
+    public override void OnDestroy()
     {
-        SetPoint(0, spring.GetStartAnchorPosition());
-        SetPoint(1, spring.GetEndAnchorPosition());
+        base.OnDestroy();
+    }
+
+    private void Update()
+    {
+        if(spring == null)
+        {
+            return;
+        }
+
+        SetPoint(0, spring.GetFloatStartAnchorPosition());
+        SetPoint(1, spring.GetFloatEndAnchorPosition());
     }
 
 

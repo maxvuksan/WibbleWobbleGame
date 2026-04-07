@@ -109,11 +109,27 @@ public class TrapPlacementArea : NetworkBehaviour
         return trapDictionary.traps[_trapNameToIndexMap[dictionaryKey]];        
     }
 
+    public int GetTrapIndexByName(string dictionaryKey)
+    {
+        return _trapNameToIndexMap[dictionaryKey];        
+    }
+
+    [Rpc(SendTo.Everyone, InvokePermission = RpcInvokePermission.Server)]
+    public void ServerSpawnAllTrapInstancesRpc()
+    {
+        DestroyAndClearAllTrapInstances();
+        SpawnAllTrapInstances();
+    }
+
     /// <summary>
     /// Reacting to a change in the networked traps list
     /// </summary>
     private void OnPlacedTrapsChanged(NetworkListEvent<TrapPlacedData> changeEvent)
     {
+
+        SpawnAllTrapInstances();
+
+        return;
         if(GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.GameState_SelectingTrap || 
            GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.GameState_PreviewLevel ||
            GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.GameState_PlacingTrap ||
@@ -172,7 +188,6 @@ public class TrapPlacementArea : NetworkBehaviour
     /// </summary>
     public void ServerClearTraps()
     {
-        DestroyAndClearAllTrapInstances();
         _networkedPlacedTrapDataList.Clear();
     }
 
@@ -305,7 +320,6 @@ public class TrapPlacementArea : NetworkBehaviour
             IntHundredth positionX = new IntHundredth { ValueHundredths = sortedTrapsToPlace[i].positionXHundredths };
             IntHundredth positionY = new IntHundredth { ValueHundredths = sortedTrapsToPlace[i].positionYHundredths };
 
-            Debug.Log("Spawning: " + trapDictionary.traps[sortedTrapsToPlace[i].trapTypeIndex].name);
             GameObject newObj = Instantiate(trapDictionary.traps[sortedTrapsToPlace[i].trapTypeIndex].behaviorPrefab, _trapStaticInstanceParent);
             newObj.SetActive(false);
 
@@ -355,25 +369,6 @@ public class TrapPlacementArea : NetworkBehaviour
             }
         }
 
-
-        // // ensure traps children are positioned prior to next draw operation... (before the physics starts)
-        // for(int i = 0; i < _trapInstances.Count; i++)
-        // {
-        //     CustomPhysicsBody[] bodies = _trapInstances[i].GetComponentsInChildren<CustomPhysicsBody>();
-        //     for(int b = 0; b < bodies.Length; b++)
-        //     {   
-        //         if(bodies[b].ParentBody == null)
-        //         {
-        //             continue;
-        //         }
-        //         VoltVector2 initalPosition = bodies[b].GetInitalPositionAccountingForParent();
-        //         bodies[b].transform.position = new Vector2((float)initalPosition.x, (float)initalPosition.y);
-        //     }
-        // }
-
-        // TODO: This is the problem, we are recomputing 0 traps...
-        Debug.Log("there is X sorted traps = " + sortedTrapsToPlace.Count);
-        Debug.Log("there is X traps = " + _trapInstances.Count);
         CustomPhysics.RecomputeEntityIds();
     }
 

@@ -13,26 +13,39 @@ using Volatile;
 
 public class CustomPlayerTickState : ICustomTickState<CustomPlayerTickState>
 {
-    public long _lastJumpPhysicsTick = int.MinValue;
+    // when was the jump input last pressed
     public long _lastJumpInputPhysicsTick = int.MinValue;
+
+    // when was a jump operation last performed...
+    public long _lastJumpPhysicsTick = int.MinValue;
+    public long _lastWallLeftJumpPhysicsTick = int.MinValue;
+    public long _lastWallRightJumpPhysicsTick = int.MinValue;
+
+    public PlayerMoveInput _playerGroundedDirection; // none if the main ground ray hits
+    public Fix64 _horizontalOverrideVelocityX;
+    public Fix64 _horizontalControlFactor; // if 0 we have control, otherwise this value approaches zero
+
+    // when did we last touch a surface...
     public long _lastGroundedPhysicsTick = int.MinValue;
-    public ulong _groundedBodyEntityId = 0;
+    public long _lastWallLeftTouchPhysicsTick = int.MinValue;
+    public long _lastWallRightTouchPhysicsTick = int.MinValue;
+    
+
+    public ulong? _groundedBodyEntityId = 0;
+    public VoltVector2 _groundedNormalDirection;
     public bool _trueGrounded = false;
+    
     public bool _grounded;
+    public bool _touchingLeftWall;
+    public bool _touchingRightWall;
+
     public int _directionFacing = 1;
     public bool _playerAliveLocally = true;
 
     public CustomPlayerTickState Clone()
-    {
-        return new CustomPlayerTickState
-        {
-            _lastJumpPhysicsTick = this._lastJumpPhysicsTick,
-            _lastJumpInputPhysicsTick = this._lastJumpInputPhysicsTick,
-            _lastGroundedPhysicsTick = this._lastGroundedPhysicsTick,
-            _trueGrounded = this._trueGrounded,
-            _grounded = this._grounded,
-            _directionFacing = this._directionFacing,
-        };
+    {   
+        // TODO: We should ensure no reference types are cloned (no reference types should be present in TickState)
+        return (CustomPlayerTickState)this.MemberwiseClone();
     }
 
     public override string ToString()
@@ -57,15 +70,23 @@ public class Player : NetworkBehaviour
     [SerializeField] private int _jumpTickDisableBuffer = 25; // minimum allowed time between jumps (prevents spamming)
     [SerializeField] private int _jumpTickInputBuffer = 30; // holds onto jump inputs for this amount of time, will then jump when grounded next
     [SerializeField] private int _groundedTickBuffer = 20;
+    [SerializeField] private IntHundredth _horizontalControlDuration;
+    [SerializeField] private IntHundredth _wallJumpHeight;
+    [SerializeField] private IntHundredth _wallJumpXVelocity;
     
     // some of these variables are stored as var/10 to allow us to store as integer for determinism restriction
-    [SerializeField] private int _jumpHeightTenths = 160;      // 16.0
-    [SerializeField] private int _maxSpeedTenths = 80;         // 8.0
+    [SerializeField] private IntHundredth _jumpHeight = 160;      // 16.0
+    [SerializeField] private IntHundredth _maxSpeed = 80;         // 8.0
     [SerializeField] private int _groundRayLengthTenths = 2;   // 0.2
     [SerializeField] private int _groundRayYOffsetTenths = 15; // 1.5
+    [SerializeField] private IntHundredth _wallRayXOffset;
+    [SerializeField] private IntHundredth _wallRayYOffset;
+    [SerializeField] private IntHundredth _wallRayLength;
+    [SerializeField] private IntHundredth _groundRaySidesXOffset;
+    [SerializeField] private IntHundredth _groundRaySidesYOffset;
+    [SerializeField] private IntHundredth _groundRaySidesLength;
 
-    private Fix64 _jumpHeight => (Fix64)_jumpHeightTenths / (Fix64)10;
-    private Fix64 _maxSpeed => (Fix64)_maxSpeedTenths / (Fix64)10;
+    // TODO: Use new IntHundreth type
     private Fix64 _groundRayLength => (Fix64)_groundRayLengthTenths / (Fix64)10;
     private Fix64 _groundRayYOffset => (Fix64)_groundRayYOffsetTenths / (Fix64)10;
 
@@ -80,7 +101,6 @@ public class Player : NetworkBehaviour
     [SerializeField] private SpriteRenderer _playerRenderer;
     [SerializeField] private SpriteRenderer eyeRenderer;
     [SerializeField] private Animator animator;
-
     [SerializeField] private CustomPhysicsBody _physicsBody;
     [SerializeField] private PlayerInputDriver _driver;
 
@@ -119,6 +139,14 @@ public class Player : NetworkBehaviour
 
     // state
     private CustomPhysicsRayResult _groundedRaycastResult;
+    private CustomPhysicsRayResult _groundedLeftRaycastResult;
+    private CustomPhysicsRayResult _groundedRightRaycastResult;
+
+    private CustomPhysicsRayResult _topLeftRaycastResult;
+    private CustomPhysicsRayResult _topRightRaycastResult;
+    private CustomPhysicsRayResult _bottomLeftRaycastResult;
+    private CustomPhysicsRayResult _bottomRightRaycastResult;
+    
     private float _inAirRotationFactor = 0;
     private float _stepSpriteDurationTracked;
     private bool _isLeftFootForward;
@@ -130,23 +158,23 @@ public class Player : NetworkBehaviour
         _inputHandler = FindFirstObjectByType<ControllerInputHandler>();
         _physicsBody = GetComponent<CustomPhysicsBody>();
 
-
-        _physicsBody.CustomState = _tickState;
     }
 
     private void OnTurnOffPhysicsSimulation()
     {
         _tickState = new CustomPlayerTickState();
-        _physicsBody.CustomState = _tickState;
 
         ResetState();
+
+        _tickState._playerAliveLocally = false;
+        _physicsBody.CustomState = _tickState;
     }
 
     void Start()
     {
         CustomPhysics.OnPhysicsTick += OnPhysicsTick;
         CustomPhysics.OnTurnOffPhysicsSimulation += OnTurnOffPhysicsSimulation;
-        CustomPhysics.OnPostPhysicsTick += OnPostPhysicsTick;
+        CustomPhysics.OnStartPhysicsSimulation += ResetState;
         CustomPhysics.OnPrePhysicsTick += OnPrePhysicsTick;
     }
 
@@ -155,7 +183,7 @@ public class Player : NetworkBehaviour
         base.OnDestroy();
         CustomPhysics.OnPhysicsTick -= OnPhysicsTick;
         CustomPhysics.OnTurnOffPhysicsSimulation -= OnTurnOffPhysicsSimulation;
-        CustomPhysics.OnPostPhysicsTick -= OnPostPhysicsTick;
+        CustomPhysics.OnStartPhysicsSimulation -= ResetState;
         CustomPhysics.OnPrePhysicsTick -= OnPrePhysicsTick;
     }
 
@@ -163,20 +191,34 @@ public class Player : NetworkBehaviour
     {
         base.OnNetworkSpawn();
 
-        ResetState();
+        OnTurnOffPhysicsSimulation();
     }
-
 
     public void ResetState()
     {
         _originalColour = _playerRenderer.color;
         _tickState._trueGrounded = false;
-        _tickState._playerAliveLocally = true;
         _stepSpriteDurationTracked = 0;
 
+        _tickState._playerAliveLocally = true;
+        
+        _tickState._horizontalOverrideVelocityX = Fix64.Zero;
+        _tickState._horizontalControlFactor = Fix64.Zero;
+        _tickState._lastJumpInputPhysicsTick = int.MinValue;
+        _tickState._lastJumpPhysicsTick = int.MinValue;
+        _tickState._lastGroundedPhysicsTick = int.MinValue;
+
+        _tickState._lastWallLeftTouchPhysicsTick = int.MinValue;
+        _tickState._lastWallLeftJumpPhysicsTick = int.MinValue;
+        _tickState._lastWallLeftJumpPhysicsTick = int.MinValue;
+        _tickState._lastWallRightJumpPhysicsTick = int.MinValue;
+
+        _physicsBody.CustomState = _tickState;
+        _physicsBody.LinearVelocity = VoltVector2.zero;
+
+        _playerHeader.SetHasWonRpc(false);
         animator.SetBool("HasWon", false);
 
-        _physicsBody.LinearVelocity = VoltVector2.zero;
 
     }
 
@@ -199,7 +241,6 @@ public class Player : NetworkBehaviour
         transform.localScale = new Vector3(1,1,1);
     }
     
-
     public void ReachEnd()
     {
         //PlayerDataManager.Singleton.PlayerData[_playerHeader.Index].hasWon = true;
@@ -229,16 +270,6 @@ public class Player : NetworkBehaviour
 
     public void Update()
     {
-        if (!_playerHeader.Alive.Value || _playerHeader.HasWon.Value || !_playerHeader.PlayerExistsInWorld.Value)
-        {
-            return;
-        }
-
-        // Don't update visuals during resimulation
-        if (CustomPhysics.Resimulating){
-            return;
-        }
-
         // sync with body
         _tickState = _physicsBody.CustomState as CustomPlayerTickState;
 
@@ -254,7 +285,6 @@ public class Player : NetworkBehaviour
 
         ReflectSpriteState();
     }
-
 
     public void SetPosition(IntHundredthVector2 position)
     {
@@ -283,13 +313,42 @@ public class Player : NetworkBehaviour
         AudioManager.Singleton.Play("Player_Death");
     }
 
-    public void Jump(bool playSound = true)
-    {
-        _physicsBody.LinearVelocity = new VoltVector2(_physicsBody.LinearVelocityX, _jumpHeight);
+    public void Jump(PlayerMoveInput wallJumpDirection = PlayerMoveInput.None)
+    {   
 
-        if (playSound)
+        _tickState._lastJumpInputPhysicsTick = CustomPhysics.Tick;
+
+        switch(wallJumpDirection){
+
+            // regular jump
+            case PlayerMoveInput.None:
+                _physicsBody.LinearVelocity = new VoltVector2(_physicsBody.LinearVelocityX, _jumpHeight);
+                _tickState._lastJumpPhysicsTick = CustomPhysics.Tick;
+                break;
+
+            // wall jumps...
+            case PlayerMoveInput.LeftPressed:
+                
+                _physicsBody.LinearVelocity = new VoltVector2(_wallJumpXVelocity, _wallJumpHeight);
+                _tickState._lastWallLeftJumpPhysicsTick = CustomPhysics.Tick;
+                _tickState._directionFacing = 1;
+                _tickState._horizontalControlFactor = _horizontalControlDuration;
+                _tickState._horizontalOverrideVelocityX = _wallJumpXVelocity;
+                break;
+
+            case PlayerMoveInput.RightPressed:
+                _physicsBody.LinearVelocity = new VoltVector2(-_wallJumpXVelocity.AsFix64(), _wallJumpHeight);
+                _tickState._lastWallRightJumpPhysicsTick = CustomPhysics.Tick;
+                _tickState._directionFacing = -1;
+                _tickState._horizontalControlFactor = _horizontalControlDuration;
+                _tickState._horizontalOverrideVelocityX = -_wallJumpXVelocity.AsFix64();
+                break;
+        }
+
+
+        if (!CustomPhysics.Resimulating)
         {
-            //AudioManager.Singleton.Play("Player_Jump");
+            AudioManager.Singleton.Play("Player_Jump");
         }
     }
 
@@ -314,30 +373,51 @@ public class Player : NetworkBehaviour
         }
 
         PerformGroundedCheck();
+        PerformWallChecks();
 
+
+        if(_tickState._horizontalControlFactor > Fix64.Zero)
+        {
+            _tickState._horizontalControlFactor -= CustomPhysics.TimeBetweenTicks;
+        }
+        else
+        {
+            _tickState._horizontalControlFactor = Fix64.Zero;
+        }
+        Fix64 horizontalControl_t = _tickState._horizontalControlFactor / _horizontalControlDuration.AsFix64();
+
+        // we can move, and we also are more than 50% in control horizontally
         int moveDirection = _driver.PlayerInputs.GetMoveDirection();
-        if(moveDirection != 0)
+        if(
+            moveDirection != 0 && 
+            ((horizontalControl_t * (Fix64)10) < (Fix64)5))
         {
             _tickState._directionFacing = moveDirection;
         }
 
+        // determine if we are within specified buffer/grace periods
+        bool jumpInput = _tickState._lastJumpInputPhysicsTick >= CustomPhysics.Tick - _jumpTickInputBuffer;
+        bool canVerticalJump = _tickState._lastJumpPhysicsTick < CustomPhysics.Tick - _jumpTickDisableBuffer;
+        bool canWallJumpLeft = _tickState._lastWallLeftJumpPhysicsTick < CustomPhysics.Tick - _jumpTickDisableBuffer;
+        bool canWallJumpRight = _tickState._lastWallRightJumpPhysicsTick < CustomPhysics.Tick - _jumpTickDisableBuffer;
 
-        bool canJump = false;
-        if(_tickState._lastJumpInputPhysicsTick >= CustomPhysics.Tick - _jumpTickInputBuffer &&
-            _tickState._lastJumpPhysicsTick < CustomPhysics.Tick - _jumpTickDisableBuffer
-        )
+        ApplyMovementPhysics(horizontalControl_t);
+
+        if(jumpInput) // & _jumpInputTracked > 0
         {
-            canJump = true;
-        }
-        
-        ApplyMovementPhysics();
+            if (canVerticalJump && _tickState._grounded)
+            {
+                Jump(_tickState._playerGroundedDirection);
+            }
+            else if (canWallJumpLeft && _tickState._touchingLeftWall)
+            {
+                Jump(PlayerMoveInput.LeftPressed);
+            }
+            else if (canWallJumpRight && _tickState._touchingRightWall)
+            {
+                Jump(PlayerMoveInput.RightPressed);
+            }
 
-        if(canJump && _tickState._grounded) // & _jumpInputTracked > 0
-        {
-            Jump(true);
-
-            _tickState._lastJumpPhysicsTick = CustomPhysics.Tick;
-            _tickState._lastGroundedPhysicsTick = int.MinValue; // ensure we are no longer considered grounded
             _tickState._lastJumpInputPhysicsTick = int.MinValue;
         }
 
@@ -348,28 +428,56 @@ public class Player : NetworkBehaviour
         _physicsBody.CustomState = _tickState;
     }
 
-    public void OnPostPhysicsTick()
-    {
-        
-    }
-
-
-    public void ApplyMovementPhysics()
+    public void ApplyMovementPhysics(Fix64 horizontalControl_t)
     {
         Fix64 targetSpeed = (Fix64)_driver.PlayerInputs.GetMoveDirection() * _maxSpeed;
+        targetSpeed = Fix64.Lerp(targetSpeed, _tickState._horizontalOverrideVelocityX, horizontalControl_t);
 
-        _physicsBody.LinearVelocityX = targetSpeed;
+        if(targetSpeed < Fix64.Zero){
+
+            // wall is on left, dont push into wall
+            if(_topLeftRaycastResult.Hit && _topLeftRaycastResult.Body.BodyType == CustomBodyType.Static)
+            {
+                targetSpeed = Fix64.Zero;
+            }
+            if(_bottomLeftRaycastResult.Hit && _bottomLeftRaycastResult.Body.BodyType == CustomBodyType.Static)
+            {
+                targetSpeed = Fix64.Zero;
+            }
+        }
+
+        if(targetSpeed > Fix64.Zero){
+            
+            // wall is on right, dont push into wall
+            if(_topRightRaycastResult.Hit && _topRightRaycastResult.Body.BodyType == CustomBodyType.Static)
+            {
+                targetSpeed = Fix64.Zero;
+            }
+            if(_bottomRightRaycastResult.Hit && _bottomRightRaycastResult.Body.BodyType == CustomBodyType.Static)
+            {
+                targetSpeed = Fix64.Zero;
+            }
+        }
+
 
         if (_tickState._trueGrounded)
-        {
-            CustomPhysicsBody otherBody = CustomPhysicsSpace.Singleton.GetBody(_tickState._groundedBodyEntityId);
+        {   
+            _physicsBody.LinearVelocityX = targetSpeed;
 
-            _physicsBody.LinearVelocityX = targetSpeed + otherBody.LinearVelocityX;
+            // only make body follow if we are not moving
+            if(_tickState._groundedBodyEntityId != null && targetSpeed == Fix64.Zero)
+            {
+                CustomPhysicsBody otherBody = CustomPhysicsSpace.Singleton.GetBody(_tickState._groundedBodyEntityId.Value);
+                _physicsBody.LinearVelocityX = targetSpeed + otherBody.LinearVelocityX;
+            }
+        }
+        else
+        {
+            _physicsBody.LinearVelocityX = targetSpeed;
         }
 
 
     }
-
 
     private void ApplyPositionWrapAroundInLobby()
     {
@@ -490,6 +598,29 @@ public class Player : NetworkBehaviour
     }
 
 
+    bool NormalIsValidForGrounding(VoltVector2 normal)
+    {   
+        // we assume the normal is already normalized
+
+        // convert to larger number for comparision
+        normal *= (Fix64)10;
+
+        // 10 is perfect floor, 0 is wall
+        if(normal.y > (Fix64)6)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    void SetCurrentGroundedBody(CustomPhysicsRayResult raycast, ulong? groundedBodyEntityId)
+    {
+        _tickState._groundedBodyEntityId = groundedBodyEntityId;
+        _tickState._groundedNormalDirection = _groundedRaycastResult.Normal;
+        _tickState._trueGrounded = true;
+        _tickState._lastGroundedPhysicsTick = CustomPhysics.Tick;
+    }
+
     void PerformGroundedCheck()
     {
         _groundedRaycastResult = CustomPhysics.Raycast(
@@ -497,13 +628,34 @@ public class Player : NetworkBehaviour
             new VoltVector2(Fix64.Zero, -Fix64.One), 
             (Fix64)_groundRayLength);
 
+        _groundedLeftRaycastResult = CustomPhysics.Raycast(
+            _physicsBody.Position + new VoltVector2(-(Fix64)_groundRaySidesXOffset, -(Fix64)_groundRaySidesYOffset), 
+            new VoltVector2(Fix64.Zero, -Fix64.One), 
+            (Fix64)_groundRaySidesLength);
 
+        _groundedRightRaycastResult = CustomPhysics.Raycast(
+            _physicsBody.Position + new VoltVector2(_groundRaySidesXOffset, -(Fix64)_groundRaySidesYOffset), 
+            new VoltVector2(Fix64.Zero, -Fix64.One), 
+            (Fix64)_groundRaySidesLength);
         
-        _tickState._trueGrounded = _groundedRaycastResult.Hit;
-        if (_tickState._trueGrounded)
+        if (_groundedRaycastResult.Hit)
         {
-            _tickState._groundedBodyEntityId = _groundedRaycastResult.Body.GetDesiredEntityId();
-            _tickState._lastGroundedPhysicsTick = CustomPhysics.Tick;
+            SetCurrentGroundedBody(_groundedRaycastResult, _groundedRaycastResult.Body.GetDesiredEntityId());
+            _tickState._playerGroundedDirection = PlayerMoveInput.None;
+        }
+        else if (_groundedLeftRaycastResult.Hit && NormalIsValidForGrounding(_groundedLeftRaycastResult.Normal))
+        {
+            SetCurrentGroundedBody(_groundedLeftRaycastResult, null);
+            _tickState._playerGroundedDirection = PlayerMoveInput.LeftPressed;
+        }
+        else if (_groundedRightRaycastResult.Hit && NormalIsValidForGrounding(_groundedRightRaycastResult.Normal))
+        {
+            SetCurrentGroundedBody(_groundedRightRaycastResult, null);
+            _tickState._playerGroundedDirection = PlayerMoveInput.RightPressed;
+        }
+        else
+        {
+            _tickState._trueGrounded = false;
         }
 
         _tickState._grounded = false;
@@ -513,18 +665,67 @@ public class Player : NetworkBehaviour
         }
     }
 
+    void PerformWallChecks()
+    {
+        _topLeftRaycastResult = CustomPhysics.Raycast(
+            _physicsBody.Position + new VoltVector2(-_wallRayXOffset.AsFix64(), (Fix64)_wallRayYOffset.AsFix64()), 
+            new VoltVector2(-Fix64.One, Fix64.Zero), 
+            (Fix64)_wallRayLength);
+
+        _bottomLeftRaycastResult = CustomPhysics.Raycast(
+            _physicsBody.Position + new VoltVector2(-_wallRayXOffset.AsFix64(), -(Fix64)_wallRayYOffset.AsFix64()), 
+            new VoltVector2(-Fix64.One, Fix64.Zero), 
+            (Fix64)_wallRayLength);
+
+        if(_topLeftRaycastResult.Hit || _bottomLeftRaycastResult.Hit)
+        {
+            _tickState._lastWallLeftTouchPhysicsTick = CustomPhysics.Tick;
+        }
+
+        _topRightRaycastResult = CustomPhysics.Raycast(
+            _physicsBody.Position + new VoltVector2(_wallRayXOffset.AsFix64(), (Fix64)_wallRayYOffset.AsFix64()), 
+            new VoltVector2(Fix64.One, Fix64.Zero), 
+            (Fix64)_wallRayLength);
+
+        _bottomRightRaycastResult = CustomPhysics.Raycast(
+            _physicsBody.Position + new VoltVector2(_wallRayXOffset.AsFix64(), -(Fix64)_wallRayYOffset.AsFix64()), 
+            new VoltVector2(Fix64.One, Fix64.Zero), 
+            (Fix64)_wallRayLength);
+
+        if(_topRightRaycastResult.Hit || _bottomRightRaycastResult.Hit)
+        {
+            _tickState._lastWallRightTouchPhysicsTick = CustomPhysics.Tick;
+        }
+
+        _tickState._touchingLeftWall = _tickState._lastWallLeftTouchPhysicsTick >= CustomPhysics.Tick - _groundedTickBuffer;
+        _tickState._touchingRightWall = _tickState._lastWallRightTouchPhysicsTick >= CustomPhysics.Tick - _groundedTickBuffer;
+
+    }
+
     void OnDrawGizmos()
     {  
-        Gizmos.color = _groundedRaycastResult.Hit ? Color.red : Color.green;
+        DrawRaycastResultGizmo(_groundedRaycastResult);
+        DrawRaycastResultGizmo(_groundedLeftRaycastResult);
+        DrawRaycastResultGizmo(_groundedRightRaycastResult);
+        
+        DrawRaycastResultGizmo(_topLeftRaycastResult);
+        DrawRaycastResultGizmo(_topRightRaycastResult);
+        DrawRaycastResultGizmo(_bottomLeftRaycastResult);
+        DrawRaycastResultGizmo(_bottomRightRaycastResult);
+    }
+
+    void DrawRaycastResultGizmo(CustomPhysicsRayResult rayResult)
+    {
+        Gizmos.color = rayResult.Hit ? Color.red : Color.green;
 
         Vector3 start = new Vector3(
-            (float)_groundedRaycastResult.Origin.x,
-            (float)_groundedRaycastResult.Origin.y,
+            (float)rayResult.Origin.x,
+            (float)rayResult.Origin.y,
             0);
 
         Vector3 end = new Vector3(
-            (float)_groundedRaycastResult.Destination.x,
-            (float)_groundedRaycastResult.Destination.y,
+            (float)rayResult.Destination.x,
+            (float)rayResult.Destination.y,
             0);
 
         Gizmos.DrawLine(start, end);

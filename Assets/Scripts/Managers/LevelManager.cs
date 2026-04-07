@@ -75,7 +75,11 @@ public class LevelManager : NetworkBehaviour
 
             Destroy(children[i].gameObject);
         }
-        TrapPlacementArea.Singleton.SpawnAllTrapInstances();
+
+        if (IsServer)
+        {
+            TrapPlacementArea.Singleton.ServerSpawnAllTrapInstancesRpc();
+        }
     }
 
     /// <summary>
@@ -113,12 +117,14 @@ public class LevelManager : NetworkBehaviour
     /// </summary>
     /// <param name="relativeDataPath">The file location relative to the Application.persistantDataPath, omit the file extension</param>
     /// <returns>True if the load was successful, false otherwise</returns>
-    public bool LoadLevelFromFile(string relativeDataPath)
+    public bool ServerLoadLevelFromFile(string relativeDataPath)
     {
         if (!IsServer)
         {
             return false;
         }
+
+        ServerLoadLevel(0);
 
         LevelSaveData saveData = DataSerializer.LoadObjectFromFile<LevelSaveData>(relativeDataPath + ".level");
     

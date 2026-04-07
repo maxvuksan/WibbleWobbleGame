@@ -14,7 +14,8 @@ public class Helpers : MonoBehaviour
 
     [HideInInspector] public float networkPhysicsTickRate = 1f / 60f;
 
-    public LayerMask layerWorldUi;
+    public int layerWorldUi;
+    public LayerMask layerMaskWorldUi;
     public int foregroundRenderingLayer;
     public int uiRenderingLayer;
     public Material RopeMaterial;
@@ -30,26 +31,30 @@ public class Helpers : MonoBehaviour
 
     public Vector2 PixelScreenToWorld(Vector2 input)
     {
-        return Camera.main.ScreenToWorldPoint(input);
-
-
-        // Dynamically get screen resolution
-        float screenWidth = Screen.width;
-        float screenHeight = Screen.height;
-
-        // Scale input to render texture resolution
-        float scaleX = cameraTexture.width / screenWidth;
-        float scaleY = cameraTexture.height / screenHeight;
-
-        scaleX *= screenWidth / (outputRect.rect.width * canvas.transform.localScale.x);
-        scaleY *= screenHeight / (outputRect.rect.height * canvas.transform.localScale.y);
-
-        Vector2 scaledInput = new Vector2(input.x * scaleX, input.y * scaleY);
-
-        // Convert to world position
-        Vector3 screenPos = new Vector3(scaledInput.x, scaledInput.y, Mathf.Abs(Camera.main.transform.position.z));
-        Vector3 worldPos = Camera.main.ScreenToWorldPoint(screenPos);
-
+        // Get mouse position in canvas space
+        Vector2 canvasPos;
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            outputRect,
+            input,
+            canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera,
+            out canvasPos
+        );
+        
+        // Normalize to [0,1] range
+        float normalizedX = (canvasPos.x / outputRect.rect.width) + 0.5f;
+        float normalizedY = (canvasPos.y / outputRect.rect.height) + 0.5f;
+        
+        // Scale to render texture resolution
+        float rtX = normalizedX * cameraTexture.width;
+        float rtY = normalizedY * cameraTexture.height;
+        
+        // Convert to world position using the camera that renders to the texture
+        Vector3 worldPos = Camera.main.ScreenToWorldPoint(new Vector3(
+            rtX, 
+            rtY, 
+            Mathf.Abs(Camera.main.transform.position.z)
+        ));
+        
         return new Vector2(worldPos.x, worldPos.y);
     }
 

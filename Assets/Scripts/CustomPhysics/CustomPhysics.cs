@@ -114,11 +114,13 @@ public class CustomPhysics : MonoBehaviour
 
         RecordSnapshotToHistory();
 
-        OnPrePhysicsTick?.Invoke();
-        OnPhysicsTick?.Invoke();
+        Helpers.SafeInvoke(OnPrePhysicsTick, "OnPrePhysicsTick");
+        Helpers.SafeInvoke(OnPhysicsTick, "OnPhysicsTick");
+        
         CustomConstraintSolver.SolveAllConstraints();
         CustomPhysicsSpace.Singleton.UpdateSimulation(TimeBetweenTicks);
-        OnPostPhysicsTick?.Invoke();
+
+        Helpers.SafeInvoke(OnPostPhysicsTick, "OnPostPhysicsTick");
 
         LogTick();
         Tick++;
@@ -165,11 +167,11 @@ public class CustomPhysics : MonoBehaviour
         {
             return;
         }
-        
+
+        OnTurnOffPhysicsSimulation?.Invoke();
         ResetTickToZero();
         _simulationStartTime = -1;
         ClearSnapshotHistoryRingBuffer();
-        OnTurnOffPhysicsSimulation?.Invoke();
         SimulateFutureAtRegularTickRate = false;
         SimuluateFutureAtRegularTickRateStartTick = long.MaxValue;
     }
@@ -195,11 +197,11 @@ public class CustomPhysics : MonoBehaviour
         {
             DeterminismLogger.ClearLog();
             OnRecomputeEntityIds?.Invoke(); 
+
             CustomPhysicsSpace.Singleton.RebuildBodyDictionary();
             CustomPhysicsSpace.Singleton.SortWorld();
+            
             OnPostRecomputeEntityIds?.Invoke();
-            
-            
 
             _recomputeEntityIdsRequired = false;
         }
@@ -333,7 +335,6 @@ public class CustomPhysics : MonoBehaviour
 
         _resimulatingDepth--;
     }
-
 
     /// <summary>
     /// Shoots a ray in the CustomPhysics simulation space

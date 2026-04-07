@@ -58,12 +58,19 @@ public class PlayerInputDriver : NetworkBehaviour
     private ControllerInputHandler _input;
 
     private double _clockOffset = 0;
+
+
+    // these variables are only relevant to the server...
+    private int _clientsSyncedCount = 0;
+    private int _totalClientsToSync = 0;
+    private HashSet<ulong> _syncedClientIds = new HashSet<ulong>();
+
     
 
     void Awake()
     {   
         _input = FindFirstObjectByType<ControllerInputHandler>();
-
+        
         CustomPhysics.OnPrePhysicsTick += OnPrePhysicsTick;
         CustomPhysics.OnTurnOffPhysicsSimulation += OnTurnOffPhysicsSimulation;
 
@@ -85,28 +92,19 @@ public class PlayerInputDriver : NetworkBehaviour
         base.OnNetworkSpawn();
     }
 
-    public void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.U))
-        {
-            CustomPhysics.BeginRollbackDebug();
-            RequestRollbackAndResimulate(1);
-        }
-    }
-
-
+    /// <summary>
+    /// For the simulation locally for each client, we must ensure they start at the time real world time. 
+    /// To do this be perform a ping-pong operation to determine the latency/difference in each clients percieved real world time
     public void SyncClockThenStartPhysics()
     {
-        if (IsServer)
+        if (IsServer && IsOwner)
         {
-            // Host has no offset
             _clockOffset = 0;
-            // wait for ping pong to start simulation... MAY NEED REFACTOR FOR MULTIPLE CLIENTS
-
+            _syncedClientIds.Clear();
+            
             if(NetworkManager.ConnectedClients.Count == 1)
             {
                 ServerBeginPhysicsSimulation(0.0d);
-                print("starting physics");
             }
             else
             {
@@ -138,11 +136,14 @@ public class PlayerInputDriver : NetworkBehaviour
         CustomPhysics.ScheduleStart(localStartTime);
     }
 
-    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
-    void PingServerRpc(double clientSendTime)
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    void PingServerRpc(double clientSendTime, RpcParams rpcParams = default)
     {
+        ulong clientId = rpcParams.Receive.SenderClientId;  // ID of the RPC sender
+    
         PongClientRpc(clientSendTime, Time.realtimeSinceStartupAsDouble);
-        ServerBeginPhysicsSimulation();
+        
+        _syncedClientIds.Add(clientId);
     }
 
     [Rpc(SendTo.NotServer)]
@@ -155,31 +156,28 @@ public class PlayerInputDriver : NetworkBehaviour
         // What is the server's clock right now, from my perspective
         double estimatedServerNow = serverReceiveTime + oneWayLatency;
         _clockOffset = estimatedServerNow - clientReceiveTime;
+
+        // tell the server we can begin the simulation
+        SignalReadyToServerRpc();
     }
 
-
-    // public override void OnNetworkSpawn()
-    // {
-    //     base.OnNetworkSpawn();
+    [Rpc(SendTo.Server)]
+    void SignalReadyToServerRpc(RpcParams rpcParams = default)
+    {
+        if (!IsServer) return;
         
-    //     if (IsOwner)
-    //     { 
-    //         Debug.Log($"Player {_playerHeader.PlayerIndex} pre-filling buffer from tick 0 to {InputBufferTickDelay}");
-            
-    //         // Pre-fill buffer with default inputs so simulation can start
-    //         for (int i = 0; i <= InputBufferTickDelay; i++)
-    //         {
-    //             long tick = i;
-    //             PlayerInputAtTick defaultInput = new();
-    //             defaultInput.WasPredicted = true;
-    //             defaultInput.Tick = tick;
+        ulong clientId = rpcParams.Receive.SenderClientId;
+        _syncedClientIds.Add(clientId);
 
-    //             RecordInputToHistory(defaultInput);
+        Debug.Log("Siganl Ready recieved, clients synced: " + _syncedClientIds.Count);
 
-    //             BroadcastInputsForTickRpc(defaultInput.Inputs, tick);
-    //         }
-    //     }
-    // }
+        // Only start once we have a CONFIRMED ready signal from all guests
+        int expectedGuests = NetworkManager.ConnectedClients.Count - 1; 
+        if(_syncedClientIds.Count >= expectedGuests)
+        {
+            ServerBeginPhysicsSimulation();
+        }
+    }
 
 
     public int GetHistoryBufferIndex(long tick)
@@ -241,6 +239,7 @@ public class PlayerInputDriver : NetworkBehaviour
         ClearHistoryRingBuffer();
         _playerInputs.InputJump = PlayerJumpInput.None;
         _playerInputs.InputMoveDirection = PlayerMoveInput.None;
+        _syncedClientIds = new HashSet<ulong>();
     }
 
     void OnPrePhysicsTick()

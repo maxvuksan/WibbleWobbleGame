@@ -14,7 +14,9 @@ public enum ColourTarget
 public class ColourPalette{
 
     public Color[] primaryBlockColours;
+    public Color ropeColour;
     public Color backgroundColourSilouttes;
+
     public Color backgroundColourA;
     public Color backgroundColourB;
 }
@@ -27,6 +29,7 @@ public class ColourPaletteManager : MonoBehaviour
     [SerializeField] private ColourPaletteGroup _colourPalettes;
 
     [SerializeField] private Material _checkeredBackgroundMaterial;
+    [SerializeField] private UnityEngine.UI.Image _dashedBorderRenderer;
 
     /// <summary>
     /// Callback is triggered when the colour palette is set
@@ -53,6 +56,10 @@ public class ColourPaletteManager : MonoBehaviour
         LoadPalette(ActivePaletteIndex);
     }
     
+    public ColourPalette GetColourPalette()
+    {   
+        return _colourPalettes.palettes[_activePaletteIndex];
+    }
 
     public Color GetColour(ColourTarget target, int colourIndex)
     {
@@ -78,8 +85,11 @@ public class ColourPaletteManager : MonoBehaviour
         }
     }
 
-    void LoadPalette(int paletteIndex)
+    public void LoadPalette(int paletteIndex)
     {
+        paletteIndex %= _colourPalettes.palettes.Length;
+
+        ActivePaletteIndex = paletteIndex;
         _activePaletteIndex = paletteIndex;
 
         // React to new palette on exisiting elements
@@ -87,6 +97,8 @@ public class ColourPaletteManager : MonoBehaviour
         ColourPalette palette = _colourPalettes.palettes[_activePaletteIndex];
 
         OnColourPaletteChange?.Invoke();
+
+        _dashedBorderRenderer.color = _colourPalettes.palettes[_activePaletteIndex].backgroundColourSilouttes;
 
         _checkeredBackgroundMaterial.SetColor("_ColorA", palette.backgroundColourA);
         _checkeredBackgroundMaterial.SetColor("_ColorB", palette.backgroundColourB);

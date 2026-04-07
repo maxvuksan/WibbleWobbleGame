@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -13,7 +14,8 @@ public class WorldUIButton : MonoBehaviour
     }
 
     [SerializeField] private GraphicTarget[] _targets;
-    [SerializeField] private UnityEvent _onPress;
+    public UnityEvent OnPress;
+    [HideInInspector] public Action OnPressAction;
     
     private bool _hovering = false;
 
@@ -24,6 +26,9 @@ public class WorldUIButton : MonoBehaviour
     }
     private static ulong _playerWhoPressedButton = 0;
 
+    public bool DoesScaleOnHover = true;
+
+
     void Awake()
     {
         _hovering = false;
@@ -31,17 +36,25 @@ public class WorldUIButton : MonoBehaviour
 
     public void Hover()
     {
-        for (int i = 0; i < _targets.Length; i++)
+        if(_targets != null)
         {
-            _targets[i].spriteRenderer.color = _targets[i].hoverColour;
-
-            ScaleTransform(1);
+            for (int i = 0; i < _targets.Length; i++)
+            {
+                _targets[i].spriteRenderer.color = _targets[i].hoverColour;
+            }   
         }
+
+        ScaleTransform(1);
         _hovering = true;
     }
 
     public void ScaleTransform(float direction)
     {
+        if (!DoesScaleOnHover)
+        {
+            return;
+        }
+
         float scale = transform.localScale.x + direction * Time.deltaTime * 2;
 
         if(scale < 1)
@@ -57,12 +70,12 @@ public class WorldUIButton : MonoBehaviour
 
     public void Press(ulong playerWhoPressedButton)
     {
-        if(_onPress.GetPersistentEventCount() > 0)
-        {
-            _playerWhoPressedButton = playerWhoPressedButton;
-            _onPress.Invoke();
-            _playerWhoPressedButton = 0;
-        }
+        _playerWhoPressedButton = playerWhoPressedButton;
+        OnPress?.Invoke(); 
+        OnPressAction?.Invoke();
+        _playerWhoPressedButton = 0;
+
+        AudioManager.Singleton.Play("Click");
     }
 
     public void Update()
@@ -71,9 +84,13 @@ public class WorldUIButton : MonoBehaviour
         if (!_hovering)
         {
             ScaleTransform(-1);
-            for (int i = 0; i < _targets.Length; i++)
+
+            if(_targets != null)
             {
-                _targets[i].spriteRenderer.color = _targets[i].baseColour;
+                for (int i = 0; i < _targets.Length; i++)
+                {
+                    _targets[i].spriteRenderer.color = _targets[i].baseColour;
+                }                
             }
         }
 

@@ -84,6 +84,16 @@ namespace FixMath.NET
             return new Fix64((value.m_rawValue + mask) ^ mask);
         }
 
+        public static Fix64 Lerp(Fix64 a, Fix64 b, Fix64 t)
+        {
+            // Clamp t between 0 and 1
+            if (t < Fix64.Zero) t = Fix64.Zero;
+            if (t > Fix64.One) t = Fix64.One;
+            
+            return a + (b - a) * t;
+        }
+
+
 
         /// <summary>
         /// Returns the largest integer less than or equal to the specified number.

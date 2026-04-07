@@ -11,8 +11,20 @@ public class RopeVisual : MonoBehaviour
         _lineRenderer = this.AddComponent<LineRenderer>();
         _lineRenderer.widthMultiplier = 0.3f;
         _lineRenderer.material = Helpers.Singleton.RopeMaterial;
-        _lineRenderer.startColor = ColourPaletteManager.Singleton.GetColour(ColourTarget.COLOUR_PRIMARY, 0);
-        _lineRenderer.endColor = ColourPaletteManager.Singleton.GetColour(ColourTarget.COLOUR_PRIMARY, 0);
+        _lineRenderer.positionCount = 0;
+        _lineRenderer.useWorldSpace = true;
+        OnColourPaletteChange();
+        ColourPaletteManager.Singleton.OnColourPaletteChange += OnColourPaletteChange;
+    }
+
+    virtual public void OnDestroy() {
+        ColourPaletteManager.Singleton.OnColourPaletteChange -= OnColourPaletteChange;
+    }
+
+    private void OnColourPaletteChange()
+    {
+        _lineRenderer.startColor = ColourPaletteManager.Singleton.GetColourPalette().ropeColour;
+        _lineRenderer.endColor = ColourPaletteManager.Singleton.GetColourPalette().ropeColour;
     }
 
     public void SetPoint(int index, VoltVector2 point)

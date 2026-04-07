@@ -73,9 +73,8 @@ public class GameStateManager : NetworkBehaviour
         ApplyGameState(NetworkedState.Value);
     }
 
-    public void SchedulePhysicsForEnable()
+    public void ServerSchedulePhysicsForEnable()
     {
-        // will only sucessfully call on host
         for(int i = 0; i < PlayerDataManager.Singleton.PlayerCount; i++)
         {
             PlayerDataManager.Singleton.PlayerData[i].playerInputDriver.SyncClockThenStartPhysics();
@@ -188,6 +187,8 @@ public class GameStateManager : NetworkBehaviour
         {
             case GameStateEnum.GameState_CreativeMode:
             {
+                LoopingAudioManager.Singleton.SwitchProfile("Light1");
+
                 CustomPhysics.TurnOffSimulation();
                 TrapPlacementArea.Singleton.DestroyAllScopedObjects();
                 TrapPlacementArea.Singleton.SpawnAllTrapInstances();
@@ -199,7 +200,7 @@ public class GameStateManager : NetworkBehaviour
                     headers[i].PlacedTrap.Value = false;
                 }
 
-                PlayerDataManager.Singleton.SetActiveAllMouseCursors(true, false);
+                PlayerDataManager.Singleton.SetActiveAllMouseCursors(true);
 
                 Helpers.SetActiveGameObjectArray(onlyWhenSelectingLevel, false);
                 Helpers.SetActiveGameObjectArray(onlyWhenPlaying, false);
@@ -221,6 +222,8 @@ public class GameStateManager : NetworkBehaviour
 
             case GameStateEnum.GameState_SelectingLevel:
             {
+                LoopingAudioManager.Singleton.SwitchProfile("Light1");
+
                 CustomPhysics.TurnOffSimulation();
 
                 for(int i = 0; i < PlayerDataManager.Singleton.PlayerCount; i++){
@@ -232,14 +235,12 @@ public class GameStateManager : NetworkBehaviour
                 TrapPlacementArea.Singleton.DestroyAndClearAllTrapInstances();
 
                 //PlayerDataManager.Singleton.SetActiveAllPlayers(false);
-                PlayerDataManager.Singleton.SetActiveAllMouseCursors(true, true);
+                PlayerDataManager.Singleton.SetActiveAllMouseCursors(true);
 
                 PlayerRoundOverScreen.Singleton.Clear();
 
                 if (IsServer)
                 {
-                    PlayerDataManager.Singleton.ServerResetAllPlayerStates();
-                    
                     if (PlayerDataManager.Singleton.IsSpawned) // TO DO: The additional is spawned check is to ensure PlayerDataManager has been spawned
                     // ideally we should have an object which coordinates the order of spawning
                     {
@@ -248,7 +249,7 @@ public class GameStateManager : NetworkBehaviour
 
                     LevelManager.Singleton.LoadLobbyRpc();
 
-                    SchedulePhysicsForEnable();
+                    ServerSchedulePhysicsForEnable();
                 }
 
 
@@ -264,8 +265,10 @@ public class GameStateManager : NetworkBehaviour
             }
             case GameStateEnum.GameState_PreviewLevel:
             {
+                LoopingAudioManager.Singleton.SwitchProfile("Light1");
+
                 CustomPhysics.TurnOffSimulation();
-                PlayerDataManager.Singleton.SetActiveAllMouseCursors(false, false);
+                PlayerDataManager.Singleton.SetActiveAllMouseCursors(false);
 
                 if (IsServer)
                 {                    
@@ -290,10 +293,12 @@ public class GameStateManager : NetworkBehaviour
             }
             case GameStateEnum.GameState_SelectingTrap:
             {
+                LoopingAudioManager.Singleton.SwitchProfile("Light1");
+
                 CustomPhysics.TurnOffSimulation();
                 TrapPlacementArea.Singleton.SpawnAllTrapInstances();
                 //PlayerDataManager.Singleton.SetActiveAllPlayers(false);
-                PlayerDataManager.Singleton.SetActiveAllMouseCursors(true, true);
+                PlayerDataManager.Singleton.SetActiveAllMouseCursors(true);
 
                 Helpers.SetActiveGameObjectArray(onlyWhenSelectingLevel, false);
                 Helpers.SetActiveGameObjectArray(onlyWhenPlacingTrap, false);
@@ -325,6 +330,8 @@ public class GameStateManager : NetworkBehaviour
 
             case GameStateEnum.GameState_PlacingTrap:
             {
+                LoopingAudioManager.Singleton.SwitchProfile("Light1");
+
                 CustomPhysics.TurnOffSimulation();
                 TrapPlacementArea.Singleton.SpawnAllTrapInstances();
 
@@ -335,7 +342,7 @@ public class GameStateManager : NetworkBehaviour
                     headers[i].PlacedTrap.Value = false;
                 }
 
-                PlayerDataManager.Singleton.SetActiveAllMouseCursors(true, false);
+                PlayerDataManager.Singleton.SetActiveAllMouseCursors(true);
 
                 Helpers.SetActiveGameObjectArray(onlyWhenSelectingLevel, false);
                 Helpers.SetActiveGameObjectArray(onlyWhenPlaying, false);
@@ -355,6 +362,8 @@ public class GameStateManager : NetworkBehaviour
             }
             case GameStateEnum.GameState_Play:
             {
+                LoopingAudioManager.Singleton.SwitchProfile("Dark1");
+
                 CustomPhysics.TurnOffSimulation();
                 TrapPlacementArea.Singleton.SpawnAllTrapInstances();
 
@@ -362,12 +371,11 @@ public class GameStateManager : NetworkBehaviour
                     
                     // TODO: Im not sure if the PlayerData list will be the same order for each player. we should check back on this
                     PlayerDataManager.Singleton.PlayerData[i].player.SetPosition(LevelManager.Singleton.LoadedLevel.GetSpawnpoint(i));
-                    PlayerDataManager.Singleton.PlayerData[i].player.ResetState();
                 }
 
                 if(IsServer){
                     
-                    SchedulePhysicsForEnable();
+                    ServerSchedulePhysicsForEnable();
 
                     PlayerDataManager.Singleton.ServerSetActiveAllTrapToPlaceRpc(false);
 
@@ -409,9 +417,22 @@ public class GameStateManager : NetworkBehaviour
 
                 Helpers.SetActiveGameObjectArray(onlyWhenShowingRoundResults, true);
 
+                if(IsServer){
+                    StartCoroutine("SwitchToSelectionModeFromRoundResults");
+                }
+
                 break;
             }
 
+        }
+    }
+    
+    public IEnumerator SwitchToSelectionModeFromRoundResults()
+    {
+        yield return new WaitForSeconds(5.0f);
+        if(NetworkedState.Value == GameStateEnum.GameState_ShowingRoundResults)
+        {
+            ServerSetGameState(GameStateEnum.GameState_CreativeMode);
         }
     }
 

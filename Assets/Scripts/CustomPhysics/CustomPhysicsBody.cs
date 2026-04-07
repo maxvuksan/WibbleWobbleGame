@@ -92,6 +92,7 @@ public class CustomPhysicsBody : MonoBehaviour
     [SerializeField] private bool _constrainYPosition = false;
 
     public Action<CustomPhysicsBody> OnTrigger;
+    public Action<CustomPhysicsBody> OnCollide;
 
     private List<CustomCollider> _colliderList = new();
     private Fix64 _radiansZFix64;
@@ -261,14 +262,16 @@ public class CustomPhysicsBody : MonoBehaviour
         if (_isTrigger)
         {
             Body.IsTrigger = true;
+            Body.IgnoreRaycasts = true;
 
             foreach(VoltShape shape in Body.shapes)
             {
                 shape.IsTrigger = true;
+                Body.IgnoreRaycasts = true;
             }
-
-            Body.OnCollision += OnInternalCollision;
         }
+
+        Body.OnCollision += OnInternalCollision;
 
         Body.Set(_positionFix64, _radiansZFix64);
 
@@ -296,14 +299,6 @@ public class CustomPhysicsBody : MonoBehaviour
     }
 
     /// <summary>
-    /// Is called if this body is a trigger and another body has overlapped said trigger. Should be extended with .OnTrigger Action
-    /// </summary>
-    private void OnTriggerCallback(CustomPhysicsBody otherBody)
-    {
-        OnTrigger?.Invoke(otherBody);
-    }
-
-    /// <summary>
     /// Associates a collision shape (collider) with this body
     /// </summary>
     /// <param name="colliderShape"></param>
@@ -319,6 +314,11 @@ public class CustomPhysicsBody : MonoBehaviour
     /// </summary>
     public void ApplySimulationToGameObject()
     {   
+        if(!_constructed || !enabled)
+        {
+            return;
+        }
+
         ApplySimulationToBody();
         ApplySimulationInterpolation();
     }
@@ -339,6 +339,7 @@ public class CustomPhysicsBody : MonoBehaviour
 
     public void ApplySimulationToBody()
     {
+
         // make body follow parent if parent is assigned
         if(_parentBody != null)
         {
@@ -509,7 +510,14 @@ public class CustomPhysicsBody : MonoBehaviour
     {
         var otherVoltBody = bodyA == Body ? bodyB : bodyA;
         var otherBody = CustomPhysicsSpace.Singleton.GetBody(otherVoltBody.EntityId);
-        OnTriggerCallback(otherBody);
+
+        if (IsTrigger)
+        {
+            OnTrigger?.Invoke(otherBody);
+        }
+        {
+            OnCollide?.Invoke(otherBody);
+        }
     }
 
     private void OnDestroy()

@@ -10,6 +10,8 @@ public class CustomConstraint : MonoBehaviour
 
     public CustomPhysicsBody bodyA;
     public CustomPhysicsBody bodyB;
+    public IntHundredthVector2 bodyAAttachmentOffset;
+    public IntHundredthVector2 bodyBAttachmentOffset;
 
     virtual public void Awake()
     {

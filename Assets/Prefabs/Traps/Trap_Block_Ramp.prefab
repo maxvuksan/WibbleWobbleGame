@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 7388891807328148775}
   - component: {fileID: 2701062411497239767}
   - component: {fileID: 3804351238180840267}
+  - component: {fileID: 6252134085403751534}
   m_Layer: 6
   m_Name: Trap_Block_Ramp
   m_TagString: Untagged
@@ -111,6 +112,7 @@ MonoBehaviour:
   _targets:
   - SpriteRenderers:
     - {fileID: 1024447458764328496}
+    Graphics: []
     ColourData:
       ColourTarget: 1
       ColourTargetIndexOffset: 0
@@ -142,6 +144,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 977d28dfaa5a7ec4ea3697316df7c061, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrapHeader
+  IsUIElement: 0
   trapName: Block_Ramp
 --- !u!114 &7388891807328148775
 MonoBehaviour:
@@ -191,6 +194,7 @@ MonoBehaviour:
   BodyType: 0
   _isTrigger: 0
   _parentBody: {fileID: 0}
+  _ignoreParentBodyRotation: 0
   _gravity:
     ValueHundredths: 0
   _restitution:
@@ -220,3 +224,57 @@ MonoBehaviour:
     ValueHundredths: 0
   _rotationDegrees:
     ValueHundredths: 0
+  _isWorldSpace: 0
+--- !u!60 &6252134085403751534
+PolygonCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4665495375785675357}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 4.125, y: 3.125}
+    newSize: {x: 6, y: 4}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Points:
+    m_Paths:
+    - - {x: 1.375, y: 1.5625}
+      - {x: -1.9375, y: 0.125}
+      - {x: -2.0625, y: -0.125}
+      - {x: -2.0625, y: -1.5625}
+      - {x: 2.0625, y: -1.5625}
+      - {x: 2.0625, y: 1.5625}
+  m_UseDelaunayMesh: 0

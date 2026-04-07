@@ -1,3 +1,4 @@
+using FixMath.NET;
 using UnityEngine;
 
 public class MouseCursor : MonoBehaviour
@@ -56,15 +57,17 @@ public class MouseCursor : MonoBehaviour
     void DetectMouseUIButtons()
     {
         Vector2 pixelMousePos = new Vector2(transform.position.x, transform.position.y);
-        Collider2D hit = Physics2D.OverlapPoint(pixelMousePos, Helpers.Singleton.layerWorldUi);
+        Collider2D hit = Physics2D.OverlapPoint(pixelMousePos, Helpers.Singleton.layerMaskWorldUi);
+
+        WorldUIButton button = null;
 
         // we have not hit anything, do not continue...
         if(hit == null)
         {
             return;
         }
+        button = hit.GetComponent<WorldUIButton>();
 
-        WorldUIButton button = hit.GetComponent<WorldUIButton>();
         button.Hover();
 
         if (_input.Input.mainButtonIsPressed)
