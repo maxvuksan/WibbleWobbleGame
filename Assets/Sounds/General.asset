@@ -19,3 +19,12 @@ MonoBehaviour:
     volume: 0.667
     pitch: 0.93
     pitch_variation: 0.029
+  - name: BirdFlyAway
+    clips:
+    - {fileID: 8300000, guid: 689708b83c5fdc348bf57d843d7cd837, type: 3}
+    - {fileID: 8300000, guid: 5ff7cf87c3ecf294d9a8a73dd9ec3b9a, type: 3}
+    - {fileID: 8300000, guid: 5362bf0a867e652488c1cfdb33320c32, type: 3}
+    - {fileID: 8300000, guid: 9665226c99f787d4a8723a9b4ba6298c, type: 3}
+    volume: 0.503
+    pitch: 1
+    pitch_variation: 0.044

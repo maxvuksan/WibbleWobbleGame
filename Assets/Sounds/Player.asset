@@ -16,18 +16,18 @@ MonoBehaviour:
   - name: Player_Jump
     clips:
     - {fileID: 8300000, guid: f2fc3a45ab117c24fab2f735f16b03b7, type: 3}
-    volume: 0.667
-    pitch: 1.69
+    volume: 0.282
+    pitch: 0.989
     pitch_variation: 0.033
   - name: Player_Death
     clips:
     - {fileID: 8300000, guid: e60891970e75a9c4d89b59298248677d, type: 3}
-    volume: 0.111
-    pitch: 1
+    volume: 0.053
+    pitch: 1.51
     pitch_variation: 0.019
   - name: Player_Step
     clips:
     - {fileID: 8300000, guid: 0cd74c08da4b9b54e8d2598dd094313b, type: 3}
-    volume: 0.497
-    pitch: 2.16
+    volume: 0.068
+    pitch: 1.492
     pitch_variation: 0.025

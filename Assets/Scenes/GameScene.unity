@@ -499,37 +499,6 @@ Camera:
   m_OcclusionCulling: 0
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
---- !u!1 &181736196
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 181736197}
-  m_Layer: 0
-  m_Name: BirdManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &181736197
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 181736196}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -15.232, y: 9.68885, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &186389971
 GameObject:
   m_ObjectHideFlags: 0
@@ -1283,15 +1252,19 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 361879695}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 88375e2feb27add4eb7267a8fcaa20db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
   FollowXAxis: 1
   FollowYAxis: 0
-  _targetPosition: {x: 0, y: 0, z: 0}
-  _smoothTime: 3
+  TargetPosition: {x: 0, y: 0, z: 0}
+  MinXPosition: -1e+38
+  MaxXPosition: 1e+35
+  _boundsPadding: 9
+  _referenceCamera: {fileID: 105663519}
+  _smoothTime: 0.3
 --- !u!1 &376413240
 GameObject:
   m_ObjectHideFlags: 0
@@ -3908,6 +3881,7 @@ GameObject:
   - component: {fileID: 1167746765}
   - component: {fileID: 1167746766}
   - component: {fileID: 1167746767}
+  - component: {fileID: 1167746768}
   m_Layer: 0
   m_Name: LevelManager
   m_TagString: Untagged
@@ -3975,6 +3949,35 @@ MonoBehaviour:
   - {fileID: 4924044236249031809, guid: 77399015f3afa894da76274b8837d3e2, type: 3}
   - {fileID: 4924044236249031809, guid: 77399015f3afa894da76274b8837d3e2, type: 3}
   _levelParent: {fileID: 15226116}
+--- !u!114 &1167746768
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1167746764}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2684e5e910f360e4fb1bbadceb59e2b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BirdManager
+  _birdCount: 10
+  _birdPrefab: {fileID: 1169576398955549107, guid: 1d06e7ae7d5e9d14dafe7e7a650b578c, type: 3}
+  _birdConfig:
+    ScareDistance: 5
+    ScareByAnotherBirdDistance: 2
+    ScareHorizontalMilage: 40
+    ScareHorizontalMilageVariance: 15
+    TimeOffscreen: 3
+    DissapearHeight: 30
+    FlySpeedMin: 5
+    FlySpeedMax: 27
+    FlyLandingSpeed: 10
+    FlySpeedVariance: 4
+    FlySpeedIncreaseRate: 24
+    FlySpeedIncreaseRateVariance: 3
+    WaveAmplitude: 0.025
+    WaveFrequency: 24
 --- !u!1 &1182495138
 GameObject:
   m_ObjectHideFlags: 0
@@ -6042,4 +6045,3 @@ SceneRoots:
   - {fileID: 1490675038}
   - {fileID: 905498917}
   - {fileID: 940613118}
-  - {fileID: 181736197}

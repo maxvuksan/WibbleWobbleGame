@@ -181,8 +181,7 @@ public class GameStateManager : NetworkBehaviour
     /// <param name="_state">The new game state we are transition to</param>
     public void ApplyGameState(GameStateEnum _state)
     {
-        Debug.Log("Game state is changing to: " + _state);
-
+        
         switch (_state)
         {
             case GameStateEnum.GameState_CreativeMode:
@@ -425,6 +424,16 @@ public class GameStateManager : NetworkBehaviour
             }
 
         }
+
+        ComputeLevelCameraBounds();
+    }
+
+    private void ComputeLevelCameraBounds()
+    {
+        (float min, float max) = TrapPlacementArea.Singleton.ComputeHorizontalBoundsOfPlacedTraps();
+        CameraMovement cameraMovement = FindFirstObjectByType<CameraMovement>();
+        cameraMovement.MinXPosition = min;
+        cameraMovement.MaxXPosition = max;
     }
     
     public IEnumerator SwitchToSelectionModeFromRoundResults()

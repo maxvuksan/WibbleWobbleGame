@@ -9,14 +9,14 @@ public class CollapsablePanel : MonoBehaviour
 
     private Vector2 _velocity;
     private bool _isOpen;
-    private Vector2 _desiredPosition;
+    private Vector2 _desiredPosition; // in local space
     private CollapsablePanelTab _openCloseTab;
 
     void Awake()
     {
         _openCloseTab = GetComponentInChildren<CollapsablePanelTab>();
         SetOpen(StartOpen);
-        transform.position = _desiredPosition;
+        transform.localPosition = _desiredPosition;
     }
 
     public void TogglePanelOpen()
@@ -26,7 +26,7 @@ public class CollapsablePanel : MonoBehaviour
 
     void Update()
     {
-        transform.position = Vector2.SmoothDamp(transform.position, _desiredPosition, ref _velocity, SmoothTime);
+        transform.localPosition = Vector2.SmoothDamp(transform.localPosition, _desiredPosition, ref _velocity, SmoothTime);
     }
 
     /// <summary>

@@ -119,6 +119,31 @@ public class TrapPlacementArea : NetworkBehaviour
     {
         DestroyAndClearAllTrapInstances();
         SpawnAllTrapInstances();
+        LevelManager.Singleton.OnLevelLoad?.Invoke();
+    }
+
+    public (float Min, float Max) ComputeHorizontalBoundsOfPlacedTraps()
+    {
+        float minX = float.MaxValue;
+        float maxX = float.MinValue;
+
+        foreach(var trap in _networkedPlacedTrapDataList)
+        {
+            float x = trap.positionXHundredths / 100.0f;
+
+            if(x > maxX)
+            {
+                maxX = x;
+            }
+            if(x < minX)
+            {
+                minX = x;
+            }
+        }
+
+
+        // Your implementation
+        return (minX, maxX);
     }
 
     /// <summary>

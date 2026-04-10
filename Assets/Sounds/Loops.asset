@@ -18,25 +18,25 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 26a3084d0513a0f438174bff68d1386c, type: 3}
     loopCategory: 0
     volumeScaler: 1
-    volume: 0.665
+    volume: 0.433
     minVolumeScale: 0.735
     maxVolumeScale: 1
     volumeModulationRate: 2.44
     fadeTimeTracked: 0.1
     fadeTime: 0.1
-    fadeIn: 1
+    fadeIn: 0
   - label: Dark1_Shots
     scheduledForSyncing: 0
     clip: {fileID: 8300000, guid: 22ff56e9802eaa844a0b51c256f05b09, type: 3}
     loopCategory: 0
     volumeScaler: 1
-    volume: 0.424
-    minVolumeScale: 1
+    volume: 0.187
+    minVolumeScale: 0.887
     maxVolumeScale: 1
-    volumeModulationRate: 0
+    volumeModulationRate: 0.266
     fadeTimeTracked: 0.1
     fadeTime: 0.1
-    fadeIn: 1
+    fadeIn: 0
   - label: General_NoiseShimmer
     scheduledForSyncing: 0
     clip: {fileID: 8300000, guid: 425b7333a8caf8e41a4dbefcc151508f, type: 3}
@@ -78,34 +78,34 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 470241573740b634e8a390134634b891, type: 3}
     loopCategory: 0
     volumeScaler: 1
-    volume: 0.545
+    volume: 0
     minVolumeScale: 1
     maxVolumeScale: 1
     volumeModulationRate: 0
-    fadeTimeTracked: 0.1
+    fadeTimeTracked: 0
     fadeTime: 0.1
-    fadeIn: 0
+    fadeIn: 1
   - label: Light1_Swells
     scheduledForSyncing: 0
     clip: {fileID: 8300000, guid: 606aa2e6ff2ff60408fd0425a01262ac, type: 3}
     loopCategory: 0
     volumeScaler: 1
-    volume: 0.382
+    volume: 0
     minVolumeScale: 1
     maxVolumeScale: 1
     volumeModulationRate: 0
-    fadeTimeTracked: 0.1
+    fadeTimeTracked: 0
     fadeTime: 0.1
-    fadeIn: 0
+    fadeIn: 1
   - label: Light1_Strings
     scheduledForSyncing: 0
     clip: {fileID: 8300000, guid: 18a6b3aa64d9ca947b5ac84c7ebfa1a1, type: 3}
     loopCategory: 0
     volumeScaler: 1
-    volume: 0.291
+    volume: 0.214
     minVolumeScale: 1
     maxVolumeScale: 1
     volumeModulationRate: 0
     fadeTimeTracked: 0.1
     fadeTime: 0.1
-    fadeIn: 0
+    fadeIn: 1

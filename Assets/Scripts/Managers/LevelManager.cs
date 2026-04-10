@@ -49,6 +49,7 @@ public class LevelManager : NetworkBehaviour
             //TrapPlacementArea.Singleton.ServerSignalTrapsLoaded();
             GameStateManager.Singleton.ServerSetGameState(GameStateManager.GameStateEnum.GameState_PreviewLevel);
         }    
+
     }
 
     [Rpc(SendTo.Everyone, InvokePermission = RpcInvokePermission.Server)]

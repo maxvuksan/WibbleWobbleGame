@@ -296,6 +296,28 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: bird_8
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 0
+        width: 24
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c794905a9f6321645b4495143b8e78fa
+      internalID: -1382388345
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
@@ -320,6 +342,7 @@ TextureImporter:
       bird_5: -7302643359093655801
       bird_6: 3088215013174724993
       bird_7: -5260235997648330841
+      bird_8: -1382388345
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

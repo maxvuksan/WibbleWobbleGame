@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using Volatile;
 
@@ -21,3 +23,16 @@ public struct CustomPhysicsRayResult
 
     public VoltVector2 Destination; 
 }
+
+/// <summary>
+/// A struct representing the result of an overlap operation
+/// </summary>
+[System.Serializable]
+public struct CustomPhyiscsOverlapResult
+{
+    public bool Hit;
+    public List<CustomPhysicsBody> Bodies;
+}
+
+
+

@@ -283,6 +283,11 @@ public class Player : NetworkBehaviour
             _playerRenderer.gameObject.SetActive(true);
         }
 
+        if (IsOwner)
+        {
+            FindFirstObjectByType<CameraMovement>().TargetPosition = transform.position;
+        }
+
         ReflectSpriteState();
     }
 
@@ -505,17 +510,17 @@ public class Player : NetworkBehaviour
             setPosOccured = true;
         }
 
-        // Horizontal wrap 
-        if (_physicsBody.Position.x < minX)
-        {
-            _physicsBody.PositionX = maxX;
-            setPosOccured = true;
-        }
-        else if (_physicsBody.Position.x > maxX)
-        {
-            _physicsBody.PositionX = minX;
-            setPosOccured = true;
-        }
+        // // Horizontal wrap 
+        // if (_physicsBody.Position.x < minX)
+        // {
+        //     _physicsBody.PositionX = maxX;
+        //     setPosOccured = true;
+        // }
+        // else if (_physicsBody.Position.x > maxX)
+        // {
+        //     _physicsBody.PositionX = minX;
+        //     setPosOccured = true;
+        // }
 
         if (setPosOccured)
         {

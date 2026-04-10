@@ -60,11 +60,15 @@ public class CustomCommandInterpreter : CommandInterpreter
             if(args.Length == 1)
             {
                 submission.MessageType = CommandLineMessageType.Print;
-                submission.Message = "/level [save / load / list]";
+                submission.Message = "/level [save / load / list / clear]";
                 CommandLine.PushLineToHistory(submission);
             }
             else
             {
+                if(args[1] == "clear")
+                {
+                    TrapPlacementArea.Singleton.ServerClearTraps();
+                }
                 if(args[1] == "save")
                 {
                     if(args.Length == 3)
@@ -166,6 +170,11 @@ public class CustomCommandInterpreter : CommandInterpreter
             return;
         }
 
+        CommandLineSubmission emptySubmission = new();
+        emptySubmission.MessageType = CommandLineMessageType.Print;
+        emptySubmission.Message = "----------------------------------------------------------------------";
+        CommandLine.PushLineToHistory(emptySubmission);
+
         // Extract just the filenames without paths and extensions
         string[] levelNames = levelFiles.Select(f => Path.GetFileNameWithoutExtension(f)).ToArray();
 
@@ -180,5 +189,7 @@ public class CustomCommandInterpreter : CommandInterpreter
             submission.Message = line;
             CommandLine.PushLineToHistory(submission);
         }
+
+        CommandLine.PushLineToHistory(emptySubmission);
     }
 }

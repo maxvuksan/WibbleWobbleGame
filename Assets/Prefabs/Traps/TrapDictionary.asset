@@ -76,3 +76,6 @@ MonoBehaviour:
   - name: WinBeam
     soundOnPlace: 
     behaviorPrefab: {fileID: 4665495375785675357, guid: 41623f62a184e8d4eb077e9acc9622a5, type: 3}
+  - name: PlayerSpawn
+    soundOnPlace: 
+    behaviorPrefab: {fileID: 2899622994378174877, guid: 959b2034c95e46a40a3b600c07550681, type: 3}

@@ -284,6 +284,8 @@ public class CustomPhysics : MonoBehaviour
     /// <param name="previousTick">The tick we wish to rollback to</param>
     private static void Rollback(long previousTick)
     {
+        Debug.Log("Rollback occured");
+
         if (previousTick <= 0)
         {
             Debug.LogWarning("Cannot rollback to tick less than 0, ignoring");
@@ -336,15 +338,43 @@ public class CustomPhysics : MonoBehaviour
         _resimulatingDepth--;
     }
 
+
     /// <summary>
-    /// Shoots a ray in the CustomPhysics simulation space
+    /// Queries and returns the bodies which overlap a defined circle in the simulation space
+    /// </summary>
+    /// <param name="origin">The centre of the circle</param>
+    /// <param name="radius">The radius of the circle</param>
+    /// <returns>The result of the operation</returns>
+    public static CustomPhyiscsOverlapResult OverlapCircle(VoltVector2 origin, Fix64 radius)
+    {
+        CustomPhyiscsOverlapResult customResult = new() {Hit = false};
+        var outputVoltBuffer = CustomPhysicsSpace.Singleton.SimulationSpace.QueryCircle(origin, radius, null);
+
+        if(outputVoltBuffer.Count != 0)
+        {
+            customResult.Hit = true;
+        }
+
+        customResult.Bodies = new List<CustomPhysicsBody>();
+
+        foreach(var body in outputVoltBuffer)
+        {
+            var bodyComponent = CustomPhysicsSpace.Singleton.GetBody(body.EntityId);
+            customResult.Bodies.Add(bodyComponent);
+        }
+    
+        return customResult;
+    }
+
+    /// <summary>
+    /// Shoots a ray in the simulation space
     /// </summary>
     public static CustomPhysicsRayResult Raycast(VoltVector2 origin, VoltVector2 direction, Fix64 distance)
     {
         VoltRayCast ray = new VoltRayCast(origin, direction, distance);
         VoltRayResult result = new();
 
-        CustomPhysicsRayResult customResult = new() { Hit = false};
+        CustomPhysicsRayResult customResult = new();
         customResult.Hit = CustomPhysicsSpace.Singleton.SimulationSpace.RayCast(ref ray, ref result, null);
         customResult.Origin = origin;
         customResult.Direction = direction;

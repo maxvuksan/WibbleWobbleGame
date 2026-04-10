@@ -1319,6 +1319,28 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: blocks_50
+      rect:
+        serializedVersion: 2
+        x: 228
+        y: 110
+        width: 24
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ec4fbedac7f55474594240b924efe284
+      internalID: -2026215191
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
@@ -1379,6 +1401,7 @@ TextureImporter:
       blocks_48: 1241822895
       blocks_49: 1692320937
       blocks_5: 4256288277297392353
+      blocks_50: -2026215191
       blocks_6: -7855626261214365963
       blocks_7: -2880035774045676689
       blocks_8: 2587766382346407471
