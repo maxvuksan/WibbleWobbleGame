@@ -9,6 +9,7 @@ public class WorldUIButton : MonoBehaviour
     public struct GraphicTarget{
 
         public SpriteRenderer spriteRenderer;
+        public TMPro.TextMeshPro text;
         public Color baseColour;
         public Color hoverColour;
     }
@@ -40,13 +41,21 @@ public class WorldUIButton : MonoBehaviour
         {
             for (int i = 0; i < _targets.Length; i++)
             {
-                _targets[i].spriteRenderer.color = _targets[i].hoverColour;
+                if(_targets[i].spriteRenderer != null)
+                {
+                    _targets[i].spriteRenderer.color = _targets[i].hoverColour;
+                }
+                if(_targets[i].text != null)
+                {
+                    _targets[i].text.color = _targets[i].hoverColour;
+                }
             }   
         }
 
         ScaleTransform(1);
         _hovering = true;
     }
+
 
     public void ScaleTransform(float direction)
     {
@@ -89,7 +98,14 @@ public class WorldUIButton : MonoBehaviour
             {
                 for (int i = 0; i < _targets.Length; i++)
                 {
-                    _targets[i].spriteRenderer.color = _targets[i].baseColour;
+                    if(_targets[i].spriteRenderer != null)
+                    {
+                        _targets[i].spriteRenderer.color = _targets[i].baseColour;
+                    }
+                    if(_targets[i].text != null)
+                    {
+                        _targets[i].text.color = _targets[i].baseColour;
+                    }
                 }                
             }
         }

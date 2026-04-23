@@ -10,18 +10,12 @@ public class AlwaysMaintainRotation : MonoBehaviour
 
     void Awake()
     {
-        if(_bodyToApplyTo != null)
-        {
-            CustomPhysics.OnPostPhysicsTick += OnPostPhysicsTick;    
-        }
+        CustomPhysics.OnPostPhysicsTick += OnPostPhysicsTick;    
     }
 
     void OnDestroy()
     {
-        if(_bodyToApplyTo != null)
-        {
-            CustomPhysics.OnPostPhysicsTick -= OnPostPhysicsTick;    
-        }
+        CustomPhysics.OnPostPhysicsTick -= OnPostPhysicsTick;    
     }
 
     void OnPostPhysicsTick()

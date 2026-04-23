@@ -56,5 +56,23 @@ public static class CustomMaths
         );
     }
 
+    /// <summary>
+    /// Reflects a vector across a surface normal
+    /// Formula: r = d - 2(d · n)n
+    /// </summary>
+    /// <param name="direction">Incoming direction vector (will be normalized internally)</param>
+    /// <param name="normal">Surface normal (should be normalized)</param>
+    /// <returns>Reflected direction vector (normalized)</returns>
+    public static VoltVector2 Reflect(VoltVector2 direction, VoltVector2 normal)
+    {
+        VoltVector2 d = direction.normalized;
+        
+        // Compute dot product: d · n
+        Fix64 dotProduct = VoltVector2.Dot(d, normal);
+        
+        // Compute reflection: r = d - 2(d · n)n
+        return d - (Fix64)2 * dotProduct * normal;
+    }
+
     
 }

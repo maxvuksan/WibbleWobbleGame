@@ -88,6 +88,12 @@ public class Helpers : MonoBehaviour
 
         foreach (var subscriber in action.GetInvocationList())
         {
+            // Skip if target is a disabled MonoBehaviour
+            if (subscriber.Target is MonoBehaviour behaviour && !behaviour.enabled)
+            {
+                continue;
+            }
+
             try
             {
                 ((Action)subscriber).Invoke();
@@ -107,34 +113,24 @@ public class Helpers : MonoBehaviour
     /// <returns>World space point</returns>
     public static VoltVector2 TransformPointFix64(CustomTransform customTransform, VoltVector2 localPoint)
     {
-        // Convert transform values to Fix64
-        Fix64 posX = customTransform.GetPositionFix64().x;
-        Fix64 posY = customTransform.GetPositionFix64().y;
-        
-        // Rotation
-        Fix64 angleRad = customTransform.GetRotationRadiansFix64();
+        VoltVector2 rotatedPoint = RotatePosition(localPoint, customTransform.GetRotationRadiansFix64());
+        return customTransform.GetPositionFix64() + rotatedPoint;
+    }
+
+    public static VoltVector2 RotatePosition(VoltVector2 localPoint, Fix64 angleRad)
+    {
         Fix64 cos = Fix64.Cos(angleRad);
         Fix64 sin = Fix64.Sin(angleRad);
-        
-        // In our use case do not care about scale...
-        
-        // Rotate
-        Fix64 rotatedX = localPoint.x * cos - localPoint.y * sin;
-        Fix64 rotatedY = localPoint.x * sin + localPoint.y * cos;
-        
-        // Translate
-        return new VoltVector2(posX + rotatedX, posY + rotatedY);
+
+        return new VoltVector2(
+                cos * localPoint.x - sin * localPoint.y,
+                sin * localPoint.x + cos * localPoint.y
+        );
     }
 
     public static VoltVector2 TransformLocalPositionByParentTransform(CustomTransform parentTransform, VoltVector2 position)
     {
-        Fix64 cos = Fix64.Cos(parentTransform.GetRotationRadiansFix64());
-        Fix64 sin = Fix64.Sin(parentTransform.GetRotationRadiansFix64());
-
-        VoltVector2 transformedPosition = new VoltVector2(
-                cos * position.x - sin * position.y,
-                sin * position.x + cos * position.y
-        );
+        VoltVector2 transformedPosition = RotatePosition(position, parentTransform.GetRotationRadiansFix64());
         
         transformedPosition += parentTransform.GetPositionFix64();
 

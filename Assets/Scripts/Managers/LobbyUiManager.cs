@@ -74,18 +74,29 @@ public class LobbyUiManager : MonoBehaviour
         SteamFriends.OpenGameInviteOverlay(SteamPersistant.Context.lobby.Id);
     }
 
-    public void Button_Leave()
+    /// <summary>
+    /// Leaves the current lobby and shutsdown the network manager if it is currently listening (if we are in a game)
+    /// </summary>
+    public static void LeaveLobby()
     {
         if (SteamPersistant.Context.lobbyAuthority == SteamPersistant.LobbyAuthority.NOT_CONNECTED){
             Debug.Log("We are not connected to a lobby, return early. Button_Leave()");
             return;
         }
 
-        Debug.Log("Leaving lobby. Button_Leave");
+        if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
+        {
+            Debug.Log("Shutting down NetworkManager...");
+            NetworkManager.Singleton.Shutdown();
+        }
 
         SteamPersistant.Context.lobby.Leave();
         SteamPersistant.Context.lobbyAuthority = SteamPersistant.LobbyAuthority.NOT_CONNECTED;
-        
+    }
+
+    public void Button_Leave()
+    {
+        LeaveLobby();
         RefreshAllLobbyUI();
     }
     

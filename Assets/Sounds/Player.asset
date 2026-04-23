@@ -22,7 +22,7 @@ MonoBehaviour:
   - name: Player_Death
     clips:
     - {fileID: 8300000, guid: e60891970e75a9c4d89b59298248677d, type: 3}
-    volume: 0.053
+    volume: 0.489
     pitch: 1.51
     pitch_variation: 0.019
   - name: Player_Step

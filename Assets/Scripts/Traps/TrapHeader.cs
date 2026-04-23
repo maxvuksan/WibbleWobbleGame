@@ -1,16 +1,42 @@
 using System;
+using System.Collections.Generic;
+using FixMath.NET;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Events;
+using Volatile;
+
+
+public struct AttachedTrap
+{
+    public TrapHeader Header;
+    public CustomPhysicsBody Body;
+    public CustomPhysicsBody ParentBody;
+    public VoltVector2 LocalOffset; // Child position relative to parent center in parent local space
+    public Fix64 RelativeRotation;  // Difference in rotation between child and parent
+}
 
 public class TrapHeader : MonoBehaviour
 {
     public string TrapName { get => trapName; }
     public bool IsUIElement = false;
+    public List<AttachedTrap> attachedTraps;
 
     [Tooltip("This name should match the name of the trap within the trap dictionary")]
     [SerializeField] private string trapName;
 
+
+    void Awake()
+    {
+        attachedTraps = new List<AttachedTrap>();
+        CustomPhysics.OnPostPhysicsTick += OnPostPhysicsTick;
+    }
+
+    void OnDestroy()
+    {
+        CustomPhysics.OnPostPhysicsTick -= OnPostPhysicsTick;
+        
+    }
 
     void Start()
     {
@@ -39,11 +65,49 @@ public class TrapHeader : MonoBehaviour
     }
     
     /// <summary>
-    /// Bolt a child trap to this block. makes the child move with this block
+    /// Attach/parent this child trap to this block. makes the child move with this block
     /// </summary>
-    public void AttachChildTrap(BoltHeader bolt)
+    public void AttachChildBody(TrapHeader trap, CustomPhysicsBody childBody, CustomPhysicsBody parentBody){
+
+        // 1. Calculate the vector from Parent to Child in World Space
+        VoltVector2 worldOffset = childBody.Position - parentBody.Position;
+
+        // 2. Rotate that vector into the Parent's Local Space
+        VoltVector2 localOffset = Helpers.RotatePosition(worldOffset, -parentBody.Body.Angle);
+
+        // 3. Store the rotation difference
+        Fix64 relativeRot = childBody.Body.Angle - parentBody.Body.Angle;
+
+        var entry = new AttachedTrap()
+        {
+            Header = trap,
+            Body = childBody,
+            ParentBody = parentBody,
+            LocalOffset = localOffset,
+            RelativeRotation = relativeRot
+        };
+
+        // // 4. Disable physics forces on the child so it follows the parent smoothly
+        // childBody.Body.IsKinematic = true; 
+
+        attachedTraps.Add(entry);
+    }
+
+    public void OnPostPhysicsTick()
     {
-        bolt.transform.parent = this.transform;
+        for(int i = 0; i < attachedTraps.Count; i++)
+        {
+            var child = attachedTraps[i];
+            Fix64 parentAngle = child.ParentBody.Body.Angle; 
+            
+            // Calculate new world position based on parent's current state
+            VoltVector2 rotatedOffset = Helpers.RotatePosition(child.LocalOffset, parentAngle);
+            VoltVector2 newWorldPos = child.ParentBody.Position + rotatedOffset;
+            Fix64 newWorldAngle = parentAngle + child.RelativeRotation;
+
+            // Apply directly to the body
+            child.Body.Body.Set(newWorldPos, newWorldAngle);
+        }
     }
 
 

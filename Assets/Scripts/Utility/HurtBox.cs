@@ -16,6 +16,11 @@ public class HurtBox : MonoBehaviour
     }
 
 
+    void Update()
+    {
+        
+    }
+
     private void OnTrigger(CustomPhysicsBody other) {
 
         Player player = other.GetComponent<Player>();

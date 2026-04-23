@@ -14,22 +14,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ColourPaletteGroup
   palettes:
   - primaryBlockColours:
+    - {r: 0.17621928, g: 0.21719208, b: 0.3773585, a: 1}
+    - {r: 0.15686275, g: 0.28024727, b: 0.3882353, a: 1}
+    ropeColour: {r: 0.14818442, g: 0.16947405, b: 0.2830189, a: 1}
+    backgroundColourSilouttes: {r: 0.09411765, g: 0.101960786, b: 0.20784314, a: 1}
+    backgroundColourA: {r: 0.05882353, g: 0.05882353, b: 0.14509805, a: 1}
+    backgroundColourB: {r: 0.058758628, g: 0.058758628, b: 0.14509805, a: 1}
+  - primaryBlockColours:
+    - {r: 0.12068351, g: 0.12068351, b: 0.2264151, a: 1}
+    - {r: 0.18117648, g: 0.18117648, b: 0.27450982, a: 1}
+    ropeColour: {r: 0.058823533, g: 0.058823533, b: 0.058823533, a: 1}
+    backgroundColourSilouttes: {r: 0.059341177, g: 0.062385436, b: 0.101960786, a: 1}
+    backgroundColourA: {r: 0.033333335, g: 0.033333335, b: 0.05, a: 1}
+    backgroundColourB: {r: 0.033333335, g: 0.033333335, b: 0.05, a: 1}
+  - primaryBlockColours:
     - {r: 0.3019608, g: 0.21960784, b: 0.36078432, a: 1}
     - {r: 0.39607844, g: 0.18039216, b: 0.28627452, a: 1}
     ropeColour: {r: 0.2924528, g: 0.10898005, b: 0.1990485, a: 1}
     backgroundColourSilouttes: {r: 0.14509805, g: 0.06666667, b: 0.20784314, a: 1}
     backgroundColourA: {r: 0.078431375, g: 0.03529412, b: 0.12156863, a: 1}
     backgroundColourB: {r: 0.078431375, g: 0.03529412, b: 0.12156863, a: 1}
-  - primaryBlockColours:
-    - {r: 0.17621928, g: 0.21719208, b: 0.3773585, a: 1}
-    - {r: 0.15686275, g: 0.28024727, b: 0.3882353, a: 1}
-    ropeColour: {r: 0.14818442, g: 0.16947405, b: 0.2830189, a: 1}
-    backgroundColourSilouttes: {r: 0.09411765, g: 0.101960786, b: 0.20784314, a: 1}
-    backgroundColourA: {r: 0.05882353, g: 0.05882353, b: 0.14509805, a: 1}
-    backgroundColourB: {r: 0.058758628, g: 0.058758628, b: 0.142, a: 1}
-  - primaryBlockColours:
-    - {r: 0.0754717, g: 0.0754717, b: 0.0754717, a: 1}
-    ropeColour: {r: 0.058823533, g: 0.058823533, b: 0.058823533, a: 1}
-    backgroundColourSilouttes: {r: 0.03, g: 0.03, b: 0.03, a: 1}
-    backgroundColourA: {r: 0, g: 0, b: 0, a: 1}
-    backgroundColourB: {r: 0, g: 0, b: 0, a: 1}

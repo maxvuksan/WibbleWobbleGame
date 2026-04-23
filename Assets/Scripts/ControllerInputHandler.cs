@@ -33,6 +33,12 @@ public class ControllerInputHandler : MonoBehaviour
         CustomPhysics.OnStartPhysicsSimulation += OnStartPhysicsSimulation;
     }
 
+    void OnDestroy()
+    {
+        CustomPhysics.OnPostPhysicsTick -= OnPostPhysicsTick;
+        CustomPhysics.OnStartPhysicsSimulation -= OnStartPhysicsSimulation;
+    }
+
     public void OnStartPhysicsSimulation()
     {
         _input.jumpButtonIsPressed = false;

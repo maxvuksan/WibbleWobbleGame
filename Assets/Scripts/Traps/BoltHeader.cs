@@ -22,31 +22,31 @@ public class BoltHeader : MonoBehaviour
 
 
 
-        AttemptAttachingToTrap();
+        // AttemptAttachingToTrap();
     }
 
 
 
-    public void AttemptAttachingToTrap()
-    {
-        tryAttach = true;
+    // public void AttemptAttachingToTrap()
+    // {
+    //     tryAttach = true;
 
-        Collider2D hit = Physics2D.OverlapCircle(boltPosition.position, 0.4f);
+    //     Collider2D hit = Physics2D.OverlapCircle(boltPosition.position, 0.4f);
 
-        if(hit == null)
-        {
-            Debug.Log("Failed to attach bolt to trap");
-            return;
-        }
+    //     if(hit == null)
+    //     {
+    //         Debug.Log("Failed to attach bolt to trap");
+    //         return;
+    //     }
 
-        TrapHeader header = hit.GetComponent<TrapHeader>();
+    //     TrapHeader header = hit.GetComponent<TrapHeader>();
 
-        if (header != null)
-        {
-            tryAttach = true;
-            header.AttachChildTrap(this);    
-        }
-    }
+    //     if (header != null)
+    //     {
+    //         tryAttach = true;
+    //         header.AttachChildTrap(this);    
+    //     }
+    // }
 
     private void OnDrawGizmosSelected()
     {

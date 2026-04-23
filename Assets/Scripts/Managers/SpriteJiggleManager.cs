@@ -16,6 +16,7 @@ public class SpriteJiggleManager : MonoBehaviour
         if(Singleton == null)
         {
             Singleton = this;
+            DontDestroyOnLoad(this.gameObject);
         }
         else
         {

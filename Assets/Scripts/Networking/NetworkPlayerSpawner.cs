@@ -8,11 +8,6 @@ public class NetworkPlayerSpawner : NetworkBehaviour
 
     [SerializeField] private GameObject _playerDataSetPrefab;
 
-    private void Start()
-    {
-        DontDestroyOnLoad(this.gameObject);    
-    }
-
     public override void OnNetworkSpawn()
     {
         NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += OnGameSceneLoaded;

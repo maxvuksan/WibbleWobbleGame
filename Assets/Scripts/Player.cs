@@ -98,6 +98,7 @@ public class Player : NetworkBehaviour
     [SerializeField] private float stepRotation = 15.0f;
     [SerializeField] private float stepSpriteDuration = 0.2f;
     [SerializeField] private GameObject _footstepPrefab;    
+    [SerializeField] private GameObject _deathPrefab;
     [SerializeField] private SpriteRenderer _playerRenderer;
     [SerializeField] private SpriteRenderer eyeRenderer;
     [SerializeField] private Animator animator;
@@ -313,8 +314,11 @@ public class Player : NetworkBehaviour
         OnPlayerDeath();
     }
 
-    public void OnPlayerDeath()
+    private void OnPlayerDeath()
     {
+        GameObject deathEffectInstance = RollbackAwareObjectSpawner.Instantiate(_deathPrefab, transform.position);
+        deathEffectInstance.GetComponent<PlayerDeathExplosion>().SetColour(_originalColour);
+
         AudioManager.Singleton.Play("Player_Death");
     }
 
@@ -682,6 +686,15 @@ public class Player : NetworkBehaviour
             new VoltVector2(-Fix64.One, Fix64.Zero), 
             (Fix64)_wallRayLength);
 
+        if (!_topLeftRaycastResult.Hit)
+        {
+            // recast in middle
+            _topLeftRaycastResult = CustomPhysics.Raycast(
+                _physicsBody.Position + new VoltVector2(-_wallRayXOffset.AsFix64(), Fix64.Zero), 
+                new VoltVector2(-Fix64.One, Fix64.Zero), 
+                (Fix64)_wallRayLength);
+        }
+
         if(_topLeftRaycastResult.Hit || _bottomLeftRaycastResult.Hit)
         {
             _tickState._lastWallLeftTouchPhysicsTick = CustomPhysics.Tick;
@@ -696,6 +709,15 @@ public class Player : NetworkBehaviour
             _physicsBody.Position + new VoltVector2(_wallRayXOffset.AsFix64(), -(Fix64)_wallRayYOffset.AsFix64()), 
             new VoltVector2(Fix64.One, Fix64.Zero), 
             (Fix64)_wallRayLength);
+
+        if (!_topRightRaycastResult.Hit)
+        {
+            // recast in middle
+            _topRightRaycastResult = CustomPhysics.Raycast(
+                _physicsBody.Position + new VoltVector2(_wallRayXOffset.AsFix64(), Fix64.Zero), 
+                new VoltVector2(Fix64.One, Fix64.Zero), 
+                (Fix64)_wallRayLength);
+        }
 
         if(_topRightRaycastResult.Hit || _bottomRightRaycastResult.Hit)
         {

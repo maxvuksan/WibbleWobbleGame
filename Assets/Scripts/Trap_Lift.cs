@@ -39,8 +39,12 @@ public class Trap_Lift : MonoBehaviour
 
     void OnDestroy()
     {
+        if(_triggerBody != null)
+        {
+            _triggerBody.OnTrigger -= OnTrigger;
+        }
         CustomPhysics.OnPhysicsTick -= OnPhysicsTick;
-         CustomPhysics.OnStartPhysicsSimulation -= OnStartPhysicsSimulation;
+        CustomPhysics.OnStartPhysicsSimulation -= OnStartPhysicsSimulation;
     }
 
     private void OnStartPhysicsSimulation()
@@ -49,7 +53,6 @@ public class Trap_Lift : MonoBehaviour
 
         _initalPos = Helpers.TransformLocalPositionByParentTransform(parentCustomTransform, _initalPosCustomTransform.GetPositionFix64());
         _endPos = Helpers.TransformLocalPositionByParentTransform(parentCustomTransform, _endPosCustomTransform.GetPositionFix64());
-
     }
 
 
@@ -63,6 +66,11 @@ public class Trap_Lift : MonoBehaviour
 
     public void OnPhysicsTick()
     {
+        if (!gameObject.activeInHierarchy)
+        {
+            return;
+        }
+
         Fix64 speedIncreaseFactorFix64 = (Fix64)_speedIncreaseFactor;
         Fix64 deltaTime = CustomPhysics.TimeBetweenTicks;
 

@@ -192,7 +192,7 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 4096
+    maxTextureSize: 8192
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 0
@@ -1328,7 +1328,7 @@ TextureImporter:
         width: 24
         height: 39
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1337,6 +1337,28 @@ TextureImporter:
       bones: []
       spriteID: ec4fbedac7f55474594240b924efe284
       internalID: -2026215191
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: blocks_51
+      rect:
+        serializedVersion: 2
+        x: 36
+        y: 194
+        width: 25
+        height: 21
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f05bca33ae7a2d342ad677359a6b4d9e
+      internalID: -749586078
       vertices: []
       indices: 
       edges: []
@@ -1402,6 +1424,7 @@ TextureImporter:
       blocks_49: 1692320937
       blocks_5: 4256288277297392353
       blocks_50: -2026215191
+      blocks_51: -749586078
       blocks_6: -7855626261214365963
       blocks_7: -2880035774045676689
       blocks_8: 2587766382346407471

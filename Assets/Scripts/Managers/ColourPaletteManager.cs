@@ -98,7 +98,9 @@ public class ColourPaletteManager : MonoBehaviour
 
         OnColourPaletteChange?.Invoke();
 
-        _dashedBorderRenderer.color = _colourPalettes.palettes[_activePaletteIndex].backgroundColourSilouttes;
+        if(_dashedBorderRenderer != null){
+            _dashedBorderRenderer.color = _colourPalettes.palettes[_activePaletteIndex].backgroundColourSilouttes;
+        }
 
         _checkeredBackgroundMaterial.SetColor("_ColorA", palette.backgroundColourA);
         _checkeredBackgroundMaterial.SetColor("_ColorB", palette.backgroundColourB);

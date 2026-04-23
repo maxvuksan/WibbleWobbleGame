@@ -482,7 +482,7 @@ TextureImporter:
         width: 6
         height: 8
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -504,7 +504,7 @@ TextureImporter:
         width: 6
         height: 8
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -513,6 +513,28 @@ TextureImporter:
       bones: []
       spriteID: a9fbb2e4edfefb9439e203c99d417913
       internalID: -1479241318
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_19
+      rect:
+        serializedVersion: 2
+        x: 8
+        y: 67
+        width: 18
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e0eb292ae798bfd419c3ff53b89a56ab
+      internalID: -284933266
       vertices: []
       indices: 
       edges: []
@@ -544,6 +566,7 @@ TextureImporter:
       Player_16: -1468290112
       Player_17: 361274003
       Player_18: -1479241318
+      Player_19: -284933266
       Player_2: -1322825474
       Player_3: 438055858
       Player_4: 642868790

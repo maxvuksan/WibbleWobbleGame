@@ -48,7 +48,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 4289917413
+  GlobalObjectIdHash: 351663768
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -958,9 +958,9 @@ MonoBehaviour:
   _wallRayXOffset:
     ValueHundredths: 61
   _wallRayYOffset:
-    ValueHundredths: 51
+    ValueHundredths: 67
   _wallRayLength:
-    ValueHundredths: 14
+    ValueHundredths: 16
   _groundRaySidesXOffset:
     ValueHundredths: 59
   _groundRaySidesYOffset:
@@ -973,6 +973,7 @@ MonoBehaviour:
   stepRotation: 6
   stepSpriteDuration: 0.15
   _footstepPrefab: {fileID: 1984085572172503019, guid: 6ca0ccd7f29f5f747a356b05ed40689e, type: 3}
+  _deathPrefab: {fileID: 3446585449989391743, guid: 70fe4ad48c0aff14dadecd842ec9f21c, type: 3}
   _playerRenderer: {fileID: 3849084462165430682}
   eyeRenderer: {fileID: 6695744250585645009}
   animator: {fileID: 2829270620690801660}

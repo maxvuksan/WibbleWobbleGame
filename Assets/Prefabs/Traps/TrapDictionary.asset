@@ -15,67 +15,109 @@ MonoBehaviour:
   traps:
   - name: Clamp
     soundOnPlace: 
+    IsVisualOnly: 0
     behaviorPrefab: {fileID: 2893538759217496779, guid: 49ace691c5ec59b468fac46a2046a533, type: 3}
   - name: Spring_Test2
     soundOnPlace: 
+    IsVisualOnly: 0
     behaviorPrefab: {fileID: 7286761290850663326, guid: 81106fcfe547678439d61495694f76d0, type: 3}
   - name: Spring_Test
     soundOnPlace: 
+    IsVisualOnly: 0
     behaviorPrefab: {fileID: 7286761290850663326, guid: 6bff177e19c382f4db3e685074b72ba3, type: 3}
   - name: Block_L
     soundOnPlace: 
+    IsVisualOnly: 0
     behaviorPrefab: {fileID: 4665495375785675357, guid: 9c5a785c731228d4c9ec7b4f7400bb65, type: 3}
   - name: Block_2x2
     soundOnPlace: 
+    IsVisualOnly: 0
     behaviorPrefab: {fileID: 4665495375785675357, guid: 2a45f26386ea6d448a0da64617b51918, type: 3}
   - name: Block_1x1
     soundOnPlace: 
+    IsVisualOnly: 0
     behaviorPrefab: {fileID: 4665495375785675357, guid: 8fa0d383d2a7d8945add3c1b36f3af9f, type: 3}
   - name: Metal_3x1
     soundOnPlace: 
+    IsVisualOnly: 0
     behaviorPrefab: {fileID: 1676973214346812978, guid: 17811caeb55d48b48bcf789a6d52e532, type: 3}
   - name: Block_3x1
     soundOnPlace: 
+    IsVisualOnly: 0
     behaviorPrefab: {fileID: 4665495375785675357, guid: cddb505372a7a1f4fb2cf937eb464b86, type: 3}
   - name: Block_LSmall
     soundOnPlace: 
+    IsVisualOnly: 0
     behaviorPrefab: {fileID: 2244898614544078694, guid: 7341dbff7ebbb5948a4ffc39ced43da1, type: 3}
   - name: Block_Platform
     soundOnPlace: 
+    IsVisualOnly: 0
     behaviorPrefab: {fileID: 4665495375785675357, guid: dd7c10faafc440e44a54420eea7e231f, type: 3}
   - name: Block_Circle
     soundOnPlace: 
+    IsVisualOnly: 0
     behaviorPrefab: {fileID: 4665495375785675357, guid: b4493475684505245af3315c70f4c9d8, type: 3}
   - name: Block_Ramp
     soundOnPlace: 
+    IsVisualOnly: 0
     behaviorPrefab: {fileID: 4665495375785675357, guid: 7a5de903e1b8faf448afe106de69c876, type: 3}
   - name: BalanceBeam
     soundOnPlace: 
+    IsVisualOnly: 0
     behaviorPrefab: {fileID: 4886874729649364179, guid: ca7b25b9ba250ce4fba305a1553d5a1c, type: 3}
   - name: Saw
     soundOnPlace: 
+    IsVisualOnly: 0
     behaviorPrefab: {fileID: 4967037026206012188, guid: 237bd78f05bc09c4b91ebe2c3c610eb7, type: 3}
   - name: Lift
     soundOnPlace: 
+    IsVisualOnly: 0
     behaviorPrefab: {fileID: 1967868990143498241, guid: 97c66fdd49fd22d448e550c96598f9bc, type: 3}
   - name: Spike
     soundOnPlace: 
+    IsVisualOnly: 0
     behaviorPrefab: {fileID: 2899622994378174877, guid: be5c77b58113f39468e2347fde6f1e45, type: 3}
   - name: Rope_Swing
     soundOnPlace: 
+    IsVisualOnly: 0
     behaviorPrefab: {fileID: 1006486918728558157, guid: 3e9dd1eb5b6d7c64988150d344d09c26, type: 3}
   - name: Trap_L_Dynamic
     soundOnPlace: 
+    IsVisualOnly: 0
     behaviorPrefab: {fileID: 4665495375785675357, guid: 51d8d4b835072614a9519c01d5ae3989, type: 3}
   - name: Block_1x1_Dynamic
     soundOnPlace: 
+    IsVisualOnly: 0
     behaviorPrefab: {fileID: 4665495375785675357, guid: 7e1a01c17a41d264da18763fbb0434a7, type: 3}
   - name: SeeSaw
     soundOnPlace: 
+    IsVisualOnly: 0
     behaviorPrefab: {fileID: 4967037026206012188, guid: 836b2764f723eef4d9c8e8b47893aa85, type: 3}
   - name: WinBeam
     soundOnPlace: 
+    IsVisualOnly: 0
     behaviorPrefab: {fileID: 4665495375785675357, guid: 41623f62a184e8d4eb077e9acc9622a5, type: 3}
   - name: PlayerSpawn
     soundOnPlace: 
+    IsVisualOnly: 0
     behaviorPrefab: {fileID: 2899622994378174877, guid: 959b2034c95e46a40a3b600c07550681, type: 3}
+  - name: Bg_Block_2x2
+    soundOnPlace: 
+    IsVisualOnly: 1
+    behaviorPrefab: {fileID: 7840762163455792637, guid: 5de7c0327fcca6f4bb2544315d58f931, type: 3}
+  - name: Bg_Block_L
+    soundOnPlace: 
+    IsVisualOnly: 1
+    behaviorPrefab: {fileID: 7840762163455792637, guid: 9389dc038f354464b9c83f07b3edc0b6, type: 3}
+  - name: Bg_Block_1x1
+    soundOnPlace: 
+    IsVisualOnly: 1
+    behaviorPrefab: {fileID: 3446332295718165646, guid: b5f2c3dbaa92850468c491852ef87a72, type: 3}
+  - name: Bg_Block_3x1
+    soundOnPlace: 
+    IsVisualOnly: 1
+    behaviorPrefab: {fileID: 7840762163455792637, guid: 76bcbfbf2fb13b747b414f694d6b3cd4, type: 3}
+  - name: Block_SpikeTest
+    soundOnPlace: 
+    IsVisualOnly: 0
+    behaviorPrefab: {fileID: 2244898614544078694, guid: e61cae3276e48e54fa4970ceffe5f573, type: 3}

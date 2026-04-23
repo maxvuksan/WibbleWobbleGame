@@ -283,6 +283,8 @@ public class TrapPlacementArea : NetworkBehaviour
 
         for(int i = 0; i < _trapInstances.Count; i++)
         {
+            // TODO: This is redudant for traps which flag IsVisualOnly = true
+
             // Assign IDs to this trap and all its child physics bodies
             currentEntityId = AssignEntityIdsRecursive(_trapInstances[i], currentEntityId);
         }
@@ -353,31 +355,36 @@ public class TrapPlacementArea : NetworkBehaviour
 
             // Set the CustomTransform values to the IntHundredth values, to ensure deterministic position and rotation on every client...
             
-            CustomTransform customTransform = newObj.GetComponent<CustomTransform>();
 
-            if(customTransform == null)
-            {
-                customTransform = newObj.GetComponentInChildren<CustomTransform>();
-            }
-            if(customTransform == null)
-            {
-                Debug.LogError("No CustomTransform attached to placed trap, SpawnAllTrapInstances()");
-            }
+            // the trap is not a background element, thus we must handle CustomTransform and physic bodies
+            if(!trapDictionary.traps[sortedTrapsToPlace[i].trapTypeIndex].IsVisualOnly){
 
-            customTransform.SetValues(positionX, positionY, rotationDegrees);
-            // TODO: We may need to update the child CustomTransform, will see
+                CustomTransform customTransform = newObj.GetComponent<CustomTransform>();
 
-            CustomTransform[] bodies = newObj.GetComponentsInChildren<CustomTransform>();
-            for(int b = 0; b < bodies.Length; b++)
-            {   
-                if(!bodies[b].IsWorldSpace)
+                if(customTransform == null)
                 {
-                    continue;
+                    customTransform = newObj.GetComponentInChildren<CustomTransform>();
                 }
-                bodies[b].SetValues(
-                    positionX + bodies[b].PositionXHundredth, 
-                    positionY + bodies[b].PositionYHundredth, 
-                    rotationDegrees + bodies[b].RotationDegreesHundredth);
+                if(customTransform == null)
+                {
+                    Debug.LogError("No CustomTransform attached to placed trap, if this is a visual element, mark it as so with IsVisualOnly = true, SpawnAllTrapInstances()");
+                }
+
+                customTransform.SetValues(positionX, positionY, rotationDegrees);
+                // TODO: We may need to update the child CustomTransform, will see
+
+                CustomTransform[] bodies = newObj.GetComponentsInChildren<CustomTransform>();
+                for(int b = 0; b < bodies.Length; b++)
+                {   
+                    if(!bodies[b].IsWorldSpace)
+                    {
+                        continue;
+                    }
+                    bodies[b].SetValues(
+                        positionX + bodies[b].PositionXHundredth, 
+                        positionY + bodies[b].PositionYHundredth, 
+                        rotationDegrees + bodies[b].RotationDegreesHundredth);
+                }
             }
 
             // trigger start to run

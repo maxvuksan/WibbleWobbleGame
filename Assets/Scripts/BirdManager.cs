@@ -19,7 +19,8 @@ public class BirdManager : MonoBehaviour
     public void Awake()
     {
         LevelManager.Singleton.OnLevelLoad += OnLevelLoad;
-        CustomPhysics.OnPhysicsTick += OnPhysicsTick;
+        CustomPhysics.OnPhysicsTick += OnPrePhysicsTick;
+        
         _birds = new List<GameObject>();
     
 
@@ -33,7 +34,7 @@ public class BirdManager : MonoBehaviour
     public void OnDestroy()
     {
         LevelManager.Singleton.OnLevelLoad -= OnLevelLoad;
-        CustomPhysics.OnPhysicsTick -= OnPhysicsTick;
+        CustomPhysics.OnPhysicsTick -= OnPrePhysicsTick;
         Singleton = null;
     }
 
@@ -56,15 +57,21 @@ public class BirdManager : MonoBehaviour
         }
     }
 
-    private void OnPhysicsTick()
+    private void OnPrePhysicsTick()
     {
         if(CustomPhysics.Tick == 0)
         {
-            // compute bounds of traps
-
             for(int i = 0; i < _birds.Count; i++)
             {
                 _birds[i].transform.position = FindNewPerchSpot(_birds[i]);
+                if(_birds[i].transform.position.y == _birdConfig.DissapearHeight)
+                {
+                    _birds[i].GetComponent<Bird>().RefreshState(Bird.BirdState.Offscreen);
+                }
+                else
+                {
+                    _birds[i].GetComponent<Bird>().RefreshState(Bird.BirdState.Idle);
+                }
             }
         }
     }

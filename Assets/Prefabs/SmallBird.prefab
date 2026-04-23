@@ -50,9 +50,11 @@ MonoBehaviour:
     ScareByAnotherBirdDistance: 2
     ScareHorizontalMilage: 40
     ScareHorizontalMilageVariance: 15
+    TimeOffscreen: 3
     DissapearHeight: 30
     FlySpeedMin: 5
     FlySpeedMax: 27
+    FlyLandingSpeed: 20
     FlySpeedVariance: 4
     FlySpeedIncreaseRate: 24
     FlySpeedIncreaseRateVariance: 3

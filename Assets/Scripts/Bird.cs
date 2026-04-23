@@ -53,8 +53,8 @@ public class Bird : MonoBehaviour
         _animator = GetComponentInChildren<Animator>();
         _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
         _spriteRenderer.flipX = false;
-        CustomPhysics.OnPhysicsTick += OnPhysicsTick;
 
+        CustomPhysics.OnPhysicsTick += OnPhysicsTick;
         s_OnAnotherBirdTakesOff += OnAnotherBirdTakesOff;
 
         RefreshState(BirdState.Idle);
@@ -302,7 +302,7 @@ public class Bird : MonoBehaviour
 
     }
 
-    void RefreshState(BirdState newState)
+    public void RefreshState(BirdState newState)
     {
         if(_state != BirdState.FlyingAway || _state != BirdState.FlyingToLand)
         {

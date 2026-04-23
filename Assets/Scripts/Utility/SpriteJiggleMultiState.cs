@@ -13,7 +13,6 @@ public class SpriteJiggleMultiState : MonoBehaviour
     }
 
 
-
     public SpriteRenderer target;
     public NamedState[] states;
     private Dictionary<string, SpriteJiggle.State> stateDictionary;
@@ -53,8 +52,12 @@ public class SpriteJiggleMultiState : MonoBehaviour
 
     private void UpdateSprite()
     {
-
         if(this._currentState == "")
+        {
+            return;
+        }
+
+        if(target == null && stateDictionary?[_currentState] != null)
         {
             return;
         }

@@ -4,6 +4,7 @@ using System.Linq;
 using FixMath.NET;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UIElements;
 using Volatile;
 
 /// <summary>
@@ -348,7 +349,7 @@ public class CustomPhysics : MonoBehaviour
     public static CustomPhyiscsOverlapResult OverlapCircle(VoltVector2 origin, Fix64 radius)
     {
         CustomPhyiscsOverlapResult customResult = new() {Hit = false};
-        var outputVoltBuffer = CustomPhysicsSpace.Singleton.SimulationSpace.QueryCircle(origin, radius, null);
+        var outputVoltBuffer = CustomPhysicsSpace.Singleton.SimulationSpace.QueryCircle(origin, radius, (body) => true);
 
         if(outputVoltBuffer.Count != 0)
         {
@@ -362,7 +363,7 @@ public class CustomPhysics : MonoBehaviour
             var bodyComponent = CustomPhysicsSpace.Singleton.GetBody(body.EntityId);
             customResult.Bodies.Add(bodyComponent);
         }
-    
+
         return customResult;
     }
 
@@ -375,7 +376,7 @@ public class CustomPhysics : MonoBehaviour
         VoltRayResult result = new();
 
         CustomPhysicsRayResult customResult = new();
-        customResult.Hit = CustomPhysicsSpace.Singleton.SimulationSpace.RayCast(ref ray, ref result, null);
+        customResult.Hit = CustomPhysicsSpace.Singleton.SimulationSpace.RayCast(ref ray, ref result, (body) => true);
         customResult.Origin = origin;
         customResult.Direction = direction;
 

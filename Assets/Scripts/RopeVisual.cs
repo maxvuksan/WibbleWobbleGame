@@ -13,6 +13,7 @@ public class RopeVisual : MonoBehaviour
         _lineRenderer.material = Helpers.Singleton.RopeMaterial;
         _lineRenderer.positionCount = 0;
         _lineRenderer.useWorldSpace = true;
+        
         OnColourPaletteChange();
         ColourPaletteManager.Singleton.OnColourPaletteChange += OnColourPaletteChange;
     }
