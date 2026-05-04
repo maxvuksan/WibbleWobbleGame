@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 7542137508883700422}
   - component: {fileID: 420298326279749191}
   - component: {fileID: 3526882801882290721}
-  - component: {fileID: 4228120301861411487}
   - component: {fileID: 1119091139773192896}
   - component: {fileID: 9186455772326895101}
   m_Layer: 6
@@ -67,8 +66,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   _spriteState: {fileID: 5408498979230157386}
-  _initalPosition: {fileID: 8215767007652110590}
-  _endPosition: {fileID: 4929384377760614154}
   _initalPosCustomTransform: {fileID: 3150933104203476631}
   _endPosCustomTransform: {fileID: 7844967802063187145}
   _triggerBody: {fileID: 4075815425644812839}
@@ -80,29 +77,10 @@ MonoBehaviour:
       ValueHundredths: 1000
     dampingConstant:
       ValueHundredths: 10
-  _speedIncreaseFactor: 50
-  _maxSpeed: 25
---- !u!114 &4228120301861411487
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1967868990143498241}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3ebf2adb2caf32143b4e5d636c880367, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ApplyColourPalette
-  _targets:
-  - SpriteRenderers:
-    - {fileID: 3674387223976754413}
-    - {fileID: 1756357859111498546}
-    - {fileID: 120261818069221201}
-    Graphics: []
-    ColourData:
-      ColourTarget: 2
-      ColourTargetIndexOffset: 0
+  _speedIncreaseFactor:
+    ValueHundredths: 2500
+  _maxSpeed:
+    ValueHundredths: 4500
 --- !u!114 &1119091139773192896
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -178,7 +156,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3059082619022742236}
   - component: {fileID: 120261818069221201}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: Railing
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -248,9 +226,9 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: -10
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 0.1740833, g: 0.18947501, b: 0.2264151, a: 1}
+  m_Color: {r: 0.30588236, g: 0.36862746, b: 0.5019608, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -321,7 +299,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522806131143303929}
   - component: {fileID: 3674387223976754413}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: End
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -389,9 +367,9 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: -10
   m_Sprite: {fileID: -2413806693520163455, guid: 63e95332fb70c57469dad7c137e1c3fc, type: 3}
-  m_Color: {r: 0.1740833, g: 0.18947501, b: 0.2264151, a: 1}
+  m_Color: {r: 0.30588236, g: 0.36862746, b: 0.5019608, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -564,7 +542,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8e80e72817d95e41bd6acdeaf91824d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CustomPhysicsBody
-  BodyType: 1
+  _bodyType: 1
   _isTrigger: 0
   _parentBody: {fileID: 0}
   _ignoreParentBodyRotation: 0
@@ -659,7 +637,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5512412178304489836}
   - component: {fileID: 1756357859111498546}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: End (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -727,9 +705,9 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: -10
   m_Sprite: {fileID: -2413806693520163455, guid: 63e95332fb70c57469dad7c137e1c3fc, type: 3}
-  m_Color: {r: 0.1740833, g: 0.18947501, b: 0.2264151, a: 1}
+  m_Color: {r: 0.30588236, g: 0.36862746, b: 0.5019608, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -805,7 +783,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8e80e72817d95e41bd6acdeaf91824d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CustomPhysicsBody
-  BodyType: 1
+  _bodyType: 0
   _isTrigger: 1
   _parentBody: {fileID: 2035312255179220503}
   _ignoreParentBodyRotation: 1

@@ -32,6 +32,49 @@ public class CustomPhysicsSpace : MonoBehaviour
     private Dictionary<ulong, CustomPhysicsBody> _bodies;
 
 
+    // Buffer for collecting triggers in a tick
+    private List<(ulong triggerId, ulong otherId, VoltVector2 position, VoltVector2 normal)> _pendingTriggers = new();
+    
+    // Called from OnInternalCollision
+    public void RegisterTrigger(ulong triggerBodyId, ulong otherBodyId, VoltVector2 position, VoltVector2 normal)
+    {
+        _pendingTriggers.Add((triggerBodyId, otherBodyId, position, normal));
+    }
+
+    public void ClearPendingTriggers()
+    {
+        _pendingTriggers.Clear();
+    }
+
+    public void ProcessTriggersDeterministically()
+    {
+        // Sort by (triggerId, otherId) to ensure deterministic order
+        _pendingTriggers.Sort((a, b) => {
+
+            int triggerCompare = a.triggerId.CompareTo(b.triggerId);
+
+            if (triggerCompare != 0) {
+                return triggerCompare;
+            }
+
+            return a.otherId.CompareTo(b.otherId);
+        });
+        
+        foreach (var trigger in _pendingTriggers)
+        {
+            var triggerBody = GetBody(trigger.triggerId);
+            var otherBody = GetBody(trigger.otherId);
+            
+            if (triggerBody != null && otherBody != null)
+            {
+                triggerBody.OnTrigger?.Invoke(otherBody);
+            }
+        }
+        
+        _pendingTriggers.Clear();
+    }
+
+
     public VoltWorld SimulationSpace
     {
         get => _simulationSpace;

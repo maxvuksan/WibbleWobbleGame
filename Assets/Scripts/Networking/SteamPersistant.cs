@@ -27,7 +27,7 @@ public class SteamPersistant : MonoBehaviour
     }
 
     public static SteamContext Context;
-    private static SteamPersistant _Singleton;
+    public static SteamPersistant Singleton;
 
 
 
@@ -37,13 +37,13 @@ public class SteamPersistant : MonoBehaviour
     {
         if (Configuration.Singleton.UseSteamTransport)
         {
-            if (_Singleton != null)
+            if (Singleton != null)
             {
                 Destroy(this);
                 return;
             }
 
-            _Singleton = this;
+            Singleton = this;
             Context = new SteamContext();
 
             DontDestroyOnLoad(this);

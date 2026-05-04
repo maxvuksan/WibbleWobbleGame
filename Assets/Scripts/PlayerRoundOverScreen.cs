@@ -36,18 +36,18 @@ public class PlayerRoundOverScreen : NetworkBehaviour
             _playerScoreBars.Add(playerScoreBar);
 
             playerScoreBar.SetColour(PlayerDataManager.Singleton.PlayerDataPerIndex[i].colourBody);
-            playerScoreBar.SetInitalScore(PlayerDataManager.Singleton.PlayerData[i].networkedPlayerHeader.Score.Value);
-            playerScoreBar.SetIncreasedScore(PlayerDataManager.Singleton.PlayerData[i].networkedPlayerHeader.Score.Value);
+            playerScoreBar.SetInitalScore(PlayerDataManager.Singleton.PlayerData[i].NetworkedPlayerHeader.Score.Value);
+            playerScoreBar.SetIncreasedScore(PlayerDataManager.Singleton.PlayerData[i].NetworkedPlayerHeader.Score.Value);
 
             if (IsServer && 
-                PlayerDataManager.Singleton.PlayerData[i].networkedPlayerHeader.HasWon.Value)
+                PlayerDataManager.Singleton.PlayerData[i].NetworkedPlayerHeader.HasWon.Value)
             {
-                int newScore = PlayerDataManager.Singleton.PlayerData[i].networkedPlayerHeader.Score.Value + 1;
+                int newScore = PlayerDataManager.Singleton.PlayerData[i].NetworkedPlayerHeader.Score.Value + 1;
 
                 print("New Score: " + newScore);
                 
-                PlayerDataManager.Singleton.PlayerData[i].networkedPlayerHeader.SetScoreRpc(newScore);
-                PlayerDataManager.Singleton.PlayerData[i].networkedPlayerHeader.SetHasWonRpc(false);
+                PlayerDataManager.Singleton.PlayerData[i].NetworkedPlayerHeader.SetScoreRpc(newScore);
+                PlayerDataManager.Singleton.PlayerData[i].NetworkedPlayerHeader.SetHasWonRpc(false);
 
                 IncreaseScoreRpc(i, newScore);
             }

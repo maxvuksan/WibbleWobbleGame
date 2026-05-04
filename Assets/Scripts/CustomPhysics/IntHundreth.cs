@@ -12,12 +12,27 @@ public struct IntHundredthVector2
     public IntHundredth X;
     public IntHundredth Y;
 
+    public static IntHundredthVector2 CreateFromHundrethValues(int xHundreths, int yHundreths)
+    {
+        IntHundredthVector2 vec2 = new();
+
+        vec2.X = new IntHundredth(){ValueHundredths = xHundreths};
+        vec2.Y = new IntHundredth(){ValueHundredths = yHundreths};
+
+        return vec2;
+    }
+
     public IntHundredthVector2(IntHundredth _x, IntHundredth _y)
     {
         X = _x;
         Y = _y;
     }
 
+    public IntHundredthVector2(Fix64 _x, Fix64 _y)
+    {
+        X = new IntHundredth(_x);
+        Y = new IntHundredth(_y);
+    }
     /// <summary>
     /// Converts and casts the internal value to a VoltVector2 type, this removes the hundredth scaler
     /// </summary>

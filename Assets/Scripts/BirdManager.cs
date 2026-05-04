@@ -18,19 +18,14 @@ public class BirdManager : MonoBehaviour
 
     public void Awake()
     {
+        Helpers.CreateSingleton(ref Singleton, this);
+
         LevelManager.Singleton.OnLevelLoad += OnLevelLoad;
         CustomPhysics.OnPhysicsTick += OnPrePhysicsTick;
         
         _birds = new List<GameObject>();
-    
-
-        if(Singleton != null)
-        {
-            Debug.LogError("Cannot have multiple BirdManager singletons");
-            return;
-        }
-        Singleton = this;
     }
+
     public void OnDestroy()
     {
         LevelManager.Singleton.OnLevelLoad -= OnLevelLoad;
@@ -40,7 +35,6 @@ public class BirdManager : MonoBehaviour
 
     private void OnLevelLoad()
     {
-        print("SPAWNING BIRDS");
         (_levelXMin, _levelXMax) = TrapPlacementArea.Singleton.ComputeHorizontalBoundsOfPlacedTraps();
    
         SpawnBirds();

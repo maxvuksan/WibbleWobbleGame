@@ -116,6 +116,7 @@ MonoBehaviour:
     ColourData:
       ColourTarget: 1
       ColourTargetIndexOffset: 0
+    IgnoreApplyingAlpha: 0
 --- !u!114 &3742951165435896355
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -178,12 +179,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8e80e72817d95e41bd6acdeaf91824d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CustomPhysicsBody
-  BodyType: 0
+  _bodyType: 0
   _isTrigger: 0
   _parentBody: {fileID: 0}
   _ignoreParentBodyRotation: 0
   _gravity:
-    ValueHundredths: 0
+    ValueHundredths: 3000
   _restitution:
     ValueHundredths: 0
   _friction:

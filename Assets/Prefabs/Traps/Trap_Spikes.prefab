@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2342561934480609004}
   - component: {fileID: 6362346082800357166}
-  m_Layer: 12
+  m_Layer: 0
   m_Name: spikes
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -79,7 +79,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 3
+  m_SortingOrder: -1
   m_Sprite: {fileID: 1181173260568724218, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -106,7 +106,7 @@ GameObject:
   - component: {fileID: 3362087225914794122}
   - component: {fileID: 1174163473018851247}
   - component: {fileID: 5278175999359294818}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Trap_Spikes
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -121,7 +121,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2899622994378174877}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -175,12 +175,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8e80e72817d95e41bd6acdeaf91824d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CustomPhysicsBody
-  BodyType: 1
+  _bodyType: 1
   _isTrigger: 0
   _parentBody: {fileID: 0}
   _ignoreParentBodyRotation: 0
   _gravity:
-    ValueHundredths: 1000
+    ValueHundredths: 0
   _restitution:
     ValueHundredths: 0
   _friction:
@@ -208,17 +208,21 @@ MonoBehaviour:
     ValueHundredths: 0
   _points:
   - X:
-      ValueHundredths: 0
+      ValueHundredths: 60
     Y:
-      ValueHundredths: 101
+      ValueHundredths: -34
   - X:
-      ValueHundredths: 100
+      ValueHundredths: 90
     Y:
       ValueHundredths: -100
   - X:
-      ValueHundredths: -100
+      ValueHundredths: -85
     Y:
       ValueHundredths: -100
+  - X:
+      ValueHundredths: -62
+    Y:
+      ValueHundredths: -35
 --- !u!114 &1174163473018851247
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -288,7 +292,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8750358103537435842}
   - component: {fileID: 3067792972005301048}
-  m_Layer: 12
+  m_Layer: 0
   m_Name: hurtbox
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -376,12 +380,28 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1566633685222602990}
     - target: {fileID: 2386993755770445546, guid: 9af2090bc4aedd947a3907859d300861, type: 3}
+      propertyPath: _attachRadius.ValueHundredths
+      value: 23
+      objectReference: {fileID: 0}
+    - target: {fileID: 2386993755770445546, guid: 9af2090bc4aedd947a3907859d300861, type: 3}
       propertyPath: VectorOffset.Y.ValueHundredths
-      value: -141
+      value: -135
       objectReference: {fileID: 0}
     - target: {fileID: 2920384934208732614, guid: 9af2090bc4aedd947a3907859d300861, type: 3}
       propertyPath: m_Name
       value: Attacher
+      objectReference: {fileID: 0}
+    - target: {fileID: 2920384934208732614, guid: 9af2090bc4aedd947a3907859d300861, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4353215274617244103, guid: 9af2090bc4aedd947a3907859d300861, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6090389298853299304, guid: 9af2090bc4aedd947a3907859d300861, type: 3}
+      propertyPath: m_SortingOrder
+      value: -1
       objectReference: {fileID: 0}
     - target: {fileID: 6787732690541805057, guid: 9af2090bc4aedd947a3907859d300861, type: 3}
       propertyPath: _positionX.ValueHundredths

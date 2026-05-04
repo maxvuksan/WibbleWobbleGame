@@ -35,7 +35,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1017.9, y: 50}
+  m_SizeDelta: {x: 1017.9, y: 22}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2292744183138955640
 CanvasRenderer:
@@ -67,8 +67,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: ZooperDoooper
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2e953452787ca2c438b1504bc3c31811, type: 2}
-  m_sharedMaterial: {fileID: 7085044302214347903, guid: 2e953452787ca2c438b1504bc3c31811, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: eabc7ec92e58d8243950ac80beaa96d3, type: 2}
+  m_sharedMaterial: {fileID: -5957469800119585073, guid: eabc7ec92e58d8243950ac80beaa96d3, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -92,8 +92,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 76.8
-  m_fontSizeBase: 76.8
+  m_fontSize: 36
+  m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18

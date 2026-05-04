@@ -32,13 +32,12 @@ public class TrapHeader : MonoBehaviour
         CustomPhysics.OnPostPhysicsTick += OnPostPhysicsTick;
     }
 
-    void OnDestroy()
+    public virtual void OnDestroy()
     {
         CustomPhysics.OnPostPhysicsTick -= OnPostPhysicsTick;
-        
     }
 
-    void Start()
+    public virtual void Start()
     {
         if (IsUIElement)
         {
@@ -59,7 +58,7 @@ public class TrapHeader : MonoBehaviour
     {
         ulong clientId = NetworkManager.Singleton.LocalClientId;
         int trapIndex = TrapPlacementArea.Singleton.GetTrapIndexByName(trapName);
-        PlayerDataManager.Singleton.PlayerData[(int)clientId].networkedPlayerHeader.SetSelectedTrapRpc(trapIndex);
+        PlayerDataManager.Singleton.PlayerData[(int)clientId].NetworkedPlayerHeader.SetSelectedTrapRpc(trapIndex);
 
         CollapsablePanel.CloseAllPanels();
     }
@@ -69,13 +68,13 @@ public class TrapHeader : MonoBehaviour
     /// </summary>
     public void AttachChildBody(TrapHeader trap, CustomPhysicsBody childBody, CustomPhysicsBody parentBody){
 
-        // 1. Calculate the vector from Parent to Child in World Space
+        // Calculate the vector from Parent to Child in World Space
         VoltVector2 worldOffset = childBody.Position - parentBody.Position;
 
-        // 2. Rotate that vector into the Parent's Local Space
+        // Rotate that vector into the Parent's Local Space
         VoltVector2 localOffset = Helpers.RotatePosition(worldOffset, -parentBody.Body.Angle);
 
-        // 3. Store the rotation difference
+        // Store the rotation difference
         Fix64 relativeRot = childBody.Body.Angle - parentBody.Body.Angle;
 
         var entry = new AttachedTrap()
@@ -87,7 +86,7 @@ public class TrapHeader : MonoBehaviour
             RelativeRotation = relativeRot
         };
 
-        // // 4. Disable physics forces on the child so it follows the parent smoothly
+        // Disable physics forces on the child so it follows the parent smoothly
         // childBody.Body.IsKinematic = true; 
 
         attachedTraps.Add(entry);

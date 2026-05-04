@@ -20,6 +20,7 @@ public class ApplyColourPalette : MonoBehaviour
         public SpriteRenderer[] SpriteRenderers;
         public Graphic[] Graphics;
         public ColourData ColourData;
+        public bool IgnoreApplyingAlpha;
     }
 
 
@@ -43,10 +44,18 @@ public class ApplyColourPalette : MonoBehaviour
             Color colour = ColourPaletteManager.Singleton.GetColour(_targets[i].ColourData.ColourTarget, _targets[i].ColourData.ColourTargetIndexOffset);
             for(int s = 0; s < _targets[i].SpriteRenderers.Length; s++)
             {
+                if (_targets[i].IgnoreApplyingAlpha)
+                {
+                    colour.a = _targets[i].SpriteRenderers[s].color.a;
+                }
                 _targets[i].SpriteRenderers[s].color = colour;
             }
             for(int s = 0; s < _targets[i].Graphics.Length; s++)
             {
+                if (_targets[i].IgnoreApplyingAlpha)
+                {
+                    colour.a = _targets[i].Graphics[s].color.a;
+                }
                 _targets[i].Graphics[s].color = colour;
             }
         }

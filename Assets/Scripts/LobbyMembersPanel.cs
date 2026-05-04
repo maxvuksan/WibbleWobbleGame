@@ -19,8 +19,6 @@ public class LobbyMembersPanel : MonoBehaviour
 
     public void ConstructPlayerEntries()
     {   
-        print("ConstructPlayerEntries");
-
         ClearEntries();
         
         for(int i = 0; i < PlayerDataManager.Singleton.PlayerCount; i++)
@@ -31,11 +29,8 @@ public class LobbyMembersPanel : MonoBehaviour
             var entry = newEntry.GetComponent<LobbyMembersPlayerEntry>();
 
             // TODO: Each player should have a stored name variable, this is for steam lobbies the steam name, otherwise Player1, player 2 etc...
-            entry.SetName("This is a test");
-            entry.SetPlayerColour(PlayerDataManager.Singleton.PlayerDataPerIndex[PlayerDataManager.Singleton.PlayerData[i].index].colourBody);
-       
-            print("ConstructPlayerEntries, " + i);
-       
+            entry.SetName("Player " + i);
+            entry.SetPlayerColour(PlayerDataManager.Singleton.PlayerDataPerIndex[PlayerDataManager.Singleton.PlayerData[i].Index].colourBody);
         }
     }
 

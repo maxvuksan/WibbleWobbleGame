@@ -32,7 +32,7 @@ Material:
     - _InitialProjectionAlpha: 1
     - _LayerCount: 8
     - _ProjectionDecay: 1
-    - _ProjectionScale: -10
+    - _ProjectionScale: 0
     m_Colors:
     - _SourceTexSize: {r: 1920, g: 1080, b: 0, a: 0}
   m_BuildTextureStacks: []

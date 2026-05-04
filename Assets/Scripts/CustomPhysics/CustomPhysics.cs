@@ -15,7 +15,7 @@ public class CustomPhysics : MonoBehaviour
     /// <summary>
     /// How many times PhysicsTick() is called per second 
     /// </summary>
-    private static readonly int s_ticksPerSecond = 120;
+    public static readonly int TicksPerSecond = 120;
     
     /// <summary>
     /// The real time the last physics tick occured
@@ -25,12 +25,12 @@ public class CustomPhysics : MonoBehaviour
     /// <summary>
     /// Fixed delta time value, is the difference in time between each tick
     /// </summary>
-    public static readonly Fix64 TimeBetweenTicks = Fix64.One / (Fix64)s_ticksPerSecond;
+    public static readonly Fix64 TimeBetweenTicks = Fix64.One / (Fix64)TicksPerSecond;
 
     /// <summary>
     /// How many ticks in the past are snapshots recorded for. This history would be useful for performing rollbacks
     /// </summary>
-    public static readonly int HistoryLength = s_ticksPerSecond * 150;
+    public static readonly int HistoryLength = TicksPerSecond * 150;
 
     /// <summary>
     /// Is true if the physics simulation is resimulating (catching up ticks)
@@ -62,8 +62,17 @@ public class CustomPhysics : MonoBehaviour
     /// All physics operations should be performed in this callback
     /// </summary>
     public static Action OnPrePhysicsTick;
+
+    /// <summary>
+    /// Is called before the simulation updates
+    /// </summary>
     public static Action OnPhysicsTick;
+    
+    /// <summary>
+    /// Is called after the simulation has updated for this tick
+    /// </summary>
     public static Action OnPostPhysicsTick;
+
     public static Action OnTurnOffPhysicsSimulation;
     public static Action OnStartPhysicsSimulation;
     public static Action OnRecomputeEntityIds;
@@ -119,9 +128,12 @@ public class CustomPhysics : MonoBehaviour
         Helpers.SafeInvoke(OnPhysicsTick, "OnPhysicsTick");
         
         CustomConstraintSolver.SolveAllConstraints();
-        CustomPhysicsSpace.Singleton.UpdateSimulation(TimeBetweenTicks);
 
         Helpers.SafeInvoke(OnPostPhysicsTick, "OnPostPhysicsTick");
+
+        CustomPhysicsSpace.Singleton.UpdateSimulation(TimeBetweenTicks);
+
+        CustomPhysicsSpace.Singleton.ProcessTriggersDeterministically();
 
         LogTick();
         Tick++;
@@ -137,7 +149,7 @@ public class CustomPhysics : MonoBehaviour
             if(PlayerDataManager.Singleton != null){
                 for(int i = 0; i < PlayerDataManager.Singleton.PlayerCount; i++)
                 {
-                    playerDrivers.Add(PlayerDataManager.Singleton.PlayerData[i].playerInputDriver);
+                    playerDrivers.Add(PlayerDataManager.Singleton.PlayerData[i].InputDriver);
                 }
             }
 
@@ -163,6 +175,8 @@ public class CustomPhysics : MonoBehaviour
 
     public static void TurnOffSimulation()
     {
+        ResetTickToZero();
+
         // the simulation is already off
         if(_simulationStartTime == -1)
         {
@@ -170,7 +184,6 @@ public class CustomPhysics : MonoBehaviour
         }
 
         OnTurnOffPhysicsSimulation?.Invoke();
-        ResetTickToZero();
         _simulationStartTime = -1;
         ClearSnapshotHistoryRingBuffer();
         SimulateFutureAtRegularTickRate = false;
@@ -207,7 +220,7 @@ public class CustomPhysics : MonoBehaviour
             _recomputeEntityIdsRequired = false;
         }
 
-        long targetTick = (long)((Time.realtimeSinceStartupAsDouble - _simulationStartTime) * s_ticksPerSecond);
+        long targetTick = (long)((Time.realtimeSinceStartupAsDouble - _simulationStartTime) * TicksPerSecond);
 
         PerformNecassaryPhysicsTicks(targetTick);
     }
@@ -315,7 +328,11 @@ public class CustomPhysics : MonoBehaviour
             DeterminismLogger.LogExtraInfo("Performing Rollback, CurrentTick: " + Tick + " RollbackSnapshotTick: " + snapshotTick);
         }
 
+
+        RollbackAwareObjectSpawner.Rollback(previousTick);
+
         CustomPhysicsSpace.Singleton.RestoreSimulationSnapshot(_historyRingBuffer[shiftedIndex]);
+        CustomPhysicsSpace.Singleton.ClearPendingTriggers();
         
         Tick = previousTick; // restore simulate -1 so the next tick we process previousTick
     }
@@ -340,16 +357,9 @@ public class CustomPhysics : MonoBehaviour
     }
 
 
-    /// <summary>
-    /// Queries and returns the bodies which overlap a defined circle in the simulation space
-    /// </summary>
-    /// <param name="origin">The centre of the circle</param>
-    /// <param name="radius">The radius of the circle</param>
-    /// <returns>The result of the operation</returns>
-    public static CustomPhyiscsOverlapResult OverlapCircle(VoltVector2 origin, Fix64 radius)
+    private static CustomPhyiscsOverlapResult ParseVoltBufferToCustomPhysicsAbstraction(VoltBuffer<VoltBody> outputVoltBuffer)
     {
         CustomPhyiscsOverlapResult customResult = new() {Hit = false};
-        var outputVoltBuffer = CustomPhysicsSpace.Singleton.SimulationSpace.QueryCircle(origin, radius, (body) => true);
 
         if(outputVoltBuffer.Count != 0)
         {
@@ -368,12 +378,48 @@ public class CustomPhysics : MonoBehaviour
     }
 
     /// <summary>
+    /// Queries and returns the bodies which overlap a defined circle in the simulation space
+    /// </summary>
+    /// <param name="origin">The centre of the circle</param>
+    /// <param name="radius">The radius of the circle</param>
+    /// <returns>A struct containing the results of the overlap</returns>
+    public static CustomPhyiscsOverlapResult OverlapCircle(VoltVector2 origin, Fix64 radius)
+    {
+        var outputVoltBuffer = CustomPhysicsSpace.Singleton.SimulationSpace.QueryCircle(origin, radius);
+
+        return ParseVoltBufferToCustomPhysicsAbstraction(outputVoltBuffer);
+    }
+
+    /// <summary>
+    /// Queries and returns the bodies which overlap a defined rect in the simulation space
+    /// </summary>
+    /// <param name="centre">The centre position of the rect</param>
+    /// <param name="extents">The half width and height of the rect</param>
+    /// <param name="dynamicBodiesOnly">If true only returns bodies which are dynamic (not static)</param> 
+    /// <returns>A struct containing the results of the overlap</returns>
+    public static CustomPhyiscsOverlapResult OverlapRect(VoltVector2 centre, VoltVector2 extents, bool dynamicBodiesOnly = false)
+    {
+        VoltAABB worldBounds = new(centre, extents);
+        var outputVoltBuffer = CustomPhysicsSpace.Singleton.SimulationSpace.QueryOverlap(worldBounds, dynamicBodiesOnly, (body) => true);
+
+        return ParseVoltBufferToCustomPhysicsAbstraction(outputVoltBuffer);
+    }
+
+    public static CustomPhyiscsOverlapResult OverlapPoint(VoltVector2 point)
+    {
+        var outputVoltBuffer = CustomPhysicsSpace.Singleton.SimulationSpace.QueryPoint(point, (body) => true);
+        return ParseVoltBufferToCustomPhysicsAbstraction(outputVoltBuffer);
+    }
+
+    /// <summary>
     /// Shoots a ray in the simulation space
     /// </summary>
     public static CustomPhysicsRayResult Raycast(VoltVector2 origin, VoltVector2 direction, Fix64 distance)
     {
         VoltRayCast ray = new VoltRayCast(origin, direction, distance);
         VoltRayResult result = new();
+
+        direction = direction.normalized;
 
         CustomPhysicsRayResult customResult = new();
         customResult.Hit = CustomPhysicsSpace.Singleton.SimulationSpace.RayCast(ref ray, ref result, (body) => true);

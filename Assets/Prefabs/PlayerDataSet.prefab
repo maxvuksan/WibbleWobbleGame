@@ -667,7 +667,7 @@ Transform:
   m_GameObject: {fileID: 5049000554711917476}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -2.92, y: 0.57, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -944,9 +944,9 @@ MonoBehaviour:
   _jumpTickInputBuffer: 18
   _groundedTickBuffer: 10
   _horizontalControlDuration:
-    ValueHundredths: 57
+    ValueHundredths: 50
   _wallJumpHeight:
-    ValueHundredths: 1500
+    ValueHundredths: 1600
   _wallJumpXVelocity:
     ValueHundredths: 1300
   _jumpHeight:
@@ -967,7 +967,7 @@ MonoBehaviour:
     ValueHundredths: 82
   _groundRaySidesLength:
     ValueHundredths: 51
-  inAirRotationSpeed: 15
+  inAirRotationSpeed: 4
   verticalStretch: 0.01
   horizontalCounterStretch: 0.005
   stepRotation: 6
@@ -1055,7 +1055,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8e80e72817d95e41bd6acdeaf91824d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CustomPhysicsBody
-  BodyType: 1
+  _bodyType: 1
   _isTrigger: 0
   _parentBody: {fileID: 0}
   _ignoreParentBodyRotation: 0
@@ -1205,7 +1205,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 150
+  m_SortingOrder: 32767
   m_Sprite: {fileID: -339526375, guid: 3e6957a04c4b64a48ab8aa41bfd461cf, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0

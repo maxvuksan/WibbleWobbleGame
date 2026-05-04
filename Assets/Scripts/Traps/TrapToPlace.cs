@@ -67,8 +67,8 @@ public class TrapToPlace : NetworkBehaviour
             return;
         }
 
-        if (GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.GameState_PlacingTrap ||
-            GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.GameState_CreativeMode
+        if (GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.PlacingTrap ||
+            GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.CreativeMode
         )
         {
             if (_inputHandler.Input.mainButtonIsPressed)
@@ -116,7 +116,7 @@ public class TrapToPlace : NetworkBehaviour
         TrapPlacementArea.Singleton.AddTrapRpc(transform.position, _placementTrapGuideObject.transform.eulerAngles.z, _playerHeader.SelectedTrap.Value);
 
 
-        if(GameStateManager.Singleton.NetworkedState.Value != GameStateManager.GameStateEnum.GameState_CreativeMode)
+        if(GameStateManager.Singleton.NetworkedState.Value != GameStateManager.GameStateEnum.CreativeMode)
         {
             Destroy(_placementTrapGuideObject);
             _playerHeader.SetSelectedTrapRpc(-1);

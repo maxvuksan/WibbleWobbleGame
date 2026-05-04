@@ -10,8 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2427215875516390605}
   - component: {fileID: 3272291997332338955}
-  - component: {fileID: 8327098570664617383}
-  - component: {fileID: 6373031505640959725}
   m_Layer: 12
   m_Name: HookStart
   m_TagString: Untagged
@@ -92,54 +90,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!50 &8327098570664617383
-Rigidbody2D:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1037741136145218207}
-  m_BodyType: 2
-  m_Simulated: 1
-  m_UseFullKinematicContacts: 0
-  m_UseAutoMass: 0
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_GravityScale: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_Interpolate: 0
-  m_SleepingMode: 1
-  m_CollisionDetection: 0
-  m_Constraints: 0
---- !u!231 &6373031505640959725
-SpringJoint2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1037741136145218207}
-  m_Enabled: 1
-  serializedVersion: 4
-  m_EnableCollision: 0
-  m_ConnectedRigidBody: {fileID: 4872783339455172050}
-  m_BreakForce: Infinity
-  m_BreakTorque: Infinity
-  m_BreakAction: 3
-  m_AutoConfigureConnectedAnchor: 0
-  m_Anchor: {x: 0, y: 0}
-  m_ConnectedAnchor: {x: 0, y: 0}
-  m_AutoConfigureDistance: 1
-  m_Distance: 1.05
-  m_DampingRatio: 0.1
-  m_Frequency: 1.3
 --- !u!1 &2305245832656487536
 GameObject:
   m_ObjectHideFlags: 0
@@ -151,7 +101,6 @@ GameObject:
   - component: {fileID: 6543050305982053646}
   - component: {fileID: 4835125138824466341}
   - component: {fileID: 7159650834581355823}
-  - component: {fileID: 4872783339455172050}
   m_Layer: 12
   m_Name: HookEnd
   m_TagString: Untagged
@@ -248,38 +197,11 @@ MonoBehaviour:
   states:
   - name: Open
     onSprite: {fileID: -7961285409242522895, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
-    offSprite: {fileID: -7961285409242522895, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
+    offSprite: {fileID: -1847482732, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
   - name: Closed
     onSprite: {fileID: -4172891971193494056, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
-    offSprite: {fileID: -4172891971193494056, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
+    offSprite: {fileID: -769666066, guid: f13f9b077554bdc418f4b9603b210115, type: 3}
   _currentState: 
---- !u!50 &4872783339455172050
-Rigidbody2D:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2305245832656487536}
-  m_BodyType: 1
-  m_Simulated: 1
-  m_UseFullKinematicContacts: 0
-  m_UseAutoMass: 0
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0
-  m_GravityScale: 0
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_Interpolate: 1
-  m_SleepingMode: 1
-  m_CollisionDetection: 0
-  m_Constraints: 0
 --- !u!1 &2893538759217496779
 GameObject:
   m_ObjectHideFlags: 0
@@ -292,7 +214,10 @@ GameObject:
   - component: {fileID: 7618801273982818609}
   - component: {fileID: 9208638663966668700}
   - component: {fileID: 5217128594222847466}
-  - component: {fileID: 8044860637660121863}
+  - component: {fileID: 5763236278142202380}
+  - component: {fileID: 1715120101442915486}
+  - component: {fileID: 6415699768202345190}
+  - component: {fileID: 9031262038038989610}
   m_Layer: 0
   m_Name: Trap_Clamp
   m_TagString: Untagged
@@ -330,16 +255,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d899aa92765113841907492756c50436, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Trap_Clamp
-  lr: {fileID: 4710721346741361884}
-  lrStart: {fileID: 2427215875516390605}
-  lrEnd: {fileID: 6543050305982053646}
-  hookEndRb: {fileID: 4872783339455172050}
-  hookEndJiggle: {fileID: 7159650834581355823}
-  hookSpeed: 2
-  hookSpeedIncrease: 1.5
-  trapLayer:
-    serializedVersion: 2
-    m_Bits: 64
+  _ropeVisual: {fileID: 1715120101442915486}
+  _hookAnchorBody: {fileID: 5763236278142202380}
+  _hookEndJiggle: {fileID: 7159650834581355823}
+  _hookSpeed:
+    ValueHundredths: 0
+  _hookSpeedIncrease:
+    ValueHundredths: 30
 --- !u!114 &9208638663966668700
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -352,6 +274,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 977d28dfaa5a7ec4ea3697316df7c061, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrapHeader
+  IsUIElement: 0
   trapName: Clamp
 --- !u!114 &5217128594222847466
 MonoBehaviour:
@@ -365,15 +288,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d54b084106aee904cabb37e28de18d5a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CustomSpring
-  _useImpulseSolver: 1
-  _calculateRestLengthAtStart: 1
-  configuration:
-    restLength:
-      ValueHundredths: 0
-    springConstant:
-      ValueHundredths: 0
-    dampingConstant:
-      ValueHundredths: 0
   bodyA: {fileID: 0}
   bodyB: {fileID: 0}
   bodyAAttachmentOffset:
@@ -386,7 +300,16 @@ MonoBehaviour:
       ValueHundredths: 0
     Y:
       ValueHundredths: 0
---- !u!114 &8044860637660121863
+  _useImpulseSolver: 1
+  _calculateRestLengthAtStart: 1
+  configuration:
+    restLength:
+      ValueHundredths: 0
+    springConstant:
+      ValueHundredths: 1500
+    dampingConstant:
+      ValueHundredths: 1000
+--- !u!114 &5763236278142202380
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -395,9 +318,91 @@ MonoBehaviour:
   m_GameObject: {fileID: 2893538759217496779}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8e5df004d3917264991d5ae1a0adf7b4, type: 3}
+  m_Script: {fileID: 11500000, guid: c8e80e72817d95e41bd6acdeaf91824d, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CustomSpringVisual
+  m_EditorClassIdentifier: Assembly-CSharp::CustomPhysicsBody
+  _bodyType: 0
+  _isTrigger: 0
+  _parentBody: {fileID: 0}
+  _ignoreParentBodyRotation: 0
+  _gravity:
+    ValueHundredths: 0
+  _restitution:
+    ValueHundredths: 0
+  _friction:
+    ValueHundredths: 0
+  _mass:
+    ValueHundredths: 100
+  _constrainRotation: 0
+  _constrainXPosition: 0
+  _constrainYPosition: 0
+--- !u!114 &1715120101442915486
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2893538759217496779}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0134430a85f1c6418a8e3d99f5f50e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RopeVisual
+--- !u!114 &6415699768202345190
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2893538759217496779}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 800eea881453e7442b3d558ac39483ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CustomTransform
+  _positionX:
+    ValueHundredths: -1645
+  _positionY:
+    ValueHundredths: 278
+  _rotationDegrees:
+    ValueHundredths: 0
+  _isWorldSpace: 0
+--- !u!58 &9031262038038989610
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2893538759217496779}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: -0.94}
+  m_Radius: 1.49
 --- !u!1 &7559200935826510168
 GameObject:
   m_ObjectHideFlags: 0

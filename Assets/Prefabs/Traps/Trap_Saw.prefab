@@ -94,9 +94,9 @@ MonoBehaviour:
   OffsetX:
     ValueHundredths: 0
   OffsetY:
-    ValueHundredths: 425
+    ValueHundredths: 440
   _radius:
-    ValueHundredths: 70
+    ValueHundredths: 68
 --- !u!114 &1164768822728927056
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -222,7 +222,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 86a8ac73c54c3c642bbe5e96f154c0c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  _speed: -4
+  _speed: 3
   _bodyToApplyTo: {fileID: 1142440177249331008}
 --- !u!114 &1142440177249331008
 MonoBehaviour:
@@ -236,7 +236,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8e80e72817d95e41bd6acdeaf91824d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CustomPhysicsBody
-  BodyType: 1
+  _bodyType: 1
   _isTrigger: 1
   _parentBody: {fileID: 5258354893559297383}
   _ignoreParentBodyRotation: 0
@@ -409,7 +409,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8e80e72817d95e41bd6acdeaf91824d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CustomPhysicsBody
-  BodyType: 0
+  _bodyType: 0
   _isTrigger: 0
   _parentBody: {fileID: 0}
   _ignoreParentBodyRotation: 0
@@ -497,15 +497,15 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 2.0244963}
+  m_Offset: {x: 0, y: 2.2668087}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 2.125, y: 2}
+    oldSize: {x: 2, y: 2}
     newSize: {x: 9, y: 9.875}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 2.125, y: 6.0489926}
+  m_Size: {x: 2.125, y: 6.5336175}
   m_EdgeRadius: 0

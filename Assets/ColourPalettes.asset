@@ -17,16 +17,16 @@ MonoBehaviour:
     - {r: 0.17621928, g: 0.21719208, b: 0.3773585, a: 1}
     - {r: 0.15686275, g: 0.28024727, b: 0.3882353, a: 1}
     ropeColour: {r: 0.14818442, g: 0.16947405, b: 0.2830189, a: 1}
-    backgroundColourSilouttes: {r: 0.09411765, g: 0.101960786, b: 0.20784314, a: 1}
-    backgroundColourA: {r: 0.05882353, g: 0.05882353, b: 0.14509805, a: 1}
-    backgroundColourB: {r: 0.058758628, g: 0.058758628, b: 0.14509805, a: 1}
+    backgroundColourSilouttes: {r: 0.08593182, g: 0.08593182, b: 0.199, a: 1}
+    backgroundColourA: {r: 0.0531081, g: 0.0531081, b: 0.131, a: 1}
+    backgroundColourB: {r: 0.05490196, g: 0.05490196, b: 0.12941177, a: 1}
   - primaryBlockColours:
-    - {r: 0.12068351, g: 0.12068351, b: 0.2264151, a: 1}
-    - {r: 0.18117648, g: 0.18117648, b: 0.27450982, a: 1}
-    ropeColour: {r: 0.058823533, g: 0.058823533, b: 0.058823533, a: 1}
-    backgroundColourSilouttes: {r: 0.059341177, g: 0.062385436, b: 0.101960786, a: 1}
-    backgroundColourA: {r: 0.033333335, g: 0.033333335, b: 0.05, a: 1}
-    backgroundColourB: {r: 0.033333335, g: 0.033333335, b: 0.05, a: 1}
+    - {r: 0.24025923, g: 0.213324, b: 0.348, a: 1}
+    - {r: 0.17379308, g: 0.14275862, b: 0.27, a: 1}
+    ropeColour: {r: 0.18431373, g: 0.15686275, b: 0.29411766, a: 1}
+    backgroundColourSilouttes: {r: 0.0981264, g: 0.064584315, b: 0.16862746, a: 1}
+    backgroundColourA: {r: 0.066666655, g: 0.043137256, b: 0.1, a: 1}
+    backgroundColourB: {r: 0.06666667, g: 0.043137256, b: 0.101960786, a: 1}
   - primaryBlockColours:
     - {r: 0.3019608, g: 0.21960784, b: 0.36078432, a: 1}
     - {r: 0.39607844, g: 0.18039216, b: 0.28627452, a: 1}

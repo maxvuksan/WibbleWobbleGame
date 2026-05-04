@@ -7,20 +7,34 @@ using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 
+
+public enum MenuPage
+{
+    Title,
+    Lobby,
+    Settings,
+}
+
 public class LobbyUiManager : MonoBehaviour
 {
-
     [SerializeField] private GameObject[] enableWhenLobbyHost;
     [SerializeField] private GameObject[] enableWhenLobbyMember;
     [SerializeField] private GameObject[] enableWhenNoLobby;
 
     [SerializeField] private Transform lobbyMemberTransformParent;
-    [SerializeField] private GameObject lobbyMemberTextPrefab;
 
     [SerializeField] private TMP_InputField lobbyIdInput;
 
+    [SerializeField] private Transform _offscreenTransitionPosition; // where the camera moves to when moving off the main menu
+    [SerializeField] private TextMeshPro _lobbyMemberListText;
+
     void Start()
     {
+        if (!Configuration.Singleton.UseSteamTransport)
+        {
+            return;
+        }
+
         RefreshAllLobbyUI();
 
         // subscribing for steam callbacks...
@@ -121,6 +135,8 @@ public class LobbyUiManager : MonoBehaviour
     {
         // enables the appropriate game objects for the players lobby authority...
 
+        Vector3 cameraTarget = Vector3.zero;
+
         switch (SteamPersistant.Context.lobbyAuthority)
         {
             case SteamPersistant.LobbyAuthority.NOT_CONNECTED:
@@ -136,21 +152,22 @@ public class LobbyUiManager : MonoBehaviour
 
                 Helpers.SetActiveGameObjectArray(enableWhenNoLobby, false);
                 Helpers.SetActiveGameObjectArray(enableWhenLobbyMember, false);
-                
                 Helpers.SetActiveGameObjectArray(enableWhenLobbyHost, true);
-
+                cameraTarget = _offscreenTransitionPosition.position;   
                 break;
 
             case SteamPersistant.LobbyAuthority.MEMBER:
 
                 Helpers.SetActiveGameObjectArray(enableWhenNoLobby, false);
                 Helpers.SetActiveGameObjectArray(enableWhenLobbyHost, false);
-                
                 Helpers.SetActiveGameObjectArray(enableWhenLobbyMember, true);
+                cameraTarget = _offscreenTransitionPosition.position;   
 
                 break;
         }
 
+        CameraMovement.SceneSingleton.TargetPosition = cameraTarget;
+        
         RefreshLobbyMemberListUI();
     }
 
@@ -160,34 +177,28 @@ public class LobbyUiManager : MonoBehaviour
     private void RefreshLobbyMemberListUI()
     {
 
-        // destroy all lobby member text elements
-
-        for(int i = 0; i < lobbyMemberTransformParent.childCount; i++)
-        {
-            Destroy(lobbyMemberTransformParent.GetChild(i).gameObject);
-        }
-
-
         if(SteamPersistant.Context.lobbyAuthority == SteamPersistant.LobbyAuthority.NOT_CONNECTED)
         {
+            _lobbyMemberListText.text = "";
             return;
         }
 
         lobbyIdInput.text = SteamPersistant.Context.lobby.Id.ToString();
-        Debug.Log("Lobby Id is : " + lobbyIdInput.text);
+        
         // spawn updated member list
-
+        _lobbyMemberListText.text = "";
         foreach (var member in SteamPersistant.Context.lobby.Members)
         {
-            var go = Instantiate(lobbyMemberTextPrefab, lobbyMemberTransformParent);
-            var text = go.GetComponent<TextMeshProUGUI>();
-
-            text.text = member.Name;
-
             // mark host with Host label
             if (member.Id == SteamPersistant.Context.lobby.Owner.Id){
-                text.text += " (Host)";
+                _lobbyMemberListText.text +=  member.Name + " (Host)";
             }
+            else
+            {
+                _lobbyMemberListText.text +=  member.Name;
+            }
+
+            _lobbyMemberListText.text += "\n";
         }
     }
 

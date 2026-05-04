@@ -10,15 +10,9 @@ public class SteamIntergration : MonoBehaviour
     private static SteamIntergration Singleton = null;
 
 
-    private void Start() 
+    void Awake() 
     {
-        if (Singleton != null)
-        {
-            Destroy(this);
-            return;
-        }
-
-        DontDestroyOnLoad(this);
+        Helpers.CreateSingleton(ref Singleton, this);
     }
 
 

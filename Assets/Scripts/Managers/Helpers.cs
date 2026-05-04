@@ -6,7 +6,6 @@ using Volatile;
 public class Helpers : MonoBehaviour
 {
 
-
     [SerializeField] private RenderTexture cameraTexture;
     [SerializeField] private RectTransform outputRect;
     [SerializeField] private Canvas canvas;
@@ -29,6 +28,25 @@ public class Helpers : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// A utility function for creating and enforcing Singleton behaviour on a class
+    /// </summary>
+    /// <typeparam name="T">The class type to create a singleton from</typeparam>
+    /// <param name="Singleton">The Singleton static variable</param>
+    /// <param name="callingClass">The instance of the Singleton we wish to promote</param>
+    public static void CreateSingleton<T>(ref T Singleton, T callingClass) where T : MonoBehaviour
+    {
+        if (Singleton != null)
+        {
+            Debug.LogWarning("Could not create Singleton (" + Singleton.name + ") because another instance already exists");
+            Destroy(Singleton.gameObject);
+            return;
+        }
+
+        Singleton = callingClass;
+        DontDestroyOnLoad(Singleton.gameObject);
+    }
+
     public Vector2 PixelScreenToWorld(Vector2 input)
     {
         // Get mouse position in canvas space
@@ -50,10 +68,11 @@ public class Helpers : MonoBehaviour
         
         // Convert to world position using the camera that renders to the texture
         Vector3 worldPos = Camera.main.ScreenToWorldPoint(new Vector3(
-            rtX, 
-            rtY, 
+            Mathf.Clamp(rtX, -9999, 9999), 
+            Mathf.Clamp(rtY, -9999, 9999), 
             Mathf.Abs(Camera.main.transform.position.z)
         ));
+
         
         return new Vector2(worldPos.x, worldPos.y);
     }
@@ -131,10 +150,17 @@ public class Helpers : MonoBehaviour
     public static VoltVector2 TransformLocalPositionByParentTransform(CustomTransform parentTransform, VoltVector2 position)
     {
         VoltVector2 transformedPosition = RotatePosition(position, parentTransform.GetRotationRadiansFix64());
-        
         transformedPosition += parentTransform.GetPositionFix64();
 
         return transformedPosition;
+    }
+
+    public static VoltVector2 TransformWorldPositionToLocalPosition(VoltVector2 worldPosition, VoltVector2 objectPosition, Fix64 objectRotationRadians)
+    {
+        VoltVector2 relativePosition = worldPosition - objectPosition;
+        VoltVector2 localPosition = RotatePosition(relativePosition, -objectRotationRadians);
+        
+        return localPosition;
     }
 
 }

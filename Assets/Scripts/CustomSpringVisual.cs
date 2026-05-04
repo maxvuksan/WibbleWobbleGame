@@ -24,6 +24,10 @@ public class CustomSpringVisual : RopeVisual
             return;
         }
 
+        if(spring.bodyA == null || spring.bodyB == null)
+        {
+            return;
+        }
         SetPoint(0, spring.GetFloatStartAnchorPosition());
         SetPoint(1, spring.GetFloatEndAnchorPosition());
     }

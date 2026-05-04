@@ -91,7 +91,7 @@ public class CustomCommandInterpreter : CommandInterpreter
 
                         if (result)
                         {
-                            GameStateManager.Singleton.ServerSetGameState(GameStateManager.GameStateEnum.GameState_Play);
+                            GameStateManager.Singleton.ServerSetGameState(GameStateManager.GameStateEnum.Play);
                             CommandLine.SetOpen(false);
                         }
                         else // failed to load
@@ -119,26 +119,30 @@ public class CustomCommandInterpreter : CommandInterpreter
             if(args.Length == 1)
             {
                 submission.MessageType = CommandLineMessageType.Print;
-                submission.Message = "/game [lobby / creative / play / trapSelect]";
+                submission.Message = "/game [lobby / creative / play / trapSelect / preview]";
                 CommandLine.PushLineToHistory(submission);
             }
             else
             {
                 if(args[1] == "lobby")
                 {
-                    GameStateManager.Singleton.ServerSetGameState(GameStateManager.GameStateEnum.GameState_SelectingLevel);
+                    GameStateManager.Singleton.ServerSetGameState(GameStateManager.GameStateEnum.LobbyPlay);
                 }
                 if(args[1] == "creative")
                 {
-                    GameStateManager.Singleton.ServerSetGameState(GameStateManager.GameStateEnum.GameState_CreativeMode);
+                    GameStateManager.Singleton.ServerSetGameState(GameStateManager.GameStateEnum.CreativeMode);
                 }
                 if(args[1] == "play")
                 {
-                    GameStateManager.Singleton.ServerSetGameState(GameStateManager.GameStateEnum.GameState_Play);
+                    GameStateManager.Singleton.ServerSetGameState(GameStateManager.GameStateEnum.Play);
                 }
                 if(args[1] == "trapSelect")
                 {
-                    GameStateManager.Singleton.ServerSetGameState(GameStateManager.GameStateEnum.GameState_SelectingTrap);
+                    GameStateManager.Singleton.ServerSetGameState(GameStateManager.GameStateEnum.SelectingTrap);
+                }
+                if(args[1] == "preview")
+                {
+                    GameStateManager.Singleton.ServerSetGameState(GameStateManager.GameStateEnum.PreviewLevel);
                 }
 
                 CommandLine.SetOpen(false);

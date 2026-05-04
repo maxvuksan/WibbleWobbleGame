@@ -28,3 +28,10 @@ MonoBehaviour:
     volume: 0.503
     pitch: 1
     pitch_variation: 0.044
+  - name: KeyboardPress
+    clips:
+    - {fileID: 8300000, guid: 9ba5aa0b7d3fad843846274f961f465b, type: 3}
+    - {fileID: 8300000, guid: 9834872389f206b46a6aa9b2382b85d8, type: 3}
+    volume: 0.259
+    pitch: 1.458
+    pitch_variation: 0.044

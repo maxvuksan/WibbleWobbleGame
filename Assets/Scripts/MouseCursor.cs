@@ -3,7 +3,6 @@ using UnityEngine;
 
 public class MouseCursor : MonoBehaviour
 {
-
     [SerializeField] private float _controllerSpeed;
     [SerializeField] private SpriteRenderer _spriteRenderer;
     [SerializeField] private SpriteRenderer _outlineSpriteRenderer;
@@ -53,7 +52,6 @@ public class MouseCursor : MonoBehaviour
     }
 
 
-
     void DetectMouseUIButtons()
     {
         Vector2 pixelMousePos = new Vector2(transform.position.x, transform.position.y);
@@ -72,7 +70,13 @@ public class MouseCursor : MonoBehaviour
 
         if (_input.Input.mainButtonIsPressed)
         {
-            button.Press(_playerHeader.PlayerIndex.Value);
+            ulong playerIndex = 0;
+            if(_playerHeader != null)
+            {   
+                playerIndex = _playerHeader.PlayerIndex.Value;
+            }
+
+            button.Press(playerIndex);
             _input.ClearMainButtonIsPressed();
         }
     }

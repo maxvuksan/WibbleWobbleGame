@@ -65,7 +65,44 @@ public class CustomPhysicsBody : MonoBehaviour
     /// <summary>
     /// Determines whether the physics body can move and rotate in response to forces
     /// </summary>
-    public CustomBodyType BodyType = CustomBodyType.Static;
+    public CustomBodyType BodyType 
+    {
+        get => _bodyType;
+        set
+        {
+            if(_bodyType != value)
+            {
+                // reconstruct body because we are changing the body type
+                _bodyType = value;
+                Construct();
+            }
+        }
+    }
+    public Fix64 Gravity
+    {
+        get => _gravity;
+        set
+        {
+            _gravity = new IntHundredth(value);
+            if(Body != null)
+            {
+                Body.Gravity = new VoltVector2(Fix64.Zero, -value);
+            }
+        }
+    }
+    public Fix64 Mass
+    {
+        get => _mass;
+        set
+        {
+            _mass = new IntHundredth(value);
+            if(Body != null)
+            {
+                Body.Mass = value;
+            }
+        }
+    }
+    [SerializeField] private CustomBodyType _bodyType = CustomBodyType.Static;
     public ICustomTickState CustomState;
 
     public bool IsTrigger { get => _isTrigger; }
@@ -92,7 +129,6 @@ public class CustomPhysicsBody : MonoBehaviour
     [SerializeField] private bool _constrainYPosition = false;
 
     public Action<CustomPhysicsBody> OnTrigger;
-    public Action<CustomPhysicsBody> OnCollide;
 
     private List<CustomCollider> _colliderList = new();
     private Fix64 _radiansZFix64;
@@ -112,6 +148,7 @@ public class CustomPhysicsBody : MonoBehaviour
     /// </summary>
     private Vector2 _previousPositionForLerp;
     private Vector2 _currentPositionForLerp;
+    private Fix64 _initalRotation;
     private float _previousAngleForLerp;
     private float _currentAngleForLerp;
 
@@ -279,6 +316,8 @@ public class CustomPhysicsBody : MonoBehaviour
 
         _constructed = true;
 
+        _initalRotation = Body.Angle;
+
         ApplySimulationToGameObject();
 
     }
@@ -358,7 +397,7 @@ public class CustomPhysicsBody : MonoBehaviour
             {
                 if (!_ignoreParentBodyRotation)
                 {
-                    angle += _parentBody.Angle;
+                    angle = _initalRotation + _parentBody.Angle;
                 }
             }
 
@@ -382,19 +421,16 @@ public class CustomPhysicsBody : MonoBehaviour
             _turnOnInterpolatioNextTick = false;
         }
 
+        _previousPositionForLerp = _currentPositionForLerp;
+        _previousAngleForLerp = _currentAngleForLerp;
+        _currentPositionForLerp = new Vector2((float)Body.Position.x, (float)Body.Position.y);
+        _currentAngleForLerp = Mathf.Rad2Deg * (float)Body.Angle;
 
         if (!ShouldInterpolate())
         {
-            // Store previous frame's current as new previous
             _previousPositionForLerp = _currentPositionForLerp;
             _previousAngleForLerp = _currentAngleForLerp;
-            
-            // Store new current position from physics
-            _currentPositionForLerp = new Vector2((float)Body.Position.x, (float)Body.Position.y);
-            _currentAngleForLerp = Mathf.Rad2Deg * (float)Body.Angle;
-        }
-        else
-        {
+
             // No interpolation; direct update
             transform.position = new Vector2((float)Body.Position.x, (float)Body.Position.y);
             transform.rotation = Quaternion.Euler(0, 0, Mathf.Rad2Deg * (float)Body.Angle);
@@ -414,7 +450,7 @@ public class CustomPhysicsBody : MonoBehaviour
         }
 
 
-        if (!ShouldInterpolate())
+        if (ShouldInterpolate())
         {
             float t = CalculateInterpolationTValue();
             
@@ -422,6 +458,11 @@ public class CustomPhysicsBody : MonoBehaviour
             
             float interpolatedAngle = Mathf.LerpAngle(_previousAngleForLerp, _currentAngleForLerp, t);
             transform.rotation = Quaternion.Euler(0, 0, interpolatedAngle);
+        }
+        else
+        {
+            transform.position = _currentPositionForLerp;
+            transform.rotation = Quaternion.Euler(0, 0, _currentAngleForLerp);
         }
     }
 
@@ -511,13 +552,14 @@ public class CustomPhysicsBody : MonoBehaviour
         var otherVoltBody = bodyA == Body ? bodyB : bodyA;
         var otherBody = CustomPhysicsSpace.Singleton.GetBody(otherVoltBody.EntityId);
 
-        if (IsTrigger)
+        if (OnTrigger == null || OnTrigger.GetInvocationList().Length == 0)
         {
-            OnTrigger?.Invoke(otherBody);
+            return;
         }
-        {
-            OnCollide?.Invoke(otherBody);
-        }
+
+        // We do not call the trigger straight away, instead we call them in an ordered manner after the entire simulation tick runs
+        CustomPhysicsSpace.Singleton.RegisterTrigger(Body.EntityId, otherVoltBody.EntityId, position, normal);
+
     }
 
     private void OnDestroy()

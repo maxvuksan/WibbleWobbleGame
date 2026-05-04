@@ -55,7 +55,6 @@ public class TrapPlacementArea : NetworkBehaviour
 
     public static TrapPlacementArea Singleton;
 
-
     private void Awake()
     {
         if(Singleton != null)
@@ -92,7 +91,6 @@ public class TrapPlacementArea : NetworkBehaviour
         CustomPhysics.OnRecomputeEntityIds += OnRecomputeEntityIds;
     }
 
-
     public override void OnNetworkSpawn()
     {
         _networkedPlacedTrapDataList.OnListChanged += OnPlacedTrapsChanged;
@@ -109,6 +107,11 @@ public class TrapPlacementArea : NetworkBehaviour
         return trapDictionary.traps[_trapNameToIndexMap[dictionaryKey]];        
     }
 
+    public TrapData GetTrapDataByIndex(int trapIndex)
+    {
+        return trapDictionary.traps[trapIndex];        
+    }
+
     public int GetTrapIndexByName(string dictionaryKey)
     {
         return _trapNameToIndexMap[dictionaryKey];        
@@ -120,12 +123,13 @@ public class TrapPlacementArea : NetworkBehaviour
         DestroyAndClearAllTrapInstances();
         SpawnAllTrapInstances();
         LevelManager.Singleton.OnLevelLoad?.Invoke();
+        UpdateCameraBounds();
     }
 
     public (float Min, float Max) ComputeHorizontalBoundsOfPlacedTraps()
     {
-        float minX = float.MaxValue;
-        float maxX = float.MinValue;
+        float minX = CameraMovement.AbsoluteXMax;
+        float maxX = CameraMovement.AbsoluteXMin;
 
         foreach(var trap in _networkedPlacedTrapDataList)
         {
@@ -141,8 +145,6 @@ public class TrapPlacementArea : NetworkBehaviour
             }
         }
 
-
-        // Your implementation
         return (minX, maxX);
     }
 
@@ -152,17 +154,49 @@ public class TrapPlacementArea : NetworkBehaviour
     private void OnPlacedTrapsChanged(NetworkListEvent<TrapPlacedData> changeEvent)
     {
 
-        SpawnAllTrapInstances();
-
-        return;
-        if(GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.GameState_SelectingTrap || 
-           GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.GameState_PreviewLevel ||
-           GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.GameState_PlacingTrap ||
-           GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.GameState_CreativeMode
-        )
+        // If we are in placement mode, we have been introducing traps 1 by 1, we do not not to respawn all. 
+        if(GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.PlacingTrap ||
+        GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.CreativeMode)
         {
-            SpawnAllTrapInstances();
+            return;
         }
+        
+        SpawnAllTrapInstances();
+    }
+
+    /// <summary>
+    /// Computes and applys the CameraMovement horizontal bounds
+    /// </summary>
+    public void UpdateCameraBounds()
+    {
+        if(GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.CreativeMode)
+        {
+            CameraMovement.SceneSingleton.MinXPosition = CameraMovement.AbsoluteXMin;
+            CameraMovement.SceneSingleton.MaxXPosition = CameraMovement.AbsoluteXMax; 
+        }
+        else
+        {
+            (float min, float max) = ComputeHorizontalBoundsOfPlacedTraps();
+            CameraMovement.SceneSingleton.MinXPosition = min;
+            CameraMovement.SceneSingleton.MaxXPosition = max;      
+        }
+    }
+
+    [Rpc(SendTo.Everyone, InvokePermission = RpcInvokePermission.Server)]
+    public void SetCameraBoundsRpc(float min, float max)
+    {
+        SetCameraBounds(min, max);
+    }
+
+    public void SetCameraBounds(float min, float max)
+    {
+        CameraMovement.SceneSingleton.MinXPosition = min;
+        CameraMovement.SceneSingleton.MaxXPosition = max;
+        
+        CameraMovement.SceneSingleton.TargetPosition = new Vector2(
+            CameraMovement.SceneSingleton.XPositionMidpoint, 0
+        );
+        CameraMovement.SceneSingleton.SnapToTarget();
     }
 
     private void Start()
@@ -207,6 +241,13 @@ public class TrapPlacementArea : NetworkBehaviour
         return newObj;
     }
 
+    /// <summary>
+    /// Registers an existing GameObject as scoped, this will make it limit the objects lifetime to the current playing round
+    /// </summary>
+    public void RegisterScopedObject(GameObject objectToBecomeScoped)
+    {
+        _scopedObjectsList.Add(objectToBecomeScoped);
+    }
 
     /// <summary>
     /// Removes all traps from the placement area, deletes the currently loaded level, and spawns a new level specified by levelIndex
@@ -214,6 +255,8 @@ public class TrapPlacementArea : NetworkBehaviour
     public void ServerClearTraps()
     {
         _networkedPlacedTrapDataList.Clear();
+        DestroyAllScopedObjects();
+        DestroyAndClearAllTrapInstances();
     }
 
     public void ServerAddTrap(Vector2 position, float zRotationEuler, string trapName, bool playSound = true)
@@ -259,7 +302,20 @@ public class TrapPlacementArea : NetworkBehaviour
             return;
         }
 
+        if(GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.CreativeMode ||
+        GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.PlacingTrap
+        )
+        {
+            SpawnSingleTrapInPlaceModeRpc(trapData);
+        }
+
         _networkedPlacedTrapDataList.Add(trapData);
+    }
+
+    [Rpc(SendTo.Everyone, InvokePermission = RpcInvokePermission.Server)]
+    public void SpawnSingleTrapInPlaceModeRpc(TrapPlacedData trapPlacedData)
+    {
+        SpawnTrap(trapPlacedData);
     }
     
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
@@ -316,13 +372,10 @@ public class TrapPlacementArea : NetworkBehaviour
         return currentId; // Return next available ID
     }
 
-    /// <summary>
-    /// Spawns every trap in the placement area as their static prefabs
-    /// </summary>
-    public void SpawnAllTrapInstances()
-    {
-        DestroyAndClearAllTrapInstances();
 
+
+    public List<TrapPlacedData> GenerateSortedTrapList()
+    {
         // Sort the network trap placed data list, to ensure we introduce traps to the physics simulation in the same order
 
         var sortedTrapsToPlace = new List<TrapPlacedData>();
@@ -340,70 +393,94 @@ public class TrapPlacementArea : NetworkBehaviour
             return a.positionYHundredths.CompareTo(b.positionYHundredths);
         });
 
+        return sortedTrapsToPlace;
+
+    }
+
+    /// <summary>
+    /// Spawns every trap in the placement area as their static prefabs
+    /// </summary>
+    public void SpawnAllTrapInstances()
+    {
+        DestroyAndClearAllTrapInstances();
+
+        // Sort the network trap placed data list, to ensure we introduce traps to the physics simulation in the same order
+
+        var sortedTrapsToPlace = GenerateSortedTrapList();
 
         for(int i = 0; i < sortedTrapsToPlace.Count; i++)
         {
-            IntHundredth rotationDegrees = new IntHundredth { ValueHundredths = sortedTrapsToPlace[i].rotationHundredths };
-            IntHundredth positionX = new IntHundredth { ValueHundredths = sortedTrapsToPlace[i].positionXHundredths };
-            IntHundredth positionY = new IntHundredth { ValueHundredths = sortedTrapsToPlace[i].positionYHundredths };
-
-            GameObject newObj = Instantiate(trapDictionary.traps[sortedTrapsToPlace[i].trapTypeIndex].behaviorPrefab, _trapStaticInstanceParent);
-            newObj.SetActive(false);
-
-            newObj.transform.position = new Vector2(positionX.AsFloat(), positionY.AsFloat());
-            newObj.transform.rotation = Quaternion.Euler(0,0, rotationDegrees.AsFloat());
-
-            // Set the CustomTransform values to the IntHundredth values, to ensure deterministic position and rotation on every client...
-            
-
-            // the trap is not a background element, thus we must handle CustomTransform and physic bodies
-            if(!trapDictionary.traps[sortedTrapsToPlace[i].trapTypeIndex].IsVisualOnly){
-
-                CustomTransform customTransform = newObj.GetComponent<CustomTransform>();
-
-                if(customTransform == null)
-                {
-                    customTransform = newObj.GetComponentInChildren<CustomTransform>();
-                }
-                if(customTransform == null)
-                {
-                    Debug.LogError("No CustomTransform attached to placed trap, if this is a visual element, mark it as so with IsVisualOnly = true, SpawnAllTrapInstances()");
-                }
-
-                customTransform.SetValues(positionX, positionY, rotationDegrees);
-                // TODO: We may need to update the child CustomTransform, will see
-
-                CustomTransform[] bodies = newObj.GetComponentsInChildren<CustomTransform>();
-                for(int b = 0; b < bodies.Length; b++)
-                {   
-                    if(!bodies[b].IsWorldSpace)
-                    {
-                        continue;
-                    }
-                    bodies[b].SetValues(
-                        positionX + bodies[b].PositionXHundredth, 
-                        positionY + bodies[b].PositionYHundredth, 
-                        rotationDegrees + bodies[b].RotationDegreesHundredth);
-                }
-            }
-
-            // trigger start to run
-            newObj.SetActive(true);
-
-            _trapInstances.Add(newObj);
-
-            // Ensure the trap has the TrapHeader, this script is required by all traps
-            TrapHeader trapHeader = newObj.GetComponent<TrapHeader>();
-
-            if(trapHeader == null)
-            {
-                Debug.LogError("A trap is trying to be placed without a TrapHeader component, please ensure all traps have this for other behaviour to work");
-            }
+            SpawnTrap(sortedTrapsToPlace[i]);
         }
 
         CustomPhysics.RecomputeEntityIds();
     }
 
+    private void SpawnTrap(TrapPlacedData trapData)
+    {
+        IntHundredth rotationDegrees = new IntHundredth { ValueHundredths = trapData.rotationHundredths };
+        IntHundredth positionX = new IntHundredth { ValueHundredths = trapData.positionXHundredths };
+        IntHundredth positionY = new IntHundredth { ValueHundredths = trapData.positionYHundredths };
+
+        GameObject newObj = Instantiate(trapDictionary.traps[trapData.trapTypeIndex].behaviorPrefab, _trapStaticInstanceParent);
+        newObj.SetActive(false);
+
+        newObj.transform.position = new Vector2(positionX.AsFloat(), positionY.AsFloat());
+        newObj.transform.rotation = Quaternion.Euler(0,0, rotationDegrees.AsFloat());
+
+        // Set the CustomTransform values to the IntHundredth values, to ensure deterministic position and rotation on every client...
+        
+
+        // the trap is not a background element, thus we must handle CustomTransform and physic bodies
+        if(!trapDictionary.traps[trapData.trapTypeIndex].IsVisualOnly){
+
+            CustomTransform customTransform = newObj.GetComponent<CustomTransform>();
+
+            if(customTransform == null)
+            {
+                customTransform = newObj.GetComponentInChildren<CustomTransform>();
+            }
+            if(customTransform == null)
+            {
+                Debug.LogError("No CustomTransform attached to placed trap, if this is a visual element, mark it as so with IsVisualOnly = true, SpawnAllTrapInstances()");
+            }
+
+            customTransform.SetValues(positionX, positionY, rotationDegrees);
+            // TODO: We may need to update the child CustomTransform, will see
+
+            // CustomTransform[] bodies = newObj.GetComponentsInChildren<CustomTransform>();
+            // for(int b = 0; b < bodies.Length; b++)
+            // {   
+            //     Debug.Log("body: " + bodies[b].name + " rot: " + bodies[b].RotationDegreesHundredth.AsFloat());
+
+            //     if(!bodies[b].IsWorldSpace)
+            //     {
+            //         continue;
+            //     }
+
+            //     bodies[b].SetValues(
+            //         positionX + bodies[b].PositionXHundredth, 
+            //         positionY + bodies[b].PositionYHundredth, 
+            //         bodies[b].RotationDegreesHundredth);
+
+            //     Debug.Log("body POST SET: " + bodies[b].name + " rot: " + bodies[b].RotationDegreesHundredth.AsFloat());
+
+            // }
+        }
+
+        // trigger start to run
+        newObj.SetActive(true);
+
+        _trapInstances.Add(newObj);
+
+        // Ensure the trap has the TrapHeader, this script is required by all traps
+        TrapHeader trapHeader = newObj.GetComponent<TrapHeader>();
+
+        if(trapHeader == null)
+        {
+            Debug.LogError("A trap is trying to be placed without a TrapHeader component, please ensure all traps have this for other behaviour to work");
+        }
+    }
     
     
     /// <summary>

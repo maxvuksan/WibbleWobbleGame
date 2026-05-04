@@ -29,7 +29,7 @@ public class CameraFollowPlayers : MonoBehaviour
         return new Vector3(0,0,0);
         /*
 
-        if(PlayerDataManager.Singleton.PlayerCount == 0 || GameStateManager.Singleton.GetState() != GameStateManager.GameStateEnum.GameState_Play)
+        if(PlayerDataManager.Singleton.PlayerCount == 0 || GameStateManager.Singleton.GetState() != GameStateManager.GameStateEnum.Play)
         {
             return new Vector3(0,0,0);
         }

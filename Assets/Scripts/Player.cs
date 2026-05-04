@@ -40,7 +40,7 @@ public class CustomPlayerTickState : ICustomTickState<CustomPlayerTickState>
     public bool _touchingRightWall;
 
     public int _directionFacing = 1;
-    public bool _playerAliveLocally = true;
+    public bool _playerEnabledLocally = true;
 
     public CustomPlayerTickState Clone()
     {   
@@ -163,29 +163,21 @@ public class Player : NetworkBehaviour
 
     private void OnTurnOffPhysicsSimulation()
     {
-        _tickState = new CustomPlayerTickState();
-
         ResetState();
-
-        _tickState._playerAliveLocally = false;
-        _physicsBody.CustomState = _tickState;
+        _tickState._playerEnabledLocally = false;
     }
 
     void Start()
     {
         CustomPhysics.OnPhysicsTick += OnPhysicsTick;
-        CustomPhysics.OnTurnOffPhysicsSimulation += OnTurnOffPhysicsSimulation;
         CustomPhysics.OnStartPhysicsSimulation += ResetState;
-        CustomPhysics.OnPrePhysicsTick += OnPrePhysicsTick;
     }
 
     public override void OnDestroy()
     {
         base.OnDestroy();
         CustomPhysics.OnPhysicsTick -= OnPhysicsTick;
-        CustomPhysics.OnTurnOffPhysicsSimulation -= OnTurnOffPhysicsSimulation;
         CustomPhysics.OnStartPhysicsSimulation -= ResetState;
-        CustomPhysics.OnPrePhysicsTick -= OnPrePhysicsTick;
     }
 
     public override void OnNetworkSpawn()
@@ -197,11 +189,14 @@ public class Player : NetworkBehaviour
 
     public void ResetState()
     {
+        _tickState = new CustomPlayerTickState();
+        _physicsBody.CustomState = _tickState;
+
         _originalColour = _playerRenderer.color;
         _tickState._trueGrounded = false;
         _stepSpriteDurationTracked = 0;
 
-        _tickState._playerAliveLocally = true;
+        _tickState._playerEnabledLocally = true;
         
         _tickState._horizontalOverrideVelocityX = Fix64.Zero;
         _tickState._horizontalControlFactor = Fix64.Zero;
@@ -214,7 +209,6 @@ public class Player : NetworkBehaviour
         _tickState._lastWallLeftJumpPhysicsTick = int.MinValue;
         _tickState._lastWallRightJumpPhysicsTick = int.MinValue;
 
-        _physicsBody.CustomState = _tickState;
         _physicsBody.LinearVelocity = VoltVector2.zero;
 
         _playerHeader.SetHasWonRpc(false);
@@ -274,7 +268,7 @@ public class Player : NetworkBehaviour
         // sync with body
         _tickState = _physicsBody.CustomState as CustomPlayerTickState;
 
-        if (!_tickState._playerAliveLocally)
+        if (!_tickState._playerEnabledLocally)
         {
             _playerRenderer.gameObject.SetActive(false);
             return;
@@ -284,9 +278,10 @@ public class Player : NetworkBehaviour
             _playerRenderer.gameObject.SetActive(true);
         }
 
-        if (IsOwner)
+        // track the player movement with the camera, if we are in play mode
+        if (IsOwner && GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.Play)
         {
-            FindFirstObjectByType<CameraMovement>().TargetPosition = transform.position;
+            CameraMovement.SceneSingleton.TargetPosition = transform.position;
         }
 
         ReflectSpriteState();
@@ -299,27 +294,35 @@ public class Player : NetworkBehaviour
 
     public void HitTrap(Vector2 directionToApplyForce)
     {
-        if (!_tickState._playerAliveLocally)
+        if (!_tickState._playerEnabledLocally)
         {
             return;            
         }
-
-        _tickState._playerAliveLocally = false;
-        _physicsBody.Body.IsEnabled = _tickState._playerAliveLocally;
-        //_playerHeader.SetPlayerAliveRpc(false);
-
-        //rb.AddForce(directionToApplyForce, ForceMode2D.Impulse);
-        //PlayerDataManager.Singleton.Callback_OnPlayerDeath(_playerHeader.PlayerIndex.Value);
 
         OnPlayerDeath();
     }
 
     private void OnPlayerDeath()
     {
+        _tickState._playerEnabledLocally = false;
+        _physicsBody.Body.IsEnabled = _tickState._playerEnabledLocally;
+
+        _playerHeader.SetPlayerAliveRpc(false);
+
+        if (GameStateManager.Singleton.NetworkedState.Value != GameStateManager.GameStateEnum.Play)
+        {
+            return;
+        }
+
         GameObject deathEffectInstance = RollbackAwareObjectSpawner.Instantiate(_deathPrefab, transform.position);
         deathEffectInstance.GetComponent<PlayerDeathExplosion>().SetColour(_originalColour);
 
         AudioManager.Singleton.Play("Player_Death");
+    }
+
+    public void SetPlayerEnabled(bool state)
+    {
+        _tickState._playerEnabledLocally = state;
     }
 
     public void Jump(PlayerMoveInput wallJumpDirection = PlayerMoveInput.None)
@@ -361,17 +364,14 @@ public class Player : NetworkBehaviour
         }
     }
 
-    public void OnPrePhysicsTick()
+    public void OnPhysicsTick()
     {
         // Sync local tickstate with snapshot state...
         _tickState = _physicsBody.CustomState as CustomPlayerTickState;
-    }
 
-    public void OnPhysicsTick()
-    {
-        _physicsBody.Body.IsEnabled = _tickState._playerAliveLocally;
+        _physicsBody.Body.IsEnabled = _tickState._playerEnabledLocally;
 
-        if (!_tickState._playerAliveLocally)
+        if (!_tickState._playerEnabledLocally)
         {
             return;
         }
@@ -431,10 +431,6 @@ public class Player : NetworkBehaviour
         }
 
         ApplyPositionWrapAroundInLobby();    
-
-    
-        // reapply custom data
-        _physicsBody.CustomState = _tickState;
     }
 
     public void ApplyMovementPhysics(Fix64 horizontalControl_t)
@@ -490,25 +486,29 @@ public class Player : NetworkBehaviour
 
     private void ApplyPositionWrapAroundInLobby()
     {
-        if(GameStateManager.Singleton.NetworkedState.Value != GameStateManager.GameStateEnum.GameState_SelectingLevel)
-        {
-             //return;
-        }
-
-        Fix64 minY = (Fix64)(-25);
+        Fix64 minY = (Fix64)(-24);
         Fix64 minX = (Fix64)(-41);
-        Fix64 maxY = (Fix64)25;
+        Fix64 maxY = (Fix64)24;
         Fix64 maxX = (Fix64)41;
 
         bool setPosOccured = false;
         
+        bool shouldWrap = GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.LobbyPlay;
+
         // Vertical wrap
         if (_physicsBody.Position.y < minY)
         {
-            _physicsBody.PositionY = maxY;
-            setPosOccured = true;
+            if (shouldWrap)
+            {
+                _physicsBody.PositionY = maxY;
+                setPosOccured = true;   
+            }
+            else 
+            {
+                OnPlayerDeath();
+            }
         }
-        else if (_physicsBody.Position.y > maxY)
+        else if (shouldWrap && _physicsBody.Position.y > maxY)
         {
             _physicsBody.PositionY = minY;
             setPosOccured = true;
@@ -552,7 +552,7 @@ public class Player : NetworkBehaviour
                 _inAirRotationFactor -= inAirRotationSpeed * Time.deltaTime;
             }
 
-            _inAirRotationFactor = Mathf.Clamp(_inAirRotationFactor, -1, 1);
+            _inAirRotationFactor = Mathf.Clamp(_inAirRotationFactor, -0.4f, 1);
             _playerRenderer.transform.rotation = Quaternion.Euler(0,0,_inAirRotationFactor * stepRotation * _tickState._directionFacing);
 
         }

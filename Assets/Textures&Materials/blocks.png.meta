@@ -192,7 +192,7 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 8192
+    maxTextureSize: 16384
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 0
@@ -292,9 +292,9 @@ TextureImporter:
         x: 161
         y: 312
         width: 30
-        height: 90
+        height: 95
       alignment: 9
-      pivot: {x: 0.5045512, y: 0.0773702}
+      pivot: {x: 0.50312805, y: 0.072419494}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -355,9 +355,9 @@ TextureImporter:
       name: blocks_13
       rect:
         serializedVersion: 2
-        x: 127
+        x: 128
         y: 345
-        width: 34
+        width: 32
         height: 32
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
@@ -509,9 +509,9 @@ TextureImporter:
       name: blocks_20
       rect:
         serializedVersion: 2
-        x: 64
+        x: 65
         y: 315
-        width: 32
+        width: 30
         height: 32
       alignment: 9
       pivot: {x: 0.49822146, y: 0.59809685}
@@ -971,9 +971,9 @@ TextureImporter:
       name: blocks_41
       rect:
         serializedVersion: 2
-        x: 127
+        x: 128
         y: 313
-        width: 34
+        width: 32
         height: 32
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
@@ -1345,9 +1345,9 @@ TextureImporter:
       name: blocks_51
       rect:
         serializedVersion: 2
-        x: 36
+        x: 34
         y: 194
-        width: 25
+        width: 29
         height: 21
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
@@ -1359,6 +1359,138 @@ TextureImporter:
       bones: []
       spriteID: f05bca33ae7a2d342ad677359a6b4d9e
       internalID: -749586078
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: blocks_52
+      rect:
+        serializedVersion: 2
+        x: 97
+        y: 315
+        width: 30
+        height: 32
+      alignment: 9
+      pivot: {x: 0.5000028, y: 0.6104536}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c2eb2e223827a7441921f542ea3e4cfc
+      internalID: -1847482732
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: blocks_53
+      rect:
+        serializedVersion: 2
+        x: 99
+        y: 347
+        width: 26
+        height: 32
+      alignment: 9
+      pivot: {x: 0.5000009, y: 0.62581253}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 474c6288199a39641a76c7b2e7d05637
+      internalID: -769666066
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: blocks_54
+      rect:
+        serializedVersion: 2
+        x: 695
+        y: 308
+        width: 96
+        height: 96
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a6493308616b4974e910f0b2a0a2cef9
+      internalID: -848085192
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: blocks_57
+      rect:
+        serializedVersion: 2
+        x: 695
+        y: 209
+        width: 96
+        height: 96
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 885758065991bd34c84890c344eda0f7
+      internalID: -1768935275
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: blocks_58
+      rect:
+        serializedVersion: 2
+        x: 792
+        y: 209
+        width: 96
+        height: 96
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2947454685c60384b9607207a8ab0058
+      internalID: -1278093865
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: blocks_59
+      rect:
+        serializedVersion: 2
+        x: 889
+        y: 209
+        width: 96
+        height: 96
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: eb2f588bdd93b504c960c4ca151cdf63
+      internalID: -2088049130
       vertices: []
       indices: 
       edges: []
@@ -1425,6 +1557,14 @@ TextureImporter:
       blocks_5: 4256288277297392353
       blocks_50: -2026215191
       blocks_51: -749586078
+      blocks_52: -1847482732
+      blocks_53: -769666066
+      blocks_54: -848085192
+      blocks_55: 753360798
+      blocks_56: 1415898171
+      blocks_57: -1768935275
+      blocks_58: -1278093865
+      blocks_59: -2088049130
       blocks_6: -7855626261214365963
       blocks_7: -2880035774045676689
       blocks_8: 2587766382346407471

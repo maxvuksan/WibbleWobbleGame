@@ -60,7 +60,7 @@ public class TrapButton : NetworkBehaviour
     public void PressTrap()
     {
         ulong clientId = NetworkManager.Singleton.LocalClientId;
-        PlayerDataManager.Singleton.PlayerData[(int)clientId].networkedPlayerHeader.SetSelectedTrapRpc(_trapIndex);
+        PlayerDataManager.Singleton.PlayerData[(int)clientId].NetworkedPlayerHeader.SetSelectedTrapRpc(_trapIndex);
     }
 
 }

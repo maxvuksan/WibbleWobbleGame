@@ -26,6 +26,17 @@ public class CreativeMode : NetworkBehaviour
 
     void Update()
     {
+        if(Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
+        {
+            CameraMovement.SceneSingleton.TargetPosition.x -= Time.deltaTime;
+        }
+        if(Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
+        {
+            CameraMovement.SceneSingleton.TargetPosition.x += Time.deltaTime;
+        }
+
+
+
         return;
         // TODO: Remove this in favour of new ui based creative menu
 

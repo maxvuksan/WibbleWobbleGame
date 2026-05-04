@@ -27,8 +27,8 @@ Material:
     m_Floats:
     - _SquareCount: 14
     m_Colors:
-    - _ColorA: {r: 0.078431375, g: 0.03529412, b: 0.12156863, a: 1}
-    - _ColorB: {r: 0.078431375, g: 0.03529412, b: 0.12156863, a: 1}
+    - _ColorA: {r: 0.066666655, g: 0.043137256, b: 0.1, a: 1}
+    - _ColorB: {r: 0.06666667, g: 0.043137256, b: 0.101960786, a: 1}
     - _ScrollSpeed: {r: 0.01, g: 0.01, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

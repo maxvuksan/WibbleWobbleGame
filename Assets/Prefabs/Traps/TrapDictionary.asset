@@ -93,7 +93,7 @@ MonoBehaviour:
     soundOnPlace: 
     IsVisualOnly: 0
     behaviorPrefab: {fileID: 4967037026206012188, guid: 836b2764f723eef4d9c8e8b47893aa85, type: 3}
-  - name: WinBeam
+  - name: PlayerGoal
     soundOnPlace: 
     IsVisualOnly: 0
     behaviorPrefab: {fileID: 4665495375785675357, guid: 41623f62a184e8d4eb077e9acc9622a5, type: 3}
@@ -121,3 +121,11 @@ MonoBehaviour:
     soundOnPlace: 
     IsVisualOnly: 0
     behaviorPrefab: {fileID: 2244898614544078694, guid: e61cae3276e48e54fa4970ceffe5f573, type: 3}
+  - name: Block_LPinned
+    soundOnPlace: 
+    IsVisualOnly: 0
+    behaviorPrefab: {fileID: 4665495375785675357, guid: cca62891cd6244d4480fc39f89357a24, type: 3}
+  - name: NoGravityField
+    soundOnPlace: 
+    IsVisualOnly: 0
+    behaviorPrefab: {fileID: 4665495375785675357, guid: 753670b756f77b143878deb202daeaec, type: 3}

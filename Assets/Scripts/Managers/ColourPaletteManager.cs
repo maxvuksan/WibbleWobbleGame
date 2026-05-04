@@ -38,20 +38,25 @@ public class ColourPaletteManager : MonoBehaviour
 
     public static ColourPaletteManager Singleton;
 
-    public int ActivePaletteIndex = 0;
+    public int ActivePaletteIndex
+    {
+        get => _activePaletteIndex;
+
+        set
+        {
+            if(value != _activePaletteIndex)
+            {
+                _activePaletteIndex = value;
+                LoadPalette(value);
+            }
+        }
+    }
 
     private int _activePaletteIndex;
 
     void Awake()
     {
-        if(Singleton != null)
-        {
-            Destroy(this.gameObject);
-            return;
-        }
-
-        Singleton = this;
-        DontDestroyOnLoad(this.gameObject);
+        Helpers.CreateSingleton(ref Singleton, this);
 
         LoadPalette(ActivePaletteIndex);
     }
@@ -75,14 +80,6 @@ public class ColourPaletteManager : MonoBehaviour
         }        
         
         return Color.black;
-    }
-
-    void Update()
-    {
-        if (ActivePaletteIndex != _activePaletteIndex)
-        {
-            LoadPalette(ActivePaletteIndex);
-        }
     }
 
     public void LoadPalette(int paletteIndex)

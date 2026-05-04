@@ -22,7 +22,7 @@ public class ExitToWin : MonoBehaviour
 
     public void OnTrigger(CustomPhysicsBody collision)
     {
-        if(GameStateManager.Singleton.NetworkedState.Value != GameStateManager.GameStateEnum.GameState_Play)
+        if(GameStateManager.Singleton.NetworkedState.Value != GameStateManager.GameStateEnum.Play)
         {
             return;
         }

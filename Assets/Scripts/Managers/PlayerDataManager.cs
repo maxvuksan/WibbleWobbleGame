@@ -26,18 +26,18 @@ public enum DeviceType
 [System.Serializable]
 public class PlayerDataSet
 {
-    public ulong index;
-    public PlayerInput playerInput;
-    public TrapToPlace trapToPlace;
-    public GameObject gameObject;
-    public Player player;
-    public MouseCursor mouseCursor;
-    public NetworkPlayerHeader networkedPlayerHeader;
-    public PlayerInputDriver playerInputDriver;
+    public ulong Index;
+    public PlayerInput Input;
+    public TrapToPlace TrapToPlace;
+    public GameObject GameObject;
+    public Player Player;
+    public MouseCursor MouseCursor;
+    public NetworkPlayerHeader NetworkedPlayerHeader;
+    public PlayerInputDriver InputDriver;
 
     // ________________________________________________
 
-    public DeviceType deviceType;
+    public DeviceType DeviceType;
 
     //__________________________________________________
 }
@@ -120,14 +120,14 @@ public class PlayerDataManager : NetworkBehaviour
     {
         for(int i = 0; i < PlayerCount; i++)
         {
-            var body = PlayerData[i].player.GetComponent<CustomPhysicsBody>();
-            var networkObject = PlayerData[i].networkedPlayerHeader.GetComponent<NetworkObject>();
+            var body = PlayerData[i].Player.GetComponent<CustomPhysicsBody>();
+            var networkObject = PlayerData[i].NetworkedPlayerHeader.GetComponent<NetworkObject>();
             
             body.SetDesiredEntityId(networkObject.NetworkObjectId);
 
             if (Configuration.Singleton.DebugMode)
             {
-                DeterminismLogger.LogExtraInfo($"RecomputeEntityIds for player index={PlayerData[i].index} networkObjectId={networkObject.NetworkObjectId} entityId={body.Body.EntityId}");
+                DeterminismLogger.LogExtraInfo($"RecomputeEntityIds for player index={PlayerData[i].Index} networkObjectId={networkObject.NetworkObjectId} entityId={body.Body.EntityId}");
             }
         }
     }
@@ -201,15 +201,15 @@ public class PlayerDataManager : NetworkBehaviour
     {
         switch(GameStateManager.Singleton.GetState()){
             
-            case GameStateManager.GameStateEnum.GameState_Play:
+            case GameStateManager.GameStateEnum.Play:
             {
                 _playerData[listIndex].mouseCursor.gameObject.SetActive(false);
                 _playerData[listIndex].trapToPlace.gameObject.SetActive(false);
                 _playerData[listIndex].player.gameObject.SetActive(true);
                 break;
             }
-            case GameStateManager.GameStateEnum.GameState_SelectingLevel:
-            case GameStateManager.GameStateEnum.GameState_SelectingTrap:
+            case GameStateManager.GameStateEnum.LobbyPlay:
+            case GameStateManager.GameStateEnum.SelectingTrap:
             {
                 _playerData[listIndex].mouseCursor.gameObject.SetActive(true);
                 _playerData[listIndex].trapToPlace.gameObject.SetActive(false);
@@ -217,7 +217,7 @@ public class PlayerDataManager : NetworkBehaviour
                 _playerData[listIndex].mouseCursor.SetRenderLayer(Helpers.Singleton.uiRenderingLayer);
                 break;
             }
-            case GameStateManager.GameStateEnum.GameState_PlacingTrap:
+            case GameStateManager.GameStateEnum.PlacingTrap:
             {
                 _playerData[listIndex].mouseCursor.gameObject.SetActive(true);
                 _playerData[listIndex].trapToPlace.gameObject.SetActive(true);
@@ -271,8 +271,8 @@ public class PlayerDataManager : NetworkBehaviour
     {
         for(int i = 0; i < PlayerData.Count; i++)
         {
-            if (PlayerData[i].networkedPlayerHeader.Alive.Value && 
-                !PlayerData[i].networkedPlayerHeader.HasWon.Value)
+            if (PlayerData[i].NetworkedPlayerHeader.Alive.Value && 
+                !PlayerData[i].NetworkedPlayerHeader.HasWon.Value)
             {
                 return;
             }
@@ -287,26 +287,32 @@ public class PlayerDataManager : NetworkBehaviour
         OnRoundEnd?.Invoke();
     }
 
+
+    /// <summary>
+    /// Registers a player in the PlayerData structure,
+    /// </summary>
+    /// <param name="gameDataSetObject">The prefab to instantiate</param>
+    /// <param name="playerIndex">The network index of the client owner</param>
     public void RegisterPlayer(GameObject gameDataSetObject, ulong playerIndex)
     {
         PlayerDataSet dataSet = new PlayerDataSet();
 
-        print("register player" + playerIndex);
+        dataSet.GameObject = gameDataSetObject;
+        dataSet.Player = gameDataSetObject.GetComponentInChildren<Player>();
+        dataSet.InputDriver = gameDataSetObject.GetComponentInChildren<PlayerInputDriver>();
 
-        dataSet.gameObject = gameDataSetObject;
-        dataSet.player = gameDataSetObject.GetComponentInChildren<Player>();
-        dataSet.playerInputDriver = gameDataSetObject.GetComponentInChildren<PlayerInputDriver>();
-
-        dataSet.networkedPlayerHeader = gameDataSetObject.GetComponent<NetworkPlayerHeader>();
-        dataSet.index = playerIndex;
-        dataSet.mouseCursor = gameDataSetObject.GetComponentInChildren<MouseCursor>(true);
-        dataSet.trapToPlace = dataSet.mouseCursor.GetComponentInChildren<TrapToPlace>(true);
+        dataSet.NetworkedPlayerHeader = gameDataSetObject.GetComponent<NetworkPlayerHeader>();
+        dataSet.Index = playerIndex;
+        dataSet.MouseCursor = gameDataSetObject.GetComponentInChildren<MouseCursor>(true);
+        dataSet.TrapToPlace = dataSet.MouseCursor.GetComponentInChildren<TrapToPlace>(true);
 
         var perIndexStyling = _playerDataPerIndex[(int)playerIndex % _playerDataPerIndex.Length];
 
-        dataSet.player.SetColour(perIndexStyling.colourBody);
-        dataSet.mouseCursor.SetColour(perIndexStyling.colourMouse);
-        dataSet.mouseCursor.SetOutlineColour(perIndexStyling.colourMouseOutline);
+        dataSet.Player.SetColour(perIndexStyling.colourBody);
+        dataSet.MouseCursor.SetColour(perIndexStyling.colourMouse);
+        dataSet.MouseCursor.SetOutlineColour(perIndexStyling.colourMouseOutline);
+
+
 
         _playerData.Add(dataSet);
 
@@ -317,9 +323,9 @@ public class PlayerDataManager : NetworkBehaviour
     {
         for(int i = 0; i < PlayerCount; i++)
         {
-            if(_playerData[i].index == playerIndex)
+            if(_playerData[i].Index == playerIndex)
             {
-                return _playerData[i].networkedPlayerHeader;
+                return _playerData[i].NetworkedPlayerHeader;
             }
         }
         return null;
@@ -329,7 +335,7 @@ public class PlayerDataManager : NetworkBehaviour
     {
         for(int i = 0; i < PlayerCount; i++)
         {
-            if(_playerData[i].index == playerIndex)
+            if(_playerData[i].Index == playerIndex)
             {
                 return _playerData[i];
             }
@@ -347,9 +353,9 @@ public class PlayerDataManager : NetworkBehaviour
 
         for(int i = 0; i < PlayerCount; i++)
         {
-            if(_playerData[i].networkedPlayerHeader.IsOwner)
+            if(_playerData[i].NetworkedPlayerHeader.IsOwner)
             {
-                list.Add(_playerData[i].networkedPlayerHeader);
+                list.Add(_playerData[i].NetworkedPlayerHeader);
             }
         }
         
@@ -357,19 +363,17 @@ public class PlayerDataManager : NetworkBehaviour
     }
 
 
-    [Rpc(SendTo.Everyone, InvokePermission = RpcInvokePermission.Server)]
-    public void SetActiveAllPlayersRpc(bool activeState)
+    public void SetActiveAllPlayers(bool activeState)
     {
         for(int i = 0; i < PlayerCount; i++)
         {
             if (activeState)
             {
-                PlayerData[i].networkedPlayerHeader.Alive.Value = false;
-                PlayerData[i].networkedPlayerHeader.HasWon.Value = false;
+                //PlayerData[i].NetworkedPlayerHeader.Alive.Value = false;
+                //PlayerData[i].NetworkedPlayerHeader.HasWon.Value = false;
             }
 
-            PlayerData[i].player.enabled = true;
-            PlayerData[i].player.gameObject.SetActive(activeState);    
+            PlayerData[i].Player.SetPlayerEnabled(activeState);
         }
     }
 
@@ -383,12 +387,12 @@ public class PlayerDataManager : NetworkBehaviour
         {
             if (activeState)
             {
-                print("Set trap to place for player: " + i + ", Trap is: " + _playerData[i].networkedPlayerHeader.SelectedTrap.Value);
-                _playerData[i].trapToPlace.SetTrapType(_playerData[i].networkedPlayerHeader.SelectedTrap.Value);
+                print("Set trap to place for player: " + i + ", Trap is: " + _playerData[i].NetworkedPlayerHeader.SelectedTrap.Value);
+                _playerData[i].TrapToPlace.SetTrapType(_playerData[i].NetworkedPlayerHeader.SelectedTrap.Value);
             }
             else
             {
-                _playerData[i].trapToPlace.SetTrapType(-1);
+                _playerData[i].TrapToPlace.SetTrapType(-1);
             }
         }
     }
@@ -399,7 +403,7 @@ public class PlayerDataManager : NetworkBehaviour
     {
         for(int i = 0; i < PlayerCount; i++)
         {
-            _playerData[i].mouseCursor.gameObject.SetActive(activeState);
+            _playerData[i].MouseCursor.gameObject.SetActive(activeState);
         }
     }
 

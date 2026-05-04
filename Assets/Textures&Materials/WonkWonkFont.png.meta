@@ -1,0 +1,2275 @@
+fileFormatVersion: 2
+guid: 31d9d39e9170adf4e968aee38ccf644a
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -9027419769350356796
+    second: WonkWonkFont_0
+  - first:
+      213: 6734695405928967233
+    second: WonkWonkFont_1
+  - first:
+      213: 7875435291209431066
+    second: WonkWonkFont_2
+  - first:
+      213: 2736825386899102298
+    second: WonkWonkFont_3
+  - first:
+      213: 5258222262440085838
+    second: WonkWonkFont_4
+  - first:
+      213: 1883663875543677218
+    second: WonkWonkFont_5
+  - first:
+      213: -1381995872378421068
+    second: WonkWonkFont_6
+  - first:
+      213: 2331049051495344717
+    second: WonkWonkFont_7
+  - first:
+      213: 6232179818211798315
+    second: WonkWonkFont_8
+  - first:
+      213: -1106277605692375675
+    second: WonkWonkFont_9
+  - first:
+      213: 65292571335783896
+    second: WonkWonkFont_10
+  - first:
+      213: -1942215159208565906
+    second: WonkWonkFont_11
+  - first:
+      213: -5971676178087100928
+    second: WonkWonkFont_12
+  - first:
+      213: -3172032357563314293
+    second: WonkWonkFont_13
+  - first:
+      213: 8521112118016147115
+    second: WonkWonkFont_14
+  - first:
+      213: -1724296297337348242
+    second: WonkWonkFont_15
+  - first:
+      213: 77207265686313926
+    second: WonkWonkFont_16
+  - first:
+      213: 2145419324898725782
+    second: WonkWonkFont_17
+  - first:
+      213: -7527405755606184983
+    second: WonkWonkFont_18
+  - first:
+      213: 5471994301948685086
+    second: WonkWonkFont_19
+  - first:
+      213: 1093987307242165937
+    second: WonkWonkFont_20
+  - first:
+      213: 1524256330979346936
+    second: WonkWonkFont_21
+  - first:
+      213: 2064788142832968973
+    second: WonkWonkFont_22
+  - first:
+      213: -3869552809206755524
+    second: WonkWonkFont_23
+  - first:
+      213: 6965704087222866478
+    second: WonkWonkFont_24
+  - first:
+      213: -8690236136936971538
+    second: WonkWonkFont_25
+  - first:
+      213: 8168684455158697942
+    second: WonkWonkFont_26
+  - first:
+      213: -619334445878882810
+    second: WonkWonkFont_27
+  - first:
+      213: -8957356082025357212
+    second: WonkWonkFont_28
+  - first:
+      213: -3541855410500041360
+    second: WonkWonkFont_29
+  - first:
+      213: 1435684525984462613
+    second: WonkWonkFont_30
+  - first:
+      213: -3852801628964849791
+    second: WonkWonkFont_31
+  - first:
+      213: -2498211334607665258
+    second: WonkWonkFont_32
+  - first:
+      213: 5659700658338200899
+    second: WonkWonkFont_33
+  - first:
+      213: -6963580802105960379
+    second: WonkWonkFont_34
+  - first:
+      213: -1090926913012356749
+    second: WonkWonkFont_35
+  - first:
+      213: -3087935297915215582
+    second: WonkWonkFont_36
+  - first:
+      213: -6992154568585884667
+    second: WonkWonkFont_37
+  - first:
+      213: -4723861464287214106
+    second: WonkWonkFont_38
+  - first:
+      213: -7250245827323825310
+    second: WonkWonkFont_39
+  - first:
+      213: 8297309305117140307
+    second: WonkWonkFont_40
+  - first:
+      213: 5564118773999115058
+    second: WonkWonkFont_41
+  - first:
+      213: -2859369827356660092
+    second: WonkWonkFont_42
+  - first:
+      213: -3963611947972799151
+    second: WonkWonkFont_43
+  - first:
+      213: -1657782485230053888
+    second: WonkWonkFont_44
+  - first:
+      213: -2772863150669612290
+    second: WonkWonkFont_45
+  - first:
+      213: 3494968686052954074
+    second: WonkWonkFont_46
+  - first:
+      213: -8474316147647493788
+    second: WonkWonkFont_47
+  - first:
+      213: 6840644283696920165
+    second: WonkWonkFont_48
+  - first:
+      213: 6581878663842386652
+    second: WonkWonkFont_49
+  - first:
+      213: 8911552310050493590
+    second: WonkWonkFont_50
+  - first:
+      213: 8241776590332317154
+    second: WonkWonkFont_51
+  - first:
+      213: 515840447328381759
+    second: WonkWonkFont_52
+  - first:
+      213: -4241473424203875272
+    second: WonkWonkFont_53
+  - first:
+      213: -1627013506695260109
+    second: WonkWonkFont_54
+  - first:
+      213: -3004522992069117589
+    second: WonkWonkFont_55
+  - first:
+      213: 5483106209318395414
+    second: WonkWonkFont_56
+  - first:
+      213: -5111563387805657115
+    second: WonkWonkFont_57
+  - first:
+      213: -4461892569108949212
+    second: WonkWonkFont_58
+  - first:
+      213: 5290741632490757462
+    second: WonkWonkFont_59
+  - first:
+      213: 4673817758909894193
+    second: WonkWonkFont_60
+  - first:
+      213: 204885407255164546
+    second: WonkWonkFont_61
+  - first:
+      213: 6546533992710973825
+    second: WonkWonkFont_62
+  - first:
+      213: -82212046734755321
+    second: WonkWonkFont_63
+  - first:
+      213: 222601616723951441
+    second: WonkWonkFont_64
+  - first:
+      213: -4773618386940076122
+    second: WonkWonkFont_65
+  - first:
+      213: 9026306994632551013
+    second: WonkWonkFont_66
+  - first:
+      213: -7596582849974626899
+    second: WonkWonkFont_67
+  - first:
+      213: 3031878850687878267
+    second: WonkWonkFont_68
+  - first:
+      213: 6873311894184577893
+    second: WonkWonkFont_69
+  - first:
+      213: 3801281709732742291
+    second: WonkWonkFont_70
+  - first:
+      213: -5860866109583949205
+    second: WonkWonkFont_71
+  - first:
+      213: -902618808114104263
+    second: WonkWonkFont_72
+  - first:
+      213: -5151692408713739831
+    second: WonkWonkFont_73
+  - first:
+      213: -4088039150346186628
+    second: WonkWonkFont_74
+  - first:
+      213: 6325486087289088040
+    second: WonkWonkFont_75
+  - first:
+      213: -7797915947203918703
+    second: WonkWonkFont_76
+  - first:
+      213: 3107388867402513533
+    second: WonkWonkFont_77
+  - first:
+      213: 8956323920690034498
+    second: WonkWonkFont_78
+  - first:
+      213: -7529106118292623675
+    second: WonkWonkFont_79
+  - first:
+      213: 5346283064799908979
+    second: WonkWonkFont_80
+  - first:
+      213: 182996466541391190
+    second: WonkWonkFont_81
+  - first:
+      213: 5647663954884631031
+    second: WonkWonkFont_82
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: WonkWonkFont_0
+      rect:
+        serializedVersion: 2
+        x: 4
+        y: 774
+        width: 45
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4c088819c8928b280800000000000000
+      internalID: -9027419769350356796
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_1
+      rect:
+        serializedVersion: 2
+        x: 53
+        y: 773
+        width: 41
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 14ce9dc2ac1767d50800000000000000
+      internalID: 6734695405928967233
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_2
+      rect:
+        serializedVersion: 2
+        x: 100
+        y: 774
+        width: 44
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a18fc18ebaa2b4d60800000000000000
+      internalID: 7875435291209431066
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_3
+      rect:
+        serializedVersion: 2
+        x: 149
+        y: 774
+        width: 42
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a5a546660382bf520800000000000000
+      internalID: 2736825386899102298
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_4
+      rect:
+        serializedVersion: 2
+        x: 197
+        y: 774
+        width: 42
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e49cac6d945f8f840800000000000000
+      internalID: 5258222262440085838
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_5
+      rect:
+        serializedVersion: 2
+        x: 246
+        y: 774
+        width: 40
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2293402905e142a10800000000000000
+      internalID: 1883663875543677218
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_6
+      rect:
+        serializedVersion: 2
+        x: 293
+        y: 774
+        width: 42
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4b004d1831a22dce0800000000000000
+      internalID: -1381995872378421068
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_7
+      rect:
+        serializedVersion: 2
+        x: 343
+        y: 774
+        width: 39
+        height: 68
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d4a246c03cc895020800000000000000
+      internalID: 2331049051495344717
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_8
+      rect:
+        serializedVersion: 2
+        x: 388
+        y: 774
+        width: 43
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b2d6fd076862d7650800000000000000
+      internalID: 6232179818211798315
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_9
+      rect:
+        serializedVersion: 2
+        x: 437
+        y: 775
+        width: 40
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 58d7cb10166b5a0f0800000000000000
+      internalID: -1106277605692375675
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_10
+      rect:
+        serializedVersion: 2
+        x: 485
+        y: 775
+        width: 41
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8d5f0f86f37f7e000800000000000000
+      internalID: 65292571335783896
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_11
+      rect:
+        serializedVersion: 2
+        x: 530
+        y: 774
+        width: 38
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e63aefd5a9ddb05e0800000000000000
+      internalID: -1942215159208565906
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_12
+      rect:
+        serializedVersion: 2
+        x: 580
+        y: 774
+        width: 44
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 00eb473c728502da0800000000000000
+      internalID: -5971676178087100928
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_13
+      rect:
+        serializedVersion: 2
+        x: 628
+        y: 746
+        width: 45
+        height: 73
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b8fc46f706daaf3d0800000000000000
+      internalID: -3172032357563314293
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_14
+      rect:
+        serializedVersion: 2
+        x: 4
+        y: 646
+        width: 43
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: baef0a51352114670800000000000000
+      internalID: 8521112118016147115
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_15
+      rect:
+        serializedVersion: 2
+        x: 52
+        y: 646
+        width: 42
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e6f9fad37a11218e0800000000000000
+      internalID: -1724296297337348242
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_16
+      rect:
+        serializedVersion: 2
+        x: 100
+        y: 646
+        width: 44
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6cbdf4d599b421100800000000000000
+      internalID: 77207265686313926
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_17
+      rect:
+        serializedVersion: 2
+        x: 163
+        y: 692
+        width: 14
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 69fc8d2528f06cd10800000000000000
+      internalID: 2145419324898725782
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_18
+      rect:
+        serializedVersion: 2
+        x: 195
+        y: 646
+        width: 46
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9ebccd0e858498790800000000000000
+      internalID: -7527405755606184983
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_19
+      rect:
+        serializedVersion: 2
+        x: 261
+        y: 694
+        width: 13
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e1bec9463dd60fb40800000000000000
+      internalID: 5471994301948685086
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_20
+      rect:
+        serializedVersion: 2
+        x: 292
+        y: 646
+        width: 43
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1b694f4e8af9e2f00800000000000000
+      internalID: 1093987307242165937
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_21
+      rect:
+        serializedVersion: 2
+        x: 341
+        y: 646
+        width: 39
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8f90aa2ae0f372510800000000000000
+      internalID: 1524256330979346936
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_22
+      rect:
+        serializedVersion: 2
+        x: 389
+        y: 647
+        width: 41
+        height: 68
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d056ffd40e997ac10800000000000000
+      internalID: 2064788142832968973
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_23
+      rect:
+        serializedVersion: 2
+        x: 440
+        y: 646
+        width: 12
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c3fcd97c8369c4ac0800000000000000
+      internalID: -3869552809206755524
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_24
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 645
+        width: 47
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e22d76126f62ba060800000000000000
+      internalID: 6965704087222866478
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_25
+      rect:
+        serializedVersion: 2
+        x: 580
+        y: 646
+        width: 45
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ee2eb9bb644166780800000000000000
+      internalID: -8690236136936971538
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_26
+      rect:
+        serializedVersion: 2
+        x: 163
+        y: 646
+        width: 11
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6df4dff7b3ffc5170800000000000000
+      internalID: 8168684455158697942
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_27
+      rect:
+        serializedVersion: 2
+        x: 245
+        y: 637
+        width: 30
+        height: 54
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 60ec9345a9ea767f0800000000000000
+      internalID: -619334445878882810
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_28
+      rect:
+        serializedVersion: 2
+        x: 531
+        y: 646
+        width: 46
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 460a13cf91411b380800000000000000
+      internalID: -8957356082025357212
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_29
+      rect:
+        serializedVersion: 2
+        x: 628
+        y: 646
+        width: 43
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 075895b054dc8dec0800000000000000
+      internalID: -3541855410500041360
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_30
+      rect:
+        serializedVersion: 2
+        x: 3
+        y: 518
+        width: 46
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 51734d448739ce310800000000000000
+      internalID: 1435684525984462613
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_31
+      rect:
+        serializedVersion: 2
+        x: 52
+        y: 518
+        width: 43
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 187f08bd459188ac0800000000000000
+      internalID: -3852801628964849791
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_32
+      rect:
+        serializedVersion: 2
+        x: 101
+        y: 518
+        width: 42
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6970bdaf602945dd0800000000000000
+      internalID: -2498211334607665258
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_33
+      rect:
+        serializedVersion: 2
+        x: 148
+        y: 484
+        width: 45
+        height: 74
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 34dfa4b23cb4b8e40800000000000000
+      internalID: 5659700658338200899
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_34
+      rect:
+        serializedVersion: 2
+        x: 195
+        y: 517
+        width: 48
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5489eb5b7246c5f90800000000000000
+      internalID: -6963580802105960379
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_35
+      rect:
+        serializedVersion: 2
+        x: 245
+        y: 482
+        width: 42
+        height: 82
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3792cf9a0cf3cd0f0800000000000000
+      internalID: -1090926913012356749
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_36
+      rect:
+        serializedVersion: 2
+        x: 293
+        y: 517
+        width: 43
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 221af5605337525d0800000000000000
+      internalID: -3087935297915215582
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_37
+      rect:
+        serializedVersion: 2
+        x: 341
+        y: 518
+        width: 40
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 50c40d44770e6fe90800000000000000
+      internalID: -6992154568585884667
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_38
+      rect:
+        serializedVersion: 2
+        x: 387
+        y: 520
+        width: 47
+        height: 67
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6e5010db609717eb0800000000000000
+      internalID: -4723861464287214106
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_39
+      rect:
+        serializedVersion: 2
+        x: 438
+        y: 518
+        width: 40
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 263fa1065d3f16b90800000000000000
+      internalID: -7250245827323825310
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_40
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 518
+        width: 46
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 355ec0b1ad6f52370800000000000000
+      internalID: 8297309305117140307
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_41
+      rect:
+        serializedVersion: 2
+        x: 533
+        y: 518
+        width: 38
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 23b9c448b88b73d40800000000000000
+      internalID: 5564118773999115058
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_42
+      rect:
+        serializedVersion: 2
+        x: 579
+        y: 518
+        width: 45
+        height: 68
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 48eafe6aa4a7158d0800000000000000
+      internalID: -2859369827356660092
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_43
+      rect:
+        serializedVersion: 2
+        x: 629
+        y: 518
+        width: 43
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1555695feeb6ef8c0800000000000000
+      internalID: -3963611947972799151
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_44
+      rect:
+        serializedVersion: 2
+        x: 3
+        y: 390
+        width: 46
+        height: 68
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0069ffcec9f5ef8e0800000000000000
+      internalID: -1657782485230053888
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_45
+      rect:
+        serializedVersion: 2
+        x: 53
+        y: 390
+        width: 44
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: efa319dd7afc489d0800000000000000
+      internalID: -2772863150669612290
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_46
+      rect:
+        serializedVersion: 2
+        x: 100
+        y: 390
+        width: 44
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: adfcc49b08f908030800000000000000
+      internalID: 3494968686052954074
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_47
+      rect:
+        serializedVersion: 2
+        x: 147
+        y: 390
+        width: 46
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4694d11dc5e256a80800000000000000
+      internalID: -8474316147647493788
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_48
+      rect:
+        serializedVersion: 2
+        x: 195
+        y: 390
+        width: 46
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 566bf849bb9deee50800000000000000
+      internalID: 6840644283696920165
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_49
+      rect:
+        serializedVersion: 2
+        x: 245
+        y: 366
+        width: 42
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cd25c01c5c7875b50800000000000000
+      internalID: 6581878663842386652
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_50
+      rect:
+        serializedVersion: 2
+        x: 291
+        y: 390
+        width: 46
+        height: 68
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6941fdd4c913cab70800000000000000
+      internalID: 8911552310050493590
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_51
+      rect:
+        serializedVersion: 2
+        x: 342
+        y: 390
+        width: 42
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2ed43e0642ca06270800000000000000
+      internalID: 8241776590332317154
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_52
+      rect:
+        serializedVersion: 2
+        x: 389
+        y: 390
+        width: 41
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f3b69cf5722a82700800000000000000
+      internalID: 515840447328381759
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_53
+      rect:
+        serializedVersion: 2
+        x: 436
+        y: 390
+        width: 43
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 83c711a94624325c0800000000000000
+      internalID: -4241473424203875272
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_54
+      rect:
+        serializedVersion: 2
+        x: 485
+        y: 390
+        width: 41
+        height: 68
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3389aa006dfab69e0800000000000000
+      internalID: -1627013506695260109
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_55
+      rect:
+        serializedVersion: 2
+        x: 534
+        y: 390
+        width: 41
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b69f932e14acd46d0800000000000000
+      internalID: -3004522992069117589
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_56
+      rect:
+        serializedVersion: 2
+        x: 580
+        y: 390
+        width: 44
+        height: 68
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 61e5920fb08e71c40800000000000000
+      internalID: 5483106209318395414
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_57
+      rect:
+        serializedVersion: 2
+        x: 628
+        y: 390
+        width: 45
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5e793f65e241019b0800000000000000
+      internalID: -5111563387805657115
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_58
+      rect:
+        serializedVersion: 2
+        x: 7
+        y: 262
+        width: 40
+        height: 67
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4275e48395c2412c0800000000000000
+      internalID: -4461892569108949212
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_59
+      rect:
+        serializedVersion: 2
+        x: 54
+        y: 262
+        width: 41
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 65d5bf2bb7d7c6940800000000000000
+      internalID: 5290741632490757462
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_60
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 262
+        width: 42
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 13e8cb02d7cbcd040800000000000000
+      internalID: 4673817758909894193
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_61
+      rect:
+        serializedVersion: 2
+        x: 150
+        y: 262
+        width: 42
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 286fa1f3136e7d200800000000000000
+      internalID: 204885407255164546
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_62
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 263
+        width: 44
+        height: 68
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 189ae893bf5f9da50800000000000000
+      internalID: 6546533992710973825
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_63
+      rect:
+        serializedVersion: 2
+        x: 244
+        y: 262
+        width: 43
+        height: 68
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 70afd1e349cebdef0800000000000000
+      internalID: -82212046734755321
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_64
+      rect:
+        serializedVersion: 2
+        x: 307
+        y: 278
+        width: 11
+        height: 53
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 15f3243bdf6d61300800000000000000
+      internalID: 222601616723951441
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_65
+      rect:
+        serializedVersion: 2
+        x: 339
+        y: 263
+        width: 46
+        height: 67
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6afd9296e53b0cdb0800000000000000
+      internalID: -4773618386940076122
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_66
+      rect:
+        serializedVersion: 2
+        x: 387
+        y: 269
+        width: 46
+        height: 54
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 56a62b06362e34d70800000000000000
+      internalID: 9026306994632551013
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_67
+      rect:
+        serializedVersion: 2
+        x: 441
+        y: 277
+        width: 36
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: da510787524839690800000000000000
+      internalID: -7596582849974626899
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_68
+      rect:
+        serializedVersion: 2
+        x: 547
+        y: 303
+        width: 13
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b74454940c5631a20800000000000000
+      internalID: 3031878850687878267
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_69
+      rect:
+        serializedVersion: 2
+        x: 587
+        y: 264
+        width: 26
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 56bc65b50c8e26f50800000000000000
+      internalID: 6873311894184577893
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_70
+      rect:
+        serializedVersion: 2
+        x: 642
+        y: 263
+        width: 27
+        height: 68
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3944fcf239dd0c430800000000000000
+      internalID: 3801281709732742291
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_71
+      rect:
+        serializedVersion: 2
+        x: 488
+        y: 289
+        width: 37
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b628f1653550aaea0800000000000000
+      internalID: -5860866109583949205
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_72
+      rect:
+        serializedVersion: 2
+        x: 534
+        y: 290
+        width: 41
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 938b5cee9f04973f0800000000000000
+      internalID: -902618808114104263
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_73
+      rect:
+        serializedVersion: 2
+        x: 306
+        y: 262
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9c18a829c038188b0800000000000000
+      internalID: -5151692408713739831
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_74
+      rect:
+        serializedVersion: 2
+        x: 548
+        y: 274
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c70d9b75d0e5447c0800000000000000
+      internalID: -4088039150346186628
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_75
+      rect:
+        serializedVersion: 2
+        x: 8
+        y: 143
+        width: 36
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 828aa802514a8c750800000000000000
+      internalID: 6325486087289088040
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_76
+      rect:
+        serializedVersion: 2
+        x: 55
+        y: 139
+        width: 38
+        height: 55
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1948e8ad2cc38c390800000000000000
+      internalID: -7797915947203918703
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_77
+      rect:
+        serializedVersion: 2
+        x: 109
+        y: 134
+        width: 29
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d7cb78416b9af1b20800000000000000
+      internalID: 3107388867402513533
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_78
+      rect:
+        serializedVersion: 2
+        x: 155
+        y: 134
+        width: 29
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 247301a37214b4c70800000000000000
+      internalID: 8956323920690034498
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_79
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 151
+        width: 42
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5cea2f650ed338790800000000000000
+      internalID: -7529106118292623675
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_80
+      rect:
+        serializedVersion: 2
+        x: 245
+        y: 134
+        width: 41
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 374d5122f10d13a40800000000000000
+      internalID: 5346283064799908979
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_81
+      rect:
+        serializedVersion: 2
+        x: 295
+        y: 134
+        width: 40
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 65de95711522a8200800000000000000
+      internalID: 182996466541391190
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WonkWonkFont_82
+      rect:
+        serializedVersion: 2
+        x: 212
+        y: 134
+        width: 13
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7f91da1c178806e40800000000000000
+      internalID: 5647663954884631031
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      WonkWonkFont_0: -9027419769350356796
+      WonkWonkFont_1: 6734695405928967233
+      WonkWonkFont_10: 65292571335783896
+      WonkWonkFont_11: -1942215159208565906
+      WonkWonkFont_12: -5971676178087100928
+      WonkWonkFont_13: -3172032357563314293
+      WonkWonkFont_14: 8521112118016147115
+      WonkWonkFont_15: -1724296297337348242
+      WonkWonkFont_16: 77207265686313926
+      WonkWonkFont_17: 2145419324898725782
+      WonkWonkFont_18: -7527405755606184983
+      WonkWonkFont_19: 5471994301948685086
+      WonkWonkFont_2: 7875435291209431066
+      WonkWonkFont_20: 1093987307242165937
+      WonkWonkFont_21: 1524256330979346936
+      WonkWonkFont_22: 2064788142832968973
+      WonkWonkFont_23: -3869552809206755524
+      WonkWonkFont_24: 6965704087222866478
+      WonkWonkFont_25: -8690236136936971538
+      WonkWonkFont_26: 8168684455158697942
+      WonkWonkFont_27: -619334445878882810
+      WonkWonkFont_28: -8957356082025357212
+      WonkWonkFont_29: -3541855410500041360
+      WonkWonkFont_3: 2736825386899102298
+      WonkWonkFont_30: 1435684525984462613
+      WonkWonkFont_31: -3852801628964849791
+      WonkWonkFont_32: -2498211334607665258
+      WonkWonkFont_33: 5659700658338200899
+      WonkWonkFont_34: -6963580802105960379
+      WonkWonkFont_35: -1090926913012356749
+      WonkWonkFont_36: -3087935297915215582
+      WonkWonkFont_37: -6992154568585884667
+      WonkWonkFont_38: -4723861464287214106
+      WonkWonkFont_39: -7250245827323825310
+      WonkWonkFont_4: 5258222262440085838
+      WonkWonkFont_40: 8297309305117140307
+      WonkWonkFont_41: 5564118773999115058
+      WonkWonkFont_42: -2859369827356660092
+      WonkWonkFont_43: -3963611947972799151
+      WonkWonkFont_44: -1657782485230053888
+      WonkWonkFont_45: -2772863150669612290
+      WonkWonkFont_46: 3494968686052954074
+      WonkWonkFont_47: -8474316147647493788
+      WonkWonkFont_48: 6840644283696920165
+      WonkWonkFont_49: 6581878663842386652
+      WonkWonkFont_5: 1883663875543677218
+      WonkWonkFont_50: 8911552310050493590
+      WonkWonkFont_51: 8241776590332317154
+      WonkWonkFont_52: 515840447328381759
+      WonkWonkFont_53: -4241473424203875272
+      WonkWonkFont_54: -1627013506695260109
+      WonkWonkFont_55: -3004522992069117589
+      WonkWonkFont_56: 5483106209318395414
+      WonkWonkFont_57: -5111563387805657115
+      WonkWonkFont_58: -4461892569108949212
+      WonkWonkFont_59: 5290741632490757462
+      WonkWonkFont_6: -1381995872378421068
+      WonkWonkFont_60: 4673817758909894193
+      WonkWonkFont_61: 204885407255164546
+      WonkWonkFont_62: 6546533992710973825
+      WonkWonkFont_63: -82212046734755321
+      WonkWonkFont_64: 222601616723951441
+      WonkWonkFont_65: -4773618386940076122
+      WonkWonkFont_66: 9026306994632551013
+      WonkWonkFont_67: -7596582849974626899
+      WonkWonkFont_68: 3031878850687878267
+      WonkWonkFont_69: 6873311894184577893
+      WonkWonkFont_7: 2331049051495344717
+      WonkWonkFont_70: 3801281709732742291
+      WonkWonkFont_71: -5860866109583949205
+      WonkWonkFont_72: -902618808114104263
+      WonkWonkFont_73: -5151692408713739831
+      WonkWonkFont_74: -4088039150346186628
+      WonkWonkFont_75: 6325486087289088040
+      WonkWonkFont_76: -7797915947203918703
+      WonkWonkFont_77: 3107388867402513533
+      WonkWonkFont_78: 8956323920690034498
+      WonkWonkFont_79: -7529106118292623675
+      WonkWonkFont_8: 6232179818211798315
+      WonkWonkFont_80: 5346283064799908979
+      WonkWonkFont_81: 182996466541391190
+      WonkWonkFont_82: 5647663954884631031
+      WonkWonkFont_9: -1106277605692375675
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

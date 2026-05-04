@@ -21,6 +21,7 @@
 using FixMath.NET;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 #if UNITY
 using UnityEngine;
@@ -116,8 +117,8 @@ namespace Volatile
             this.bodies = new CheapList<VoltBody>();
             this.manifolds = new List<Manifold>();
 
-            this.dynamicBroadphase = new NaiveBroadphase();
-            this.staticBroadphase = new NaiveBroadphase(); // TODO: Was TreeBroadphase, changed because suspected determinism problems with TreeBroadphase
+            this.dynamicBroadphase = new TreeBroadphase();
+            this.staticBroadphase = new TreeBroadphase(); // TODO: Was TreeBroadphase, changed because suspected determinism problems with TreeBroadphase
 
             this.reusableBuffer = new VoltBuffer<VoltBody>();
             this.reusableOutput = new VoltBuffer<VoltBody>();
@@ -342,8 +343,8 @@ namespace Volatile
 
             // Clear Broadphase Data ------------------------------------------------------------
 
-            this.dynamicBroadphase = new NaiveBroadphase();
-            this.staticBroadphase = new NaiveBroadphase();
+            this.dynamicBroadphase = new TreeBroadphase();
+            this.staticBroadphase = new TreeBroadphase();
             
             // Re-add all bodies to the new broadphases
             foreach (var body in this.bodies)
@@ -449,6 +450,32 @@ namespace Volatile
                 VoltBody body = this.reusableBuffer[i];
                 if (VoltBody.Filter(body, filter))
                     if (body.QueryCircle(origin, radius))
+                        this.reusableOutput.Add(body);
+            }
+
+            return this.reusableOutput;
+        }
+
+        public VoltBuffer<VoltBody> QueryOverlap(
+          VoltAABB worldBounds,
+          bool dynamicBodiesOnly = false,
+          VoltBodyFilter filter = null)
+        {
+            this.reusableBuffer.Clear();
+
+            if (!dynamicBodiesOnly)
+            {
+                this.staticBroadphase.QueryOverlap(worldBounds, this.reusableBuffer);
+            }
+
+            this.dynamicBroadphase.QueryOverlap(worldBounds, this.reusableBuffer);
+
+            this.reusableOutput.Clear();
+            for (int i = 0; i < this.reusableBuffer.Count; i++)
+            {
+                VoltBody body = this.reusableBuffer[i];
+                if (VoltBody.Filter(body, filter))
+                    if (body.QueryAABBOnly(worldBounds))
                         this.reusableOutput.Add(body);
             }
 

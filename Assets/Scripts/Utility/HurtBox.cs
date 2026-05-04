@@ -7,19 +7,12 @@ public class HurtBox : MonoBehaviour
     void OnEnable()
     {
         _body.OnTrigger += OnTrigger;
-        _body.OnCollide += OnTrigger;
     }
     void OnDisable()
     {
         _body.OnTrigger -= OnTrigger;
-        _body.OnCollide -= OnTrigger;
     }
 
-
-    void Update()
-    {
-        
-    }
 
     private void OnTrigger(CustomPhysicsBody other) {
 

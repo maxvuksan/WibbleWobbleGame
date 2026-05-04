@@ -35,11 +35,16 @@ public class CustomSpring : CustomConstraint
         {
             if(_calculateRestLengthAtStart && CustomPhysics.Tick == 0)
             {
-                Fix64 distance = VoltVector2.Distance(GetStartAnchorPosition(), GetEndAnchorPosition());
-                configuration.restLength = new IntHundredth(distance);
-                _restLengthCalculated = true;
+                CalculateRestLength();
             }
         }
+    }
+
+    public void CalculateRestLength()
+    {
+        Fix64 distance = VoltVector2.Distance(GetStartAnchorPosition(), GetEndAnchorPosition());
+        configuration.restLength = new IntHundredth(distance);
+        _restLengthCalculated = true;
     }
 
     override public void ApplySubStep(Fix64 deltaTime)

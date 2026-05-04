@@ -8,10 +8,13 @@ public class Attacher : MonoBehaviour
     public IntHundredthVector2 VectorOffset;
     [SerializeField] private IntHundredth _attachRadius;
 
+    private bool _attached;        
     private TrapHeader _header;
 
     void Awake()
     {
+        _attached = false;
+
         CustomPhysics.OnPhysicsTick += OnPhysicsTick;
 
         _header = BodyToAttach.GetComponent<TrapHeader>();
@@ -29,7 +32,7 @@ public class Attacher : MonoBehaviour
 
     public void OnPhysicsTick()
     {
-        if(CustomPhysics.Tick == 0)
+        if(CustomPhysics.Tick == 5)
         {
             AttemptAttach();
         }
@@ -37,9 +40,18 @@ public class Attacher : MonoBehaviour
 
     public void AttemptAttach()
     {
+        if (_attached)
+        {
+            return;
+        }
+        _attached = true;
+
         VoltVector2 sensorWorldPos = BodyToAttach.Position + Helpers.RotatePosition(VectorOffset, BodyToAttach.Body.Angle);
 
-        var result = CustomPhysics.OverlapCircle(sensorWorldPos, _attachRadius);
+        var result = CustomPhysics.OverlapPoint(sensorWorldPos);
+
+        print("AttackAttempt: " + result.Bodies.Count + ", " + sensorWorldPos.x + ", " + sensorWorldPos.y);
+
 
         foreach(var otherBody in result.Bodies)
         {
@@ -66,7 +78,11 @@ public class Attacher : MonoBehaviour
             return;
         }
 
-        Vector3 attachPosition = (Vector2)BodyToAttach.transform.position + VectorOffset.AsVector2();
-        Gizmos.DrawSphere(attachPosition, _attachRadius.AsFloat());
+        // Use transform rotation for visualization
+        Vector2 rotatedOffset = Quaternion.Euler(0, 0, BodyToAttach.transform.eulerAngles.z) * VectorOffset.AsVector2();
+        Vector3 attachPosition = (Vector2)BodyToAttach.transform.position + rotatedOffset;
+        
+        Gizmos.color = Color.purple;
+        Gizmos.DrawWireSphere(attachPosition, _attachRadius.AsFloat());
     }
 }

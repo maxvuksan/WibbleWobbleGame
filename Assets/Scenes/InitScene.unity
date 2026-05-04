@@ -278,7 +278,7 @@ MonoBehaviour:
   m_DisconnectTimeoutMS: 30000
   ConnectionData:
     Address: 127.0.0.1
-    Port: 7778
+    Port: 7779
     ServerListenAddress: 127.0.0.1
   DebugSimulator:
     PacketDelayMS: 0
@@ -359,7 +359,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   DebugMode: 0
   GenerateLogFilesInDebugMode: 1
-  LogsShouldIncludeClientInputs: 1
+  LogsShouldIncludeClientInputs: 0
   LogsShouldIncludePhysicsBodyState: 0
   LogsShouldIgnoreStaticBodies: 1
   LogsShouldIncludeCustomDataFromBodies: 0

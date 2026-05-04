@@ -15,6 +15,7 @@ public class NetworkPlayerHeader : NetworkBehaviour
 
 
     [SerializeField] private TrapToPlace _trapToPlace;
+    private int _readyPlayers = 0;
 
 
     public override void OnNetworkSpawn()
@@ -30,16 +31,29 @@ public class NetworkPlayerHeader : NetworkBehaviour
             PlayerIndex.Value = OwnerClientId;
             ResetStateRpc();
         }
+
+        SignalLoadCompleteRpc();
+    }
+
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    private void SignalLoadCompleteRpc()
+    {
+        _readyPlayers++;
+
+        if(_readyPlayers == NetworkManager.Singleton.ConnectedClients.Count)
+        {
+            GameStateManager.Singleton.ServerSetGameState(GameStateManager.GameStateEnum.LobbyPlay);
+        }
     }
 
     private void OnSelectedTrapChanged(int oldValue, int newValue)
     {   
-        if(GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.GameState_SelectingTrap)
+        if(GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.SelectingTrap)
         {
             GameStateManager.Singleton.SuggestFinishSelectingTrapRpc();
         }
-        else if(GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.GameState_PlacingTrap ||
-                GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.GameState_CreativeMode 
+        else if(GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.PlacingTrap ||
+                GameStateManager.Singleton.NetworkedState.Value == GameStateManager.GameStateEnum.CreativeMode 
         )
         {
             _trapToPlace.SetTrapType(newValue);
@@ -57,7 +71,7 @@ public class NetworkPlayerHeader : NetworkBehaviour
 
     private void OnPlayerExistsInWorld(bool oldState, bool newState)
     {
-        PlayerDataManager.Singleton.PlayerData[(int)PlayerIndex.Value].player.ApplyExistsInWorldLocally(newState);         
+        PlayerDataManager.Singleton.PlayerData[(int)PlayerIndex.Value].Player.ApplyExistsInWorldLocally(newState);         
     }
 
     [Rpc(SendTo.Owner, InvokePermission = RpcInvokePermission.Everyone)]
@@ -128,7 +142,7 @@ public class NetworkPlayerHeader : NetworkBehaviour
         
         //TODO: This should SetPosition for this player on every client not just its own
         //PlayerDataManager.Singleton.PlayerData[(int)PlayerIndex.Value].player.SetPosition(Vector2.zero);
-        PlayerDataManager.Singleton.PlayerData[(int)PlayerIndex.Value].player.ResetState();
+        PlayerDataManager.Singleton.PlayerData[(int)PlayerIndex.Value].Player.ResetState();
     }
 
     

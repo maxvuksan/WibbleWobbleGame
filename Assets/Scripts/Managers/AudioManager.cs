@@ -23,14 +23,7 @@ public class AudioManager : MonoBehaviour
 
     void Awake()
     {
-        if (Singleton != null)
-        {
-            Destroy(this);
-            return;
-        }
-
-        Singleton = this;
-        DontDestroyOnLoad(this);
+        Helpers.CreateSingleton(ref Singleton, this);
 
         sound_source_pool = new List<AudioSource>();
 

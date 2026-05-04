@@ -26,6 +26,12 @@ public class CommandLine : MonoBehaviour
         _previousInput = "";
         _history = new();
         _colours = new();
+
+        if(_interpreter == null)
+        {
+            _interpreter = GetComponent<CommandInterpreter>();
+        }
+
         _interpreter.Initalize(this);
      
         for(int i = 0; i < _historyLineCount; i++)
